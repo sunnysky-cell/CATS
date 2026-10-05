@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+	
+<head><meta charset="UTF-8"><title>CATS Login</title></head>
+
+<body>
+	
+<h2>CATS - Course Application Tracking System</h2>
+
+<p th:if="${adminMode}">Administrator Login</p>
+
+<p th:unless="${adminMode}">Employee / Manager Login</p>
+
+<p th:if="${error}" style="color:red" th:text="${error}"></p>
+
+<form method="post" th:action="@{/login}">
+	
+  <table border="1">
+	
+    <tr><td>Username</td><td><input type="text" name="username"/></td></tr>
+	
+    <tr><td>Password</td><td><input type="password" name="password"/></td></tr>
+	
+  </table>
+  
+  <br/>
+  
+  <button type="submit">Login</button>
+  
+</form>
+
+<hr/>
+
+<p>
+	
+  <a th:href="@{/login}">Employee Login</a> 
+  
+  <a th:href="@{/admin/login}">Admin Login</a>
+</p>
+
+</body>
+
+</html>
