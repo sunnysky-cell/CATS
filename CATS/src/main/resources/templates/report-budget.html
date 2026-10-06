@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<title>Budget Utilisation Report - CATS</title>
+</head>
+
+<body>
+
+<h2>Budget Utilisation Report</h2>
+
+<hr/>
+
+<h3>Filter Criteria</h3>
+
+<form method="post" th:action="@{/manager/report/budget}">
+
+  <table border="1">
+    <tr>
+      <td>Year</td>
+      <td>
+        <select name="year">
+          <option th:each="y : ${#numbers.sequence(2024, 2030)}"
+                  th:value="${y}"
+                  th:text="${y}"
+                  th:selected="${y == year}"></option>
+        </select>
+      </td>
+    </tr>
+  </table>
+
+  <br/>
+
+  <button type="submit">Generate Report</button>
+
+</form>
+
+<hr/>
+
+<h3>Report Results</h3>
+
+<div th:if="${rows == null || rows.isEmpty()}">
+  <p>No records found. Please adjust your filter criteria.</p>
+</div>
+
+<table border="1" th:if="${rows != null && !rows.isEmpty()}">
+  <thead>
+    <tr>
+      <th>Employee Name</th>
+      <th>Designation</th>
+      <th>Entitled Days</th>
+      <th>Days Used</th>
+      <th>Annual Budget</th>
+      <th>Approved Course Fees</th>
+      <th>Claimed Amounts</th>
+      <th>Remaining Budget</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr th:each="r : ${rows}">
+      <td th:text="${r['employeeName']}"></td>
+      <td th:text="${r['designation']}"></td>
+      <td th:text="${r['entitledDays']}"></td>
+      <td th:text="${r['daysUsed']}"></td>
+      <td th:text="${r['annualBudget']}"></td>
+      <td th:text="${r['approvedCourseFees']}"></td>
+      <td th:text="${r['claimedAmounts']}"></td>
+      <td th:text="${r['remainingBudget']}"></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr/>
+
+<p>
+  <a th:href="@{/manager/report}">Back to Report Center</a> |
+  <a th:href="@{/logout}">Logout</a>
+</p>
+
+</body>
+</html>
