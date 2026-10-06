@@ -60,4 +60,6 @@ public class User {
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	private User manager;
+
+
 }
