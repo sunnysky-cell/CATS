@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<title>Attendance Report - CATS</title>
+</head>
+
+<body>
+
+<h2>Attendance Report</h2>
+
+<hr/>
+
+<h3>Filter Criteria</h3>
+
+<form method="post" th:action="@{/manager/report/attendance}">
+
+  <table border="1">
+    <tr>
+      <td>Start Date</td>
+      <td><input type="date" name="startDate" th:value="${startDate}"/></td>
+    </tr>
+    <tr>
+      <td>End Date</td>
+      <td><input type="date" name="endDate" th:value="${endDate}"/></td>
+    </tr>
+  </table>
+
+  <br/>
+
+  <button type="submit">Generate Report</button>
+
+</form>
+
+<hr/>
+
+<h3>Report Results</h3>
+
+<div th:if="${rows == null || rows.isEmpty()}">
+  <p>No records found. Please adjust your filter criteria.</p>
+</div>
+
+<table border="1" th:if="${rows != null && !rows.isEmpty()}">
+  <thead>
+    <tr>
+      <th>Employee Name</th>
+      <th>Course Title</th>
+      <th>Category</th>
+      <th>Training Provider</th>
+      <th>Start Date</th>
+      <th>End Date</th>
+      <th>Training Days</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr th:each="r : ${rows}">
+      <td th:text="${r.applicant.name}"></td>
+      <td th:text="${r.courseTitle}"></td>
+      <td th:text="${r.category != null ? r.category.name : ''}"></td>
+      <td th:text="${r.trainingProvider}"></td>
+      <td th:text="${r.startDate}"></td>
+      <td th:text="${r.endDate}"></td>
+      <td th:text="${r.trainingDays}"></td>
+      <td th:text="${r.status}"></td>
+    </tr>
+  </tbody>
+</table>
+
+<p th:if="${rows != null && !rows.isEmpty()}">
+  <a th:href="@{/manager/report/attendance/export(
+    startDate=${startDate},
+    endDate=${endDate}
+  )}">
+    <button type="button">Export as CSV</button>
+  </a>
+</p>
+
+<hr/>
+
+<p>
+  <a th:href="@{/manager/report}">Back to Report Center</a> |
+  <a th:href="@{/logout}">Logout</a>
+</p>
+
+</body>
+</html>
