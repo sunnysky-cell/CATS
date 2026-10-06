@@ -38,4 +38,18 @@ public interface CourseApplicationRepository extends JpaRepository<CourseApplica
 			""")
 	boolean existsOverlappingApplication(@Param("userId") Long userId, @Param("startDate") LocalDate startDate,
 			@Param("endDate") LocalDate endDate, @Param("activeStatuses") List<ApplicationStatus> activeStatuses);
+			  
+	@Query("""
+			SELECT ca FROM CourseApplication ca
+			JOIN FETCH ca.applicant
+			JOIN FETCH ca.category
+			WHERE ca.status = : status
+			AND ca.startDate <= :monthEnd
+			AND ca.endDate >= :monthStart
+			ORDER BY ca.startDate ASC, ca.applicant.name ASC, ca.id ASC
+			""")
+	List<CourseApplication> findCalendarApplications(
+			@Param("status")ApplicationStatus status,
+			@Param("monthStart") LocalDate monthStart,
+			@Param("monthEnd") LocalDate monthEnd);
 }
