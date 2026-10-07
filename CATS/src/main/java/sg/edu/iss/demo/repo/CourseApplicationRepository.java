@@ -14,12 +14,26 @@ import sg.edu.iss.demo.model.CourseApplication;
 public interface CourseApplicationRepository extends JpaRepository<CourseApplication, Long> {
 
 	@Query("""
-			SELECT ca FROM CourseApplication ca
-			WHERE ca.applicant.id = :userId
-			  AND FUNCTION('YEAR', ca.startDate) = :year
-			""")
-	List<CourseApplication> findByApplicantIdAndYear(@Param("userId") Long userId, @Param("year") Integer year,
-			Pageable pageable);
+	        SELECT ca FROM CourseApplication ca
+	        WHERE ca.applicant.id = :userId
+	          AND FUNCTION('YEAR', ca.startDate) = :year
+	          AND ca.status IN :statuses
+	        """)
+	List<CourseApplication> findActiveByUserAndYear(
+	        @Param("userId") Long userId,
+	        @Param("year") int year,
+	        @Param("statuses")
+	        List<ApplicationStatus> statuses);
+	
+    @Query("""
+            SELECT ca FROM CourseApplication ca
+            WHERE ca.applicant.id = :userId
+              AND FUNCTION('YEAR', ca.startDate) = :year
+            """)
+        List<CourseApplication> findByApplicantIdAndYear(
+                @Param("userId") Long userId,
+                @Param("year") Integer year,
+                Pageable pageable);
 
 	@Query("""
 			SELECT ca FROM CourseApplication ca
@@ -43,7 +57,7 @@ public interface CourseApplicationRepository extends JpaRepository<CourseApplica
 			SELECT ca FROM CourseApplication ca
 			JOIN FETCH ca.applicant
 			JOIN FETCH ca.category
-			WHERE ca.status = : status
+			WHERE ca.status = :status
 			AND ca.startDate <= :monthEnd
 			AND ca.endDate >= :monthStart
 			ORDER BY ca.startDate ASC, ca.applicant.name ASC, ca.id ASC
