@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>CATS - Admin Home</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f6f8;
+            color: #222;
+        }
+
+        header {
+            background-color: #1f3a5f;
+            color: white;
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .welcome {
+            background: white;
+            padding: 22px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+
+        .number {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 16px;
+            background-color: #1f3a5f;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .button:hover {
+            background-color: #162b47;
+        }
+
+        .error {
+            background-color: #ffe5e5;
+            color: #a00000;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+
+    <h1>
+        Course Application Tracking System
+    </h1>
+
+    <a th:href="@{/logout}">
+        Logout
+    </a>
+
+</header>
+
+
+<main>
+
+    <div class="error"
+         th:if="${error}"
+         th:text="${error}">
+    </div>
+
+
+    <section class="welcome">
+
+        <h2>
+            Administration
+        </h2>
+
+        <p>
+            Logged in as
+            <strong th:text="${me.name}">
+                Administrator
+            </strong>
+        </p>
+
+        <p>
+            Manage CATS users, course categories,
+            training entitlements and public holidays.
+        </p>
+
+    </section>
+
+
+    <section class="cards">
+
+        <!-- USER MANAGEMENT -->
+        <div class="card">
+
+            <h2>
+                User Management
+            </h2>
+
+            <div class="number"
+                 th:text="${userCount}">
+                0
+            </div>
+
+            <p>
+                Manage employees, managers, roles,
+                approval hierarchy and training entitlements.
+            </p>
+
+            <a class="button"
+               th:href="@{/admin/users}">
+                Manage Users
+            </a>
+
+        </div>
+
+
+        <!-- COURSE CATEGORY -->
+        <div class="card">
+
+            <h2>
+                Course Categories
+            </h2>
+
+            <div class="number"
+                 th:text="${categoryCount}">
+                0
+            </div>
+
+            <p>
+                Maintain internal, external and
+                professional certification categories.
+            </p>
+
+            <a class="button"
+               th:href="@{/admin/categories}">
+                Manage Categories
+            </a>
+
+        </div>
+
+
+        <!-- PUBLIC HOLIDAYS -->
+        <div class="card">
+
+            <h2>
+                Public Holidays
+            </h2>
+
+            <p>
+                Maintain the public holiday calendar
+                used for training-day calculations.
+            </p>
+
+            <a class="button"
+               th:href="@{/admin/holidays}">
+                Manage Holidays
+            </a>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>
