@@ -87,4 +87,6 @@ public class CourseApplication {
 	private LocalDateTime createdAt;
 
 	private LocalDateTime updatedAt;
+
+	
 }
