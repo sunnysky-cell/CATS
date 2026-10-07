@@ -98,21 +98,39 @@ public class TrainingEntitlement {
     }
 		
 	public static TrainingEntitlement forUser(User user, int year, BigDecimal annualBudget) {
-			
-			String D = user.getDesignation();
-			
-			if(D != null && D.toLowerCase().contains("administrative")) {
-				
-				return forAdministrative(user, year, annualBudget);
-				
-			}
-			
-			else {
-				
-				return forProfessional(user, year, annualBudget);
-				
-			}
-				
-			
+		    if (user == null) {
+		        throw new IllegalArgumentException(
+		                "User cannot be null.");
+		    }
+
+		    String designation =
+		            user.getDesignation();
+
+		    if (designation == null) {
+		        throw new IllegalArgumentException(
+		                "User designation is required.");
+		    }
+
+		    if (designation.equalsIgnoreCase(
+		            "Administrative")) {
+
+		        return forAdministrative(
+		                user,
+		                year,
+		                annualBudget);
+		    }
+
+		    if (designation.equalsIgnoreCase(
+		            "Professional")) {
+
+		        return forProfessional(
+		                user,
+		                year,
+		                annualBudget);
+		    }
+
+		    throw new IllegalArgumentException(
+		            "Unsupported designation: "
+		            + designation);
 		}
 }
