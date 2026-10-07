@@ -3,17 +3,17 @@ import java.time.LocalDate;
 public final class CalendarCourseView {
 	private final Long applicationId;
 	private final String employeeName;
-	private final String courseTtitle;
+	private final String courseTitle;
 	private final String categoryName;
 	private final String trainingProvider;
 	private final LocalDate startDate;
 	private final LocalDate endDate;
-	public CalendarCourseView(Long applicationId, String employeeName, String courseTtitle, String categoryName,
+	public CalendarCourseView(Long applicationId, String employeeName, String courseTitle, String categoryName,
 			String trainingProvider, LocalDate startDate, LocalDate endDate) {
 		super();
 		this.applicationId = applicationId;
 		this.employeeName = employeeName;
-		this.courseTtitle = courseTtitle;
+		this.courseTitle = courseTitle;
 		this.categoryName = categoryName;
 		this.trainingProvider = trainingProvider;
 		this.startDate = startDate;
@@ -26,7 +26,7 @@ public final class CalendarCourseView {
 		return employeeName;
 	}
 	public String getCourseTtitle() {
-		return courseTtitle;
+		return courseTitle;
 	}
 	public String getCategoryName() {
 		return categoryName;
