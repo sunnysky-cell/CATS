@@ -61,22 +61,21 @@ public class LoginController {
 		}
 		
 		session.setAttribute("loggedInUser", u);
-		
-		if(u.getRole() == Role.ADMIN) {
-			
-			return "redirect:/admin/home";
-			
-		}
-		
-		if(u.getRole() == Role.EMPLOYEE) {
-			
-			return "redirect:/employee/home";
-			
-		}
-		
-		return "redirect:/manager/pending";
+		return "redirect:/home";
 		
 	}
+	
+	@GetMapping("/home")
+	public String home(HttpSession session, Model model) {
+		User user = (User) session.getAttribute("loggedInUser");
+		if(user == null) {
+			return "redirect:/login";
+		}
+		model.addAttribute("user",user);
+		model.addAttribute("manager",user.getRole() == Role.MANAGER);
+		return "home";
+	}
+	
 	
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
