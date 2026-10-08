@@ -27,7 +27,6 @@ public class CourseApplicationService {
 	
 	private final UserRepository UserRepo;
 	
-	// 复用队友的组件：算工作日/天数、算已用额度与预算
 	private final TrainingDayCalculator dayCalculator;
 	
 	private final EntitlementService entitlementService;
@@ -413,7 +412,7 @@ public class CourseApplicationService {
 		
 	}
 
-	// 额度/预算使用情况汇总：委托给队友的 EntitlementService（原来的 Summary 与它重复，已删）
+
 	public String Summary(Long userId, int year) {
 		
 		return entitlementService.usageSummary(userId, year);
