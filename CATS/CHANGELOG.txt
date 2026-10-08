@@ -1,0 +1,84 @@
+# 更新日志
+
+## 2026-10-08 - Admin Module 与 Repository 整合
+
+### 新增功能
+
+- 完成 Admin Dashboard。
+- 新增用户管理功能：新增用户、编辑用户资料、分配经理、修改角色、启用/停用用户。
+- 新增年度 Training Entitlement 管理功能，支持新增或更新同一用户同一年度的培训天数与预算。
+- 新增 Course Category 管理功能：新增、修改、启用/停用课程类别。
+- 新增 Public Holiday 管理功能：按年份查看、新增及删除公共假期。
+
+### 后端更新
+
+- 新增 `UserService`，负责用户、角色、经理层级、启用状态及 Training Entitlement 管理。
+- 新增 `AdminCatalogService`，负责 Course Category 与 Public Holiday 管理。
+- 新增 `AdminController`，负责 Admin Dashboard、用户管理、培训额度、课程类别及公共假期页面路由。
+- 在 `CourseApplicationRepository` 中补充 `findActiveByUserAndYear(...)`，供 `EntitlementService` 使用。
+- 在 `CourseApplicationRepository` 中补充 `findByApplicantIdAndYear(...)`，供 `ReportingService` 使用。
+- 修正 Training Calendar repository 查询参数绑定，确保 `status`、`monthStart` 与 `monthEnd` 参数正确对应。
+
+### 前端更新
+
+- 新增 `templates/admin/home.html`。
+- 新增 `templates/admin/users.html`。
+- 新增 `templates/admin/user-form.html`。
+- 新增 `templates/admin/categories.html`。
+- 新增 `templates/admin/holidays.html`。
+- Admin 页面统一加入错误信息显示、表单验证及操作确认。
+
+### 业务规则
+
+- 新建用户时自动建立当年度 Training Entitlement。
+- Administrative 用户默认培训天数为 5 天，Professional 用户默认培训天数为 10 天。
+- 同一用户同一年度的 Training Entitlement 采用更新或新增逻辑，避免重复记录。
+- 用户采用启用/停用方式管理，不直接删除历史用户资料。
+- Half-day training 不允许与收费课程类别同时启用。
+- 同一天不能重复建立 Public Holiday。
+- 非 Admin 用户访问 Admin 路由时会被重定向至 Admin 登录页面。
+
+## 2026-10-06 - Training Calendar 功能
+
+### 新增功能
+
+- 新增 Training Calendar 月度查询功能。
+- 所有已登录用户均可查看全体员工的已批准课程。
+- 默认显示当前月份的培训安排。
+- 支持通过年份和月份下拉框切换月份。
+- 支持上一月、当前月和下一月导航。
+- 支持跨月和跨年课程查询。
+- 显示员工姓名、课程名称、课程类别、培训机构、开始日期和结束日期。
+- 无培训记录时显示空结果提示。
+
+### 后端更新
+
+- 在 `CourseApplicationRepository` 中新增培训日历查询方法。
+- 查询只返回 `APPROVED` 状态的课程申请。
+- 查询使用日期区间重叠规则，确保跨月课程不会遗漏。
+- 新增 `CalendarCourseView` 页面数据对象。
+- 新增 `TrainingCalendarService`，负责月份校验、日期范围计算和数据转换。
+- 新增 `TrainingCalendarController`，负责登录检查、请求参数处理和页面跳转。
+- 增加非法年份、非法月份和非数字参数的错误处理。
+
+### 前端更新
+
+- 新增 `training-calendar.html` 页面。
+- 新增月度选择表单和月份导航链接。
+- 新增 Training Calendar 菜单入口。
+- 新增公共 `home.html` 页面，用于登录后的功能导航。
+
+### 登录流程更新
+
+- 登录成功后进入公共 Home 页面。
+- Home 页面提供 Training Calendar 入口。
+- 保留现有登录、管理员登录和退出登录功能。
+
+
+### 业务规则
+
+- 只有 `APPROVED` 状态的课程显示在培训日历中。
+- 课程只要与所选月份存在日期交集，就会显示在该月份。
+- 查询结果面向所有已登录用户，不按员工、经理或角色过滤。
+- 培训日历只读数据，不修改课程申请、审批状态或培训额度。
+

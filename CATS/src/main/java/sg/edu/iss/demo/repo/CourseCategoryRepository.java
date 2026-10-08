@@ -11,5 +11,9 @@ public interface CourseCategoryRepository extends JpaRepository<CourseCategory, 
 
 	List<CourseCategory> findByActiveTrue();
 	
+
 	Optional<CourseCategory> findByname(String name);
+	
+//Upgrade for AdminCatalogService avoid CaseSensitive
+	Optional<CourseCategory> findByNameIgnoreCase(String name);
 }

@@ -8,7 +8,8 @@ import org.springframework.web.servlet.ModelAndView;
 public class GlobalExceptionHandler {
 	
 	@ExceptionHandler({IllegalStateException.class, IllegalArgumentException.class})
-	
+	//optimize the name
+	/*	
 	public ModelAndView Business(RuntimeException error) {
 		
 		ModelAndView a = new ModelAndView("error");
@@ -17,9 +18,23 @@ public class GlobalExceptionHandler {
 		
 		return a;
 	}
+	*/
+	public ModelAndView handleBusinessException(
+	        RuntimeException error) {
+
+	    ModelAndView modelAndView =
+	            new ModelAndView("error");
+
+	    modelAndView.addObject(
+	            "error",
+	            error.getMessage());
+
+	    return modelAndView;
+	}
 	
 	@ExceptionHandler(Exception.class)
-	
+	//optimize the name
+	/*
 	public ModelAndView other (Exception error) {
 		
 		error.printStackTrace();
@@ -29,7 +44,16 @@ public class GlobalExceptionHandler {
 		a.addObject("error","Unexpected error " + error.getMessage());
 		
 		return a;
+	*/
+		public ModelAndView handleUnexpectedException (Exception error) {
 		
+		    error.printStackTrace();
+
+		    ModelAndView modelAndView = new ModelAndView("error");
+		    
+		    modelAndView.addObject("error","Unexpected error: " + error.getMessage());
+
+		    return modelAndView;
 	}
 
 }
