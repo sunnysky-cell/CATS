@@ -1,5 +1,52 @@
 # 更新日志
 
+## 2026-10-08 - 课程申请核心 Service 与报销 Service
+
+### 新增功能
+
+- 新增 `CourseApplicationService`，负责课程申请的校验、提交与状态流转（必做功能核心）。
+- 新增 `CourseFeeClaimService`，负责课程费用报销的提交与经理审批（选做功能）。
+- 申请校验一次返回全部错误，表单可一并显示，员工不必逐条修改重交。
+
+### 后端更新
+
+- `CourseApplicationService.validate(...)` 含 8 项错误检查：结束日期早于开始日期、开始日期非工作日、结束日期非工作日、当年额度未配置、培训天数超年度额度、收费类别未填费用、费用超剩余预算、同期与本人其他 Applied/Updated/Approved 申请重叠；另含 2 项系统处理：按工作日计算培训天数、免费类别费用归零。
+- 状态机方法：`submit` / `update` / `delete` / `cancel` / `markCompleted` / `approve` / `reject`，分别由 `checkOwner`、`checkManager`、`checkComment` 把关。
+- `validate(...)` 的 `excludeId` 参数使同一方法兼顾新建与编辑：新建传 `null`，编辑传该记录自身 id，避免记录与自身比较导致误判重叠与重复计额度。
+- `CourseFeeClaimService.submitClaim(...)` 含 9 项检查：申请不存在、仅限本人申请、免费类别不可报销、课程须为 COMPLETED、一份申请只能报销一次、金额须大于 0、金额不超过课程费、收据文件名必填、结业证书文件名必填。
+- 报销 `approve(...)` / `reject(...)` 强制填写经理意见（CA 要求 "manager must again give an appropriate reason"）。
+- 报销人 `claimant` 一律取自申请记录本身，不接受前端传入，杜绝替他人提交报销。
+- 在 `CourseApplicationRepository` 中补充 `findApprovedOverlapping(...)`，供经理审批页显示同期他人已批准课程（CA 决策支持信息）。
+- 在 `CourseApplicationRepository` 中补充 `existsOverlappingApplicationExcluding(...)`，供编辑场景排除自身后判断日期重叠。
+
+### 重构与整合
+
+- 复用队友已有组件，移除本模块中重复实现，`CourseApplicationService` 净减少 117 行。
+- 培训天数与工作日判断改为调用 `TrainingDayCalculator`，删除本类中重复的 `CT(...)` 与 `isWorkingDay(...)`。
+- 已用天数与已用预算累加改为调用 `EntitlementService.calculateUsedDays(...)` / `calculateUsedBudget(...)`，删除本类中重复的累加循环与 `findActiveApplications(...)`。
+- 额度使用汇总 `Summary(...)` 改为委托 `EntitlementService.usageSummary(...)`，删除重复实现。
+- 合并 `CourseApplicationRepository` 冲突：保留双方全部查询，每个 `@Query` 与其方法签名一一对应；`findActiveByUserAndYear(...)` 采用队友版本（`int year`），供 `EntitlementService` 与本 Service 共用。
+
+### 缺陷修正
+
+- 修正额度与预算校验误置于累加循环内部的问题：原实现在员工无其他申请时完全跳过校验，且在有多条申请时重复添加同一错误信息；现改为循环外单次判断。
+- 修正结束日期工作日校验误判 `start != null` 却检查 `end` 的问题，避免 `end` 为空时抛出空指针异常。
+- 修正该校验的错误提示文案由 "Start date" 更正为 "End date"。
+- 修正 `checkManager(...)` 中空值检查顺序颠倒的问题，改为先判 `applicant` 与 `manager` 是否为 null 再比较 id。
+
+### 业务规则
+
+- 培训天数由系统按工作日计算，不接受用户填写。
+- 起止日期均须为工作日（排除周末与公共假期）。
+- 年度培训天数与预算按课程开始日期所属年度核算。
+- 免费类别的课程费用强制归零。
+- 仅 APPLIED / UPDATED 状态的申请可编辑、可审批；仅 APPROVED 状态可取消或标记完成。
+- 报销仅在课程状态为 COMPLETED 且类别需付费时可提交。
+
+### 验证
+
+- `mvn -o clean compile` 全量编译通过（含本次合并进来的 Admin、Training Calendar、Reporting 模块）。
+
 ## 2026-10-08 - Admin Module 与 Repository 整合
 
 ### 新增功能
