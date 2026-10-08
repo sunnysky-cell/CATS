@@ -1,8 +1,9 @@
 package sg.edu.iss.demo.model;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+//Modify for Admin to maintain the public holiday calendar
+//import java.time.LocalDate;
 
+import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,15 +28,15 @@ public class PublicHoliday {
 
 	@NotNull(message = "The holiday date cannot be left blank.")
 	@Column(name = "holiday_date", nullable = false, unique = true)
-	private LocalDateTime holidayDate;
-
+private LocalDateTime holidayDate;
+	
 	@NotBlank(message = "The name of the vacation cannot be left blank.")
 	@Size(max = 150)
 	@Column(nullable = false, length = 150)
 	private String description;
 	
-	public PublicHoliday(LocalDateTime holidayDate, String description) {
-		
+public PublicHoliday(LocalDateTime holidayDate, String description) {
+	
 		this.holidayDate = holidayDate;
 		
 		this.description = description;
