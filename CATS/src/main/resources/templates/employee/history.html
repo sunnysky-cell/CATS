@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CATS - My Applications</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f6f8; color: #222; }
+        header { background-color: #1f3a5f; color: white; padding: 18px 30px; }
+        header h1 { margin: 0; font-size: 24px; }
+        main { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .button { display: inline-block; padding: 9px 14px; border: none; border-radius: 5px;
+                  text-decoration: none; cursor: pointer; font-size: 14px; }
+        .primary { background-color: #1f3a5f; color: white; }
+        .secondary { background-color: #68737d; color: white; }
+        .success { background-color: #e6f4ea; color: #1e6b32; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
+        .error { background-color: #ffe5e5; color: #a00000; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
+        .table-wrapper { overflow-x: auto; background-color: white; border-radius: 8px;
+                         box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: middle; }
+        th { background-color: #e9eef3; }
+        tr:hover { background-color: #f8fafc; }
+        .empty { text-align: center; color: #777; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>My Course Applications</h1>
+</header>
+<main>
+    <div class="toolbar">
+        <a class="button secondary" th:href="@{/home}">&larr; Home</a>
+        <a class="button primary" th:href="@{/employee/applications/new}">+ New Application</a>
+    </div>
+
+    <div class="success" th:if="${success}" th:text="${success}"></div>
+    <div class="error" th:if="${error}" th:text="${error}"></div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Course</th>
+                    <th>Category</th>
+                    <th>Provider</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="a : ${applications}">
+                    <td th:text="${a.id}"></td>
+                    <td th:text="${a.courseTitle}"></td>
+                    <td th:text="${a.category != null ? a.category.name : '-'}"></td>
+                    <td th:text="${a.trainingProvider}"></td>
+                    <td th:text="${a.startDate}"></td>
+                    <td th:text="${a.endDate}"></td>
+                    <td th:text="${a.status}"></td>
+                    <td>
+                        <a class="button primary" th:href="@{/employee/applications/{id}(id=${a.id})}">View</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(applications)}">
+                    <td colspan="8" class="empty">You have no course applications this year.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>
