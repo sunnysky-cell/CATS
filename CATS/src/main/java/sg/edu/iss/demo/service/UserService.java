@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,16 +19,19 @@ import sg.edu.iss.demo.repo.UserRepository;
 public class UserService {
 	    private final UserRepository userRepo;
 	    private final TrainingEntitlementRepository entitlementRepo;
+	    private final PasswordEncoder passwordEncoder;
 
 	    private static final BigDecimal DEFAULT_ANNUAL_BUDGET =
 	            new BigDecimal("2000.00");
 
 	    public UserService(
 	            UserRepository userRepo,
-	            TrainingEntitlementRepository entitlementRepo) {
+	            TrainingEntitlementRepository entitlementRepo,
+	            PasswordEncoder passwordEncoder) {
 	
 	        this.userRepo = userRepo;
 	        this.entitlementRepo = entitlementRepo;
+	        this.passwordEncoder = passwordEncoder;
 	    }
 
 //USER MANAGEMENT - Returns all users for the Admin user-management page.
@@ -87,6 +91,25 @@ public class UserService {
 	        }
 	
 	        user.setUsername(username);
+
+// Validate and hash the password (BCrypt) before persisting
+	        String rawPassword = user.getPassword();
+
+	        if (rawPassword == null
+	                || rawPassword.isBlank()) {
+
+	            throw new IllegalArgumentException(
+	                    "Password is required.");
+	        }
+
+	        if (rawPassword.length() < 8) {
+
+	            throw new IllegalArgumentException(
+	                    "Password must be at least 8 characters long.");
+	        }
+
+	        user.setPassword(
+	                passwordEncoder.encode(rawPassword));
 
 // New users are active by default
 	        user.setEnabled(true);
