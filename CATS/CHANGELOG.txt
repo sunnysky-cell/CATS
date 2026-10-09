@@ -1,5 +1,33 @@
 # 更新日志
 
+## 2026-10-09 - 修复 Manager 审批流 500 错误（补齐模板 + Thymeleaf 变量遮蔽 bug）
+
+### 问题现象
+
+- 经理登录后访问 `/manager/pending`、`/manager/applications/{id}`、`/manager/approved-overlapping`、`/manager/history` 全部返回 HTTP 500。
+- 员工访问 `/employee/applications/{id}` 详情页部分场景同样 500 或字段渲染为空白。
+
+### 根因分析
+
+1. **模板缺失**：`ManagerCourseController`（提交 519ef7d，标注 untested）返回 `manager/pending` 等 4 个视图名，但仓库中从未提交 `templates/manager/` 目录，导致 `TemplateInputException: Error resolving template [manager/pending]`。
+2. **Thymeleaf 保留变量遮蔽**：两个控制器都用 `model.addAttribute("application", ...)` 存放课程申请对象，但 `application` 是 Thymeleaf Web 上下文的内置变量（指向 ServletContext 属性表 `WebEngineContext$ApplicationAttributeMap`），model 中同名属性被完全遮蔽。模板里所有 `${application.*}` 实际取到的是 ServletContext 属性表，因此字段全部渲染为空；`employee/detail.html` 中 `${application.status.name()}` 直接抛 NPE → 500。已用探针测试实证：`${application}` 输出为 `ApplicationAttributeMap@59412c` 而非 CourseApplication。
+
+### 修复内容
+
+- 新增 4 个经理端模板：`templates/manager/pending.html`（待审批列表）、`manager/detail.html`（审批详情 + approve/reject 表单）、`manager/approved-overlapping.html`（同期已批准课程查询）、`manager/history.html`（下属申请历史）。样式与既有 employee/admin 页面保持一致。
+- `ManagerCourseController` / `EmployeeCourseController`：model key 由 `application` 改名为 `app`（各 1 行 + 注释说明原因），`manager/detail.html` 与 `employee/detail.html` 同步改用 `${app.*}`。除该改名外未改动队友任何业务逻辑。
+
+### 验证
+
+- 新增回归测试 `ManagerFlowViewTests`（6 个用例）：4 个经理页面渲染、pending 列表包含新申请、detail 页渲染出真实字段内容、approve 带 comment 后状态持久化为 APPROVED。全部通过。
+- 全量 `mvn test`：22/22 通过（15 security + 6 manager flow + 1 上下文）。
+- 真实服务器 curl E2E 全流程通过：emp1 登录 → 提交申请 → manager 登录 → pending 列表可见 → detail 页字段完整 → 带 CSRF approve → 状态翻转 APPROVED → emp1 详情页正确显示 APPROVED 及 Cancel/Complete 操作区。
+
+### 给队友的提示
+
+- Thymeleaf 模板中禁止使用 `application`、`session`、`param` 作为 model 属性名（保留字遮蔽）。
+- 所有含 POST 表单的模板必须使用 `th:action`（而非 `action=`），否则 Spring Security 的 CSRF token 不会注入，提交会 403。
+
 ## 2026-10-08 - 课程申请核心 Service 与报销 Service
 
 ### 新增功能

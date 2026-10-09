@@ -29,7 +29,7 @@
 </head>
 <body>
 <header>
-    <h1>Application #<span th:text="${application.id}"></span></h1>
+    <h1>Application #<span th:text="${app.id}"></span></h1>
 </header>
 <main>
     <a class="button secondary" th:href="@{/employee/applications}">&larr; My Applications</a>
@@ -39,48 +39,48 @@
 
     <div class="card">
         <div class="row"><label>Status:</label>
-            <span class="status-badge" th:text="${application.status}"></span>
+            <span class="status-badge" th:text="${app.status}"></span>
         </div>
-        <div class="row"><label>Course Title:</label><span th:text="${application.courseTitle}"></span></div>
-        <div class="row"><label>Category:</label><span th:text="${application.category != null ? application.category.name : '-'}"></span></div>
-        <div class="row"><label>Provider:</label><span th:text="${application.trainingProvider}"></span></div>
-        <div class="row"><label>Start Date:</label><span th:text="${application.startDate}"></span></div>
-        <div class="row"><label>End Date:</label><span th:text="${application.endDate}"></span></div>
-        <div class="row"><label>Training Days:</label><span th:text="${application.trainingDays}"></span></div>
-        <div class="row"><label>Course Fee:</label><span th:text="${application.courseFee}"></span></div>
-        <div class="row"><label>Justification:</label><span th:text="${application.justification}"></span></div>
-        <div class="row" th:if="${application.workDissemination != null}">
-            <label>Dissemination:</label><span th:text="${application.workDissemination}"></span>
+        <div class="row"><label>Course Title:</label><span th:text="${app.courseTitle}"></span></div>
+        <div class="row"><label>Category:</label><span th:text="${app.category != null ? app.category.name : '-'}"></span></div>
+        <div class="row"><label>Provider:</label><span th:text="${app.trainingProvider}"></span></div>
+        <div class="row"><label>Start Date:</label><span th:text="${app.startDate}"></span></div>
+        <div class="row"><label>End Date:</label><span th:text="${app.endDate}"></span></div>
+        <div class="row"><label>Training Days:</label><span th:text="${app.trainingDays}"></span></div>
+        <div class="row"><label>Course Fee:</label><span th:text="${app.courseFee}"></span></div>
+        <div class="row"><label>Justification:</label><span th:text="${app.justification}"></span></div>
+        <div class="row" th:if="${app.workDissemination != null}">
+            <label>Dissemination:</label><span th:text="${app.workDissemination}"></span>
         </div>
-        <div class="row" th:if="${application.managerComment != null}">
-            <label>Manager Comment:</label><span th:text="${application.managerComment}"></span>
+        <div class="row" th:if="${app.managerComment != null}">
+            <label>Manager Comment:</label><span th:text="${app.managerComment}"></span>
         </div>
-        <div class="row" th:if="${application.decisionDate != null}">
-            <label>Decided At:</label><span th:text="${application.decisionDate}"></span>
+        <div class="row" th:if="${app.decisionDate != null}">
+            <label>Decided At:</label><span th:text="${app.decisionDate}"></span>
         </div>
-        <div class="row" th:if="${application.experienceComment != null}">
-            <label>Your Feedback:</label><span th:text="${application.experienceComment}"></span>
+        <div class="row" th:if="${app.experienceComment != null}">
+            <label>Your Feedback:</label><span th:text="${app.experienceComment}"></span>
         </div>
     </div>
 
     <!-- Edit: only allowed while still in APPLIED / UPDATED -->
-    <div class="actions" th:if="${application.status.name() == 'APPLIED' or application.status.name() == 'UPDATED'}">
-        <a class="button primary" th:href="@{/employee/applications/{id}/edit(id=${application.id})}">Edit</a>
+    <div class="actions" th:if="${app.status.name() == 'APPLIED' or app.status.name() == 'UPDATED'}">
+        <a class="button primary" th:href="@{/employee/applications/{id}/edit(id=${app.id})}">Edit</a>
     </div>
 
     <!-- Cancel / Complete: only allowed while APPROVED -->
-    <div class="card" th:if="${application.status.name() == 'APPROVED'}">
+    <div class="card" th:if="${app.status.name() == 'APPROVED'}">
         <h3>Finish up</h3>
 
         <form method="post" class="inline"
-              th:action="@{/employee/applications/{id}/cancel(id=${application.id})}"
+              th:action="@{/employee/applications/{id}/cancel(id=${app.id})}"
               th:attr="onclick='return confirm(\'Cancel this approved course?\')'">
             <button type="submit" class="button danger">Cancel Course</button>
         </form>
 
         <h3 style="margin-top:20px;">Mark as Completed</h3>
         <form method="post"
-              th:action="@{/employee/applications/{id}/complete(id=${application.id})}">
+              th:action="@{/employee/applications/{id}/complete(id=${app.id})}">
             <div class="row">
                 <label>Experience / Feedback:</label>
                 <textarea name="experienceComment" placeholder="Share your learning experience..."></textarea>
