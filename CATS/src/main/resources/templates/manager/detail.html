@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CATS - Review Application</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f6f8; color: #222; }
+        header { background-color: #1f3a5f; color: white; padding: 18px 30px; }
+        header h1 { margin: 0; font-size: 24px; }
+        main { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+        .button { display: inline-block; padding: 9px 14px; border: none; border-radius: 5px;
+                  text-decoration: none; cursor: pointer; font-size: 14px; }
+        .primary { background-color: #1f3a5f; color: white; }
+        .secondary { background-color: #68737d; color: white; }
+        .success-btn { background-color: #1e6b32; color: white; }
+        .danger { background-color: #b42318; color: white; }
+        .success { background-color: #e6f4ea; color: #1e6b32; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
+        .error { background-color: #ffe5e5; color: #a00000; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
+        .card { background-color: white; border-radius: 8px; padding: 24px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .row { margin-bottom: 12px; }
+        .row label { font-weight: bold; display: inline-block; min-width: 180px; color: #555; vertical-align: top; }
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: bold;
+                        background-color: #e9eef3; }
+        textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-height: 70px; }
+        .actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .decision { margin-top: 8px; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Review Application #<span th:text="${app.id}"></span></h1>
+</header>
+<main>
+    <a class="button secondary" th:href="@{/manager/pending}">&larr; Back to Pending</a>
+
+    <div class="success" th:if="${success}" th:text="${success}"></div>
+    <div class="error" th:if="${error}" th:text="${error}"></div>
+
+    <div class="card" style="margin-top:20px;">
+        <div class="row"><label>Status:</label>
+            <span class="status-badge" th:text="${app.status}"></span>
+        </div>
+        <div class="row"><label>Employee:</label>
+            <span th:text="${app.applicant != null ? app.applicant.name : '-'}"></span>
+        </div>
+        <div class="row"><label>Designation:</label>
+            <span th:text="${app.applicant != null ? app.applicant.designation : '-'}"></span>
+        </div>
+        <div class="row"><label>Course Title:</label><span th:text="${app.courseTitle}"></span></div>
+        <div class="row"><label>Category:</label>
+            <span th:text="${app.category != null ? app.category.name : '-'}"></span>
+        </div>
+        <div class="row"><label>Provider:</label><span th:text="${app.trainingProvider}"></span></div>
+        <div class="row"><label>Start Date:</label><span th:text="${app.startDate}"></span></div>
+        <div class="row"><label>End Date:</label><span th:text="${app.endDate}"></span></div>
+        <div class="row"><label>Training Days:</label><span th:text="${app.trainingDays}"></span></div>
+        <div class="row"><label>Course Fee:</label><span th:text="${app.courseFee != null ? app.courseFee : '-'}"></span></div>
+        <div class="row"><label>Justification:</label><span th:text="${app.justification}"></span></div>
+        <div class="row" th:if="${app.workDissemination != null}">
+            <label>Work Dissemination:</label><span th:text="${app.workDissemination}"></span>
+        </div>
+        <div class="row" th:if="${app.managerComment != null}">
+            <label>Existing Comment:</label><span th:text="${app.managerComment}"></span>
+        </div>
+        <div class="row" th:if="${app.decisionDate != null}">
+            <label>Decided At:</label><span th:text="${app.decisionDate}"></span>
+        </div>
+    </div>
+
+    <!-- Check other subordinates' approved courses overlapping this period -->
+    <div class="card">
+        <a class="button primary"
+           th:href="@{/manager/approved-overlapping(startDate=${app.startDate},endDate=${app.endDate})}">
+           View approved courses overlapping this period
+        </a>
+    </div>
+
+    <!-- Decision form: only while the application is still pending (APPLIED / UPDATED) -->
+    <div class="card" th:if="${app.status != null and (app.status.name() == 'APPLIED' or app.status.name() == 'UPDATED')}">
+        <h3>Decision</h3>
+        <p style="color:#555;">A comment stating your reason is mandatory for both approve and reject.</p>
+
+        <form method="post"
+              th:action="@{/manager/applications/{id}/approve(id=${app.id})}">
+            <div class="row decision">
+                <label>Comment / Justification:</label>
+                <textarea name="comment" placeholder="e.g. Approved - relevant to current project. Please share key learnings with the team afterwards." required></textarea>
+            </div>
+            <div class="actions">
+                <button type="submit" class="button success-btn">Approve</button>
+            </div>
+        </form>
+
+        <form method="post" style="margin-top:20px;"
+              th:action="@{/manager/applications/{id}/reject(id=${app.id})}">
+            <div class="row decision">
+                <label>Rejection Reason:</label>
+                <textarea name="comment" placeholder="e.g. Rejected - insufficient training budget for this period." required></textarea>
+            </div>
+            <div class="actions">
+                <button type="submit" class="button danger">Reject</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card" th:if="${app.status == null or (app.status.name() != 'APPLIED' and app.status.name() != 'UPDATED')}">
+        <p>This application has already been decided (status:
+           <strong th:text="${app.status}"></strong>) and can no longer be approved or rejected.</p>
+    </div>
+</main>
+</body>
+</html>

@@ -116,7 +116,9 @@ public class EmployeeCourseController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
 
-		model.addAttribute("application", application);
+		// NOTE: model key must NOT be "application" — Thymeleaf's built-in
+		// 'application' variable shadows it, breaking the detail template.
+		model.addAttribute("app", application);
 
 		return "employee/detail";
 	}

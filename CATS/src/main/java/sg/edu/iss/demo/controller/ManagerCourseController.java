@@ -106,7 +106,11 @@ public class ManagerCourseController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
-        model.addAttribute("application", application);
+        // NOTE: model key must NOT be "application" — that name is shadowed by
+        // Thymeleaf's built-in 'application' variable (ServletContext attribute
+        // map), which made every ${application.*} expression in the detail
+        // template resolve against the wrong object (blank fields / 500 errors).
+        model.addAttribute("app", application);
         model.addAttribute("manager", manager);
 
         return "manager/detail";
