@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import sg.edu.iss.demo.model.CourseCategory;
 import sg.edu.iss.demo.model.PublicHoliday;
@@ -22,9 +23,10 @@ public class DataInitializer {
 	
 	@Bean
 	CommandLineRunner initData (UserRepository userRepo,
-			                    CourseCategoryRepository categoryRepo,
-			                    PublicHolidayRepository holidayRepo,
-			                    TrainingEntitlementRepository entitlementRepo) {
+	                            CourseCategoryRepository categoryRepo,
+	                            PublicHolidayRepository holidayRepo,
+	                            TrainingEntitlementRepository entitlementRepo,
+	                            PasswordEncoder passwordEncoder) {
 		
 		
 		return args -> {
@@ -35,13 +37,15 @@ public class DataInitializer {
 				
 			}
 			
+			String encodedPassword = passwordEncoder.encode("password123");
+			
 			//1 admin + 1 manager + 2 employee
 			
 			User admin = new User();
 			
 			admin.setUsername("admin");
 			
-			admin.setPassword("password123");
+			admin.setPassword(encodedPassword);
 			
 			admin.setName("System Administrator");
 			
@@ -61,7 +65,7 @@ public class DataInitializer {
 			
 			manager.setUsername("manager");
 			
-			manager.setPassword("password123");
+			manager.setPassword(encodedPassword);
 			
 			manager.setName("Norman Manager");
 			
@@ -83,7 +87,7 @@ public class DataInitializer {
 			
 			emp1.setUsername("emp1");
 			
-			emp1.setPassword("password123");
+			emp1.setPassword(encodedPassword);
 			
 			emp1.setName("Hook Liao");
 			
@@ -105,7 +109,7 @@ public class DataInitializer {
 			
             emp2.setUsername("emp2");
 			
-            emp2.setPassword("password123");
+            emp2.setPassword(encodedPassword);
 			
             emp2.setName("Bobo");
 			

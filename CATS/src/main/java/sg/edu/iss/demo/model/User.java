@@ -36,7 +36,7 @@ public class User {
 
 	@NotBlank(message = "Password cannot be empty")
 	@Size(min = 8, message = "The password must be at least 8 characters long.")
-	@Column(nullable = false, length = 50)
+	@Column(nullable = false, length = 100)
 	private String password;
 
 	@NotBlank(message = "Name cannot be left blank.")
