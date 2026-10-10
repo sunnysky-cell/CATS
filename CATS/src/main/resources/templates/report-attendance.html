@@ -1,88 +1,162 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
-<head>
-<meta charset="UTF-8">
-<title>Attendance Report - CATS</title>
-</head>
-
-<body>
-
-<h2>Attendance Report</h2>
-
-<hr/>
-
-<h3>Filter Criteria</h3>
-
-<form method="post" th:action="@{/manager/report/attendance}">
-
-  <table border="1">
-    <tr>
-      <td>Start Date</td>
-      <td><input type="date" name="startDate" th:value="${startDate}"/></td>
-    </tr>
-    <tr>
-      <td>End Date</td>
-      <td><input type="date" name="endDate" th:value="${endDate}"/></td>
-    </tr>
-  </table>
-
-  <br/>
-
-  <button type="submit">Generate Report</button>
-
-</form>
-
-<hr/>
-
-<h3>Report Results</h3>
-
-<div th:if="${rows == null || rows.isEmpty()}">
-  <p>No records found. Please adjust your filter criteria.</p>
-</div>
-
-<table border="1" th:if="${rows != null && !rows.isEmpty()}">
-  <thead>
-    <tr>
-      <th>Employee Name</th>
-      <th>Course Title</th>
-      <th>Category</th>
-      <th>Training Provider</th>
-      <th>Start Date</th>
-      <th>End Date</th>
-      <th>Training Days</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr th:each="r : ${rows}">
-      <td th:text="${r.applicant.name}"></td>
-      <td th:text="${r.courseTitle}"></td>
-      <td th:text="${r.category != null ? r.category.name : ''}"></td>
-      <td th:text="${r.trainingProvider}"></td>
-      <td th:text="${r.startDate}"></td>
-      <td th:text="${r.endDate}"></td>
-      <td th:text="${r.trainingDays}"></td>
-      <td th:text="${r.status}"></td>
-    </tr>
-  </tbody>
-</table>
-
-<p th:if="${rows != null && !rows.isEmpty()}">
-  <a th:href="@{/manager/report/attendance/export(
-    startDate=${startDate},
-    endDate=${endDate}
-  )}">
-    <button type="button">Export as CSV</button>
-  </a>
-</p>
-
-<hr/>
-
-<p>
-  <a th:href="@{/manager/report}">Back to Report Center</a> |
-  <a th:href="@{/logout}">Logout</a>
-</p>
-
-</body>
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Attendance report')}"></head>
+  <body>
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside th:replace="~{fragments/chrome :: sidebar('reports')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Attendance report')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <h1>Attendance report</h1>
+            <p>Course participation for a selected period.</p>
+          </div>
+          <a
+            class="button text"
+            th:href="@{/manager/report}"
+          >
+            All reports
+          </a>
+        </header>
+        <div class="page-body">
+          <section
+            class="section"
+            aria-labelledby="attendance-filters-title"
+          >
+            <h2 id="attendance-filters-title">Date range</h2>
+            <form
+              method="post"
+              th:action="@{/manager/report/attendance}"
+            >
+              <div class="form-grid">
+                <div class="field">
+                  <label for="reports-startDate">Start date</label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    th:value="${startDate}"
+                    id="reports-startDate"
+                  />
+                </div>
+                <div class="field">
+                  <label for="reports-endDate">End date</label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    th:value="${endDate}"
+                    id="reports-endDate"
+                  />
+                </div>
+              </div>
+              <div class="actions">
+                <button
+                  class="button primary"
+                  type="submit"
+                >
+                  Generate report
+                </button>
+              </div>
+            </form>
+          </section>
+          <section
+            class="section"
+            aria-labelledby="attendance-results-title"
+          >
+            <div class="section-heading">
+              <h2 id="attendance-results-title">Participation records</h2>
+              <a
+                class="button secondary"
+                th:if="${rows != null &amp;&amp; !rows.isEmpty()}"
+                th:href="@{/manager/report/attendance/export(startDate=${startDate},endDate=${endDate})}"
+              >
+                Export CSV
+              </a>
+            </div>
+            <p
+              class="empty"
+              th:if="${rows == null || rows.isEmpty()}"
+            >
+              No records found. Try another date range.
+            </p>
+            <div
+              class="table-wrapper"
+              th:if="${rows != null &amp;&amp; !rows.isEmpty()}"
+            >
+              <table data-searchable="true">
+                <caption class="sr-only">Training attendance records</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Employee</th>
+                    <th scope="col">Course</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Provider</th>
+                    <th scope="col">Start date</th>
+                    <th scope="col">End date</th>
+                    <th
+                      scope="col"
+                      class="numeric"
+                    >
+                      Training days
+                    </th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="r : ${rows}">
+                    <td
+                      data-label="Employee"
+                      th:text="${r.applicant != null ? r.applicant.name : '-'}"
+                    ></td>
+                    <td data-label="Course"><strong th:text="${r.courseTitle}"></strong></td>
+                    <td
+                      data-label="Category"
+                      th:text="${r.category != null ? r.category.name : ''}"
+                    ></td>
+                    <td
+                      data-label="Provider"
+                      th:text="${r.trainingProvider}"
+                    ></td>
+                    <td
+                      data-label="Start date"
+                      th:text="${r.startDate}"
+                    ></td>
+                    <td
+                      data-label="End date"
+                      th:text="${r.endDate}"
+                    ></td>
+                    <td
+                      data-label="Training days"
+                      class="numeric"
+                      th:text="${r.trainingDays}"
+                    ></td>
+                    <td data-label="Status">
+                      <span
+                        class="status-badge"
+                        th:text="${r.status}"
+                        th:attr="data-status=${r.status}"
+                      ></span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="muted">Results reflect the records available to your account.</p>
+          </section>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
+    </div>
+  </body>
 </html>

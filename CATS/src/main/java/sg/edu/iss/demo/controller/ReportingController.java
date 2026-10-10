@@ -137,4 +137,25 @@ public class ReportingController {
 
 		return "report-budget";
 	}
+
+	@GetMapping("/budget/export")
+	public ResponseEntity<byte[]> exportBudgetReportCsv(
+			@RequestParam Integer year,
+			HttpSession session) {
+
+		User user = (User) session.getAttribute("loggedInUser");
+
+		if (user == null) {
+			return ResponseEntity.status(302).header("Location", "/login").build();
+		}
+
+		List<Map<String, Object>> rows = reportingService.getBudgetUtilisationReport(year);
+
+		byte[] csv = csvExportService.exportBudgetReport(rows);
+
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"budget-report.csv\"")
+				.contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+				.body(csv);
+	}
 }

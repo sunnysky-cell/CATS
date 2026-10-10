@@ -1,74 +1,109 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CATS - Approved Overlapping Courses</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f6f8; color: #222; }
-        header { background-color: #1f3a5f; color: white; padding: 18px 30px; }
-        header h1 { margin: 0; font-size: 24px; }
-        main { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
-        .toolbar { margin-bottom: 20px; }
-        .button { display: inline-block; padding: 9px 14px; border: none; border-radius: 5px;
-                  text-decoration: none; cursor: pointer; font-size: 14px; }
-        .secondary { background-color: #68737d; color: white; }
-        .info { background-color: #eef3f9; color: #1f3a5f; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
-        .table-wrapper { overflow-x: auto; background-color: white; border-radius: 8px;
-                         box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: middle; }
-        th { background-color: #e9eef3; }
-        tr:hover { background-color: #f8fafc; }
-        .empty { text-align: center; color: #777; }
-    </style>
-</head>
-<body>
-<header>
-    <h1>Approved Courses Overlapping Period</h1>
-</header>
-<main>
-    <div class="toolbar">
-        <a class="button secondary" th:href="@{/manager/pending}">&larr; Back to Pending</a>
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Overlapping courses')}"></head>
+  <body>
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside th:replace="~{fragments/chrome :: sidebar('approvals')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Overlapping courses')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <h1>Overlapping courses</h1>
+            <p>Approved training that shares dates with the selected period.</p>
+          </div>
+          <a
+            class="button text"
+            th:href="@{/manager/pending}"
+          >
+            Back to applications
+          </a>
+        </header>
+        <div class="page-body">
+          <section
+            class="section"
+            aria-labelledby="overlapping-title"
+          >
+            <div class="section-heading">
+              <h2 id="overlapping-title">Training in this period</h2>
+              <p>
+                <span th:text="${startDate}"></span>
+                to
+                <span th:text="${endDate}"></span>
+              </p>
+            </div>
+            <div class="table-wrapper">
+              <table data-searchable="true">
+                <caption class="sr-only">Approved courses overlapping the selected dates</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Course</th>
+                    <th scope="col">Employee</th>
+                    <th scope="col">Training dates</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="a : ${applications}">
+                    <td data-label="Course">
+                      <strong th:text="${a.courseTitle}"></strong>
+                      <small th:text="${a.trainingProvider}"></small>
+                      <small>
+                        <span th:text="${a.category != null ? a.category.name : '-'}"></span>
+                        <span aria-hidden="true">·</span>
+                        #
+                        <span th:text="${a.id}"></span>
+                      </small>
+                    </td>
+                    <td
+                      data-label="Employee"
+                      th:text="${a.applicant != null ? a.applicant.name : '-'}"
+                    ></td>
+                    <td data-label="Training dates">
+                      <span th:text="${a.startDate}"></span>
+                      <small>
+                        to
+                        <span th:text="${a.endDate}"></span>
+                      </small>
+                    </td>
+                    <td data-label="Status">
+                      <span
+                        class="status-badge"
+                        th:text="${a.status}"
+                        th:attr="data-status=${a.status}"
+                      ></span>
+                    </td>
+                  </tr>
+                  <tr th:if="${#lists.isEmpty(applications)}">
+                    <td
+                      colspan="4"
+                      class="empty"
+                    >
+                      No approved courses overlap this period.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="muted">
+              An overlap shows concurrent training; it does not by itself confirm a scheduling
+              conflict.
+            </p>
+          </section>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
     </div>
-
-    <div class="info">
-        Showing approved courses between
-        <strong th:text="${startDate}"></strong> and <strong th:text="${endDate}"></strong>.
-    </div>
-
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Employee</th>
-                    <th>Course</th>
-                    <th>Category</th>
-                    <th>Provider</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="a : ${applications}">
-                    <td th:text="${a.id}"></td>
-                    <td th:text="${a.applicant != null ? a.applicant.name : '-'}"></td>
-                    <td th:text="${a.courseTitle}"></td>
-                    <td th:text="${a.category != null ? a.category.name : '-'}"></td>
-                    <td th:text="${a.trainingProvider}"></td>
-                    <td th:text="${a.startDate}"></td>
-                    <td th:text="${a.endDate}"></td>
-                    <td th:text="${a.status}"></td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(applications)}">
-                    <td colspan="8" class="empty">No other approved courses overlap this period.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</main>
-</body>
+  </body>
 </html>

@@ -1,420 +1,229 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
-<head>
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>CATS - Course Categories</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #f4f6f8;
-            color: #222;
-        }
-
-        header {
-            background-color: #1f3a5f;
-            color: white;
-            padding: 18px 30px;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        main {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        .panel {
-            background: white;
-            padding: 24px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        }
-
-        .button {
-            padding: 9px 14px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .primary {
-            background-color: #1f3a5f;
-            color: white;
-        }
-
-        .secondary {
-            background-color: #68737d;
-            color: white;
-        }
-
-        .danger {
-            background-color: #b42318;
-            color: white;
-        }
-
-        .success {
-            background-color: #287a3c;
-            color: white;
-        }
-
-        .error {
-            background-color: #ffe5e5;
-            color: #a00000;
-            padding: 12px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-            vertical-align: middle;
-        }
-
-        th {
-            background-color: #e9eef3;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 7px;
-            border: 1px solid #bbb;
-            border-radius: 4px;
-        }
-
-        .inline-actions {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .category-edit-form {
-            display: contents;
-        }
-
-        .add-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .checkbox-label {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            font-weight: normal;
-        }
-
-        .help {
-            color: #666;
-            font-size: 13px;
-            margin-top: 8px;
-        }
-    </style>
-</head>
-
-<body>
-
-<header>
-
-    <h1>
-        Manage Course Categories
-    </h1>
-
-</header>
-
-
-<main>
-
-    <a class="button secondary"
-       th:href="@{/admin/home}">
-        ← Admin Home
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Course categories')}"></head>
+  <body class="admin-page">
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
     </a>
-
-
-    <div class="error"
-         th:if="${error}"
-         th:text="${error}">
+    <aside th:replace="~{fragments/chrome :: sidebar('categories')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Course categories')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <h1>Course categories</h1>
+            <p>Set the fee requirements and half-day rules used by training applications.</p>
+          </div>
+          <a
+            class="button"
+            href="#add-category"
+          >
+            Add category
+          </a>
+        </header>
+        <div class="page-body">
+          <div
+            class="error"
+            th:if="${error}"
+            th:text="${error}"
+            role="alert"
+          ></div>
+          <section
+            class="section admin-records"
+            aria-label="Category records"
+          >
+            <div class="table-wrapper">
+              <table
+                class="table admin-categories-table"
+                data-searchable="true"
+              >
+                <caption class="sr-only">Course category rules</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Category</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Fee required</th>
+                    <th scope="col">Half-day</th>
+                    <th scope="col">Status</th>
+                    <th scope="col"><span class="sr-only">Save</span></th>
+                    <th scope="col"><span class="sr-only">Change access</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- The form attribute keeps each editable row associated with its own POST. -->
+                  <tr th:each="c : ${categories}">
+                    <td data-label="Category">
+                      <input
+                        type="text"
+                        name="name"
+                        th:value="${c.name}"
+                        th:attr="form=${'categoryForm-' + c.id}"
+                        maxlength="100"
+                        required
+                        aria-label="Category name"
+                      />
+                    </td>
+                    <td data-label="Description">
+                      <input
+                        type="text"
+                        name="description"
+                        th:value="${c.description}"
+                        th:attr="form=${'categoryForm-' + c.id}"
+                        maxlength="255"
+                        aria-label="Category description"
+                      />
+                    </td>
+                    <td
+                      data-label="Fee required"
+                      class="admin-checkbox-cell"
+                    >
+                      <input
+                        type="checkbox"
+                        name="feeRequired"
+                        value="true"
+                        th:checked="${c.feeRequired}"
+                        th:attr="form=${'categoryForm-' + c.id}"
+                        aria-label="Fee required"
+                      />
+                    </td>
+                    <td
+                      data-label="Half-day"
+                      class="admin-checkbox-cell"
+                    >
+                      <input
+                        type="checkbox"
+                        name="allowHalfDay"
+                        value="true"
+                        th:checked="${c.allowHalfDay}"
+                        th:attr="form=${'categoryForm-' + c.id}"
+                        aria-label="Allow half day"
+                      />
+                    </td>
+                    <td data-label="Status">
+                      <span
+                        class="status"
+                        th:classappend="${c.active} ? 'status-active' : 'status-disabled'"
+                        th:text="${c.active ? 'Active' : 'Inactive'}"
+                      ></span>
+                    </td>
+                    <td data-label="Save">
+                      <form
+                        method="post"
+                        th:id="${'categoryForm-' + c.id}"
+                        th:action="@{/admin/categories/{id}/edit(id=${c.id})}"
+                      >
+                        <button
+                          type="submit"
+                          class="button text"
+                        >
+                          Save
+                        </button>
+                      </form>
+                    </td>
+                    <td data-label="Change access">
+                      <form
+                        method="post"
+                        th:action="@{/admin/categories/{id}/toggle(id=${c.id})}"
+                        th:attr="data-confirm=${c.active ? 'Deactivate this category?' : 'Activate this category?'}"
+                      >
+                        <button
+                          type="submit"
+                          class="button text"
+                          th:classappend="${c.active} ? ' danger' : ' success'"
+                          th:text="${c.active} ? 'Deactivate' : 'Activate'"
+                        ></button>
+                      </form>
+                    </td>
+                  </tr>
+                  <tr th:if="${#lists.isEmpty(categories)}">
+                    <td
+                      colspan="7"
+                      class="empty"
+                    >
+                      No course categories found.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="help admin-record-note">
+              Save applies changes to that category. Access changes use a separate confirmation.
+            </p>
+          </section>
+          <section
+            id="add-category"
+            class="section admin-edit-section"
+          >
+            <div class="admin-section-heading">
+              <h2>Add category</h2>
+              <p>Half-day training is only allowed for free internal training.</p>
+            </div>
+            <form
+              method="post"
+              th:action="@{/admin/categories/new}"
+            >
+              <div class="admin-form-grid">
+                <div class="field">
+                  <label for="category-name">
+                    Category name
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    id="category-name"
+                    type="text"
+                    name="name"
+                    maxlength="100"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="category-description">Description</label>
+                  <input
+                    id="category-description"
+                    type="text"
+                    name="description"
+                    maxlength="255"
+                  />
+                </div>
+                <label class="admin-checkbox">
+                  <input
+                    type="checkbox"
+                    name="feeRequired"
+                    value="true"
+                  />
+                  <span>Require a course fee</span>
+                </label>
+                <label class="admin-checkbox">
+                  <input
+                    type="checkbox"
+                    name="allowHalfDay"
+                    value="true"
+                  />
+                  <span>Allow half-day training</span>
+                </label>
+              </div>
+              <div class="actions admin-form-actions">
+                <button
+                  type="submit"
+                  class="button primary"
+                >
+                  Add category
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
     </div>
-
-
-    <!-- =====================================================
-         EXISTING CATEGORIES
-         ===================================================== -->
-
-    <section class="panel">
-
-        <h2>
-            Course Categories
-        </h2>
-
-
-        <table>
-
-            <thead>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Fee Required</th>
-                <th>Half Day</th>
-                <th>Status</th>
-                <th>Save</th>
-                <th>Enable / Disable</th>
-            </tr>
-            </thead>
-
-
-            <tbody>
-
-            <tr th:each="c : ${categories}">
-
-
-                <!--
-                    HTML allows each editable field to belong
-                    to this form through the form attribute.
-                -->
-                <td>
-
-                    <input type="text"
-                           name="name"
-                           th:value="${c.name}"
-                           th:attr="form=${'categoryForm-' + c.id}"
-                           maxlength="100"
-                           required>
-
-                </td>
-
-
-                <td>
-
-                    <input type="text"
-                           name="description"
-                           th:value="${c.description}"
-                           th:attr="form=${'categoryForm-' + c.id}"
-                           maxlength="255">
-
-                </td>
-
-
-                <td>
-
-                    <input type="checkbox"
-                           name="feeRequired"
-                           value="true"
-                           th:checked="${c.feeRequired}"
-                           th:attr="form=${'categoryForm-' + c.id}">
-
-                </td>
-
-
-                <td>
-
-                    <input type="checkbox"
-                           name="allowHalfDay"
-                           value="true"
-                           th:checked="${c.allowHalfDay}"
-                           th:attr="form=${'categoryForm-' + c.id}">
-
-                </td>
-
-
-                <td>
-
-                    <span th:text="${c.active
-                                    ? 'Active'
-                                    : 'Inactive'}">
-                    </span>
-
-                </td>
-
-
-                <td>
-
-                    <form method="post"
-                          th:id="${'categoryForm-' + c.id}"
-                          th:action="@{/admin/categories/{id}/edit(id=${c.id})}">
-
-                        <button type="submit"
-                                class="button primary">
-
-                            Save
-
-                        </button>
-
-                    </form>
-
-                </td>
-
-
-                <td>
-
-                    <form method="post"
-                          th:action="@{/admin/categories/{id}/toggle(id=${c.id})}">
-
-                        <button type="submit"
-                                class="button"
-                                th:classappend="${c.active}
-                                    ? ' danger'
-                                    : ' success'"
-                                th:text="${c.active}
-                                    ? 'Deactivate'
-                                    : 'Activate'"
-                                th:attr="onclick=${c.active}
-                                    ? 'return confirm(\'Deactivate this category?\')'
-                                    : 'return confirm(\'Activate this category?\')'">
-                        </button>
-
-                    </form>
-
-                </td>
-
-            </tr>
-
-
-            <tr th:if="${#lists.isEmpty(categories)}">
-
-                <td colspan="7">
-                    No course categories found.
-                </td>
-
-            </tr>
-
-            </tbody>
-
-        </table>
-
-    </section>
-
-
-    <!-- =====================================================
-         CREATE CATEGORY
-         ===================================================== -->
-
-    <section class="panel">
-
-        <h2>
-            Add Course Category
-        </h2>
-
-
-        <form method="post"
-              th:action="@{/admin/categories/new}">
-
-
-            <div class="add-grid">
-
-                <div>
-
-                    <label>
-                        Name *
-                    </label>
-
-                    <input type="text"
-                           name="name"
-                           maxlength="100"
-                           required>
-
-                </div>
-
-
-                <div>
-
-                    <label>
-                        Description
-                    </label>
-
-                    <input type="text"
-                           name="description"
-                           maxlength="255">
-
-                </div>
-
-
-                <div>
-
-                    <label class="checkbox-label">
-
-                        <input type="checkbox"
-                               name="feeRequired"
-                               value="true">
-
-                        Fee Required
-
-                    </label>
-
-                </div>
-
-
-                <div>
-
-                    <label class="checkbox-label">
-
-                        <input type="checkbox"
-                               name="allowHalfDay"
-                               value="true">
-
-                        Allow Half Day
-
-                    </label>
-
-                </div>
-
-            </div>
-
-
-            <div class="help">
-
-                Half-day training is only allowed
-                for free internal training.
-
-            </div>
-
-
-            <br>
-
-            <button type="submit"
-                    class="button primary">
-
-                Add Category
-
-            </button>
-
-        </form>
-
-    </section>
-
-</main>
-
-</body>
+  </body>
 </html>

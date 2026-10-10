@@ -1,5 +1,6 @@
 package sg.edu.iss.demo.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -17,10 +18,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
 import sg.edu.iss.demo.model.CourseApplication;
 import sg.edu.iss.demo.model.CourseCategory;
+import sg.edu.iss.demo.model.CourseFeeClaim;
 import sg.edu.iss.demo.model.Role;
 import sg.edu.iss.demo.model.User;
 import sg.edu.iss.demo.repo.CourseCategoryRepository;
 import sg.edu.iss.demo.service.CourseApplicationService;
+import sg.edu.iss.demo.service.CourseFeeClaimService;
 
 /**
  * Employee-facing course application controller.
@@ -44,12 +47,15 @@ public class EmployeeCourseController {
 
 	private final CourseApplicationService courseApplicationService;
 	private final CourseCategoryRepository courseCategoryRepository;
+	private final CourseFeeClaimService courseFeeClaimService;
 
 	public EmployeeCourseController(CourseApplicationService courseApplicationService,
-			CourseCategoryRepository courseCategoryRepository) {
+			CourseCategoryRepository courseCategoryRepository,
+			CourseFeeClaimService courseFeeClaimService) {
 
 		this.courseApplicationService = courseApplicationService;
 		this.courseCategoryRepository = courseCategoryRepository;
+		this.courseFeeClaimService = courseFeeClaimService;
 	}
 
 	@GetMapping("/applications/new")
@@ -204,6 +210,77 @@ public class EmployeeCourseController {
 		}
 
 		return "redirect:/employee/applications/" + id;
+	}
+
+	@PostMapping("/applications/{id}/delete")
+	public String deleteApplication(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+
+		User user = requireEmployee(session);
+
+		try {
+			courseApplicationService.delete(id, user.getId());
+			redirectAttributes.addFlashAttribute("success", "Application deleted.");
+		} catch (IllegalStateException ex) {
+			redirectAttributes.addFlashAttribute("error", ex.getMessage());
+		}
+
+		return "redirect:/employee/applications";
+	}
+
+	@GetMapping("/claims")
+	public String viewMyClaims(HttpSession session, Model model) {
+
+		User user = requireEmployee(session);
+
+		List<CourseFeeClaim> claims = courseFeeClaimService.findByClaimant_Id(user.getId());
+
+		model.addAttribute("claims", claims);
+
+		return "employee/claims";
+	}
+
+	@GetMapping("/claim/{appId}")
+	public String showClaimForm(@PathVariable Long appId, HttpSession session, Model model) {
+
+		User user = requireEmployee(session);
+
+		CourseApplication app = courseApplicationService.findById(appId);
+
+		if (app == null || app.getApplicant() == null
+				|| !app.getApplicant().getId().equals(user.getId())) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
+
+		model.addAttribute("app", app);
+
+		return "employee/claim-form";
+	}
+
+	@PostMapping("/claim")
+	public String submitClaim(@RequestParam Long applicationId,
+			@RequestParam(required = false) BigDecimal claimAmount,
+			@RequestParam String receipt,
+			@RequestParam String certificate,
+			HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+
+		User user = requireEmployee(session);
+
+		String error = courseFeeClaimService.submitClaim(applicationId, user.getId(),
+				claimAmount, receipt, certificate);
+
+		if (error != null) {
+
+			CourseApplication app = courseApplicationService.findById(applicationId);
+
+			model.addAttribute("app", app);
+			model.addAttribute("error", error);
+
+			return "employee/claim-form";
+		}
+
+		redirectAttributes.addFlashAttribute("success", "Fee claim submitted. Awaiting manager approval.");
+
+		return "redirect:/employee/claims";
 	}
 
 	private User requireEmployee(HttpSession session) {

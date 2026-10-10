@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="960"
+  viewBox="0 0 960 960" role="img" aria-labelledby="title description">
+  <title id="title">Course Request</title>
+  <desc id="description">Original CATS course artwork, shown on a circular color field. Illustrative artwork.</desc>
+  <!-- A blue, green or lilac circle replaces the previous rectangular poster. -->
+  <circle cx="480" cy="480" r="480" fill="#e2eddf" />
+  <g transform="translate(0 -180)">
+<!-- Offset sheets: no gradients, raster assets or heavy shadow filters. -->
+  
+  <rect
+    x="227"
+    y="352"
+    width="482"
+    height="528"
+    fill="#dce6eb"
+    stroke="#9eb3c2"
+    stroke-width="3"
+  />
+  <path
+    d="M135 423H553L617 487V948H135Z"
+    fill="#f9f9f7"
+    stroke="#47654e"
+    stroke-width="5"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M553 423V487H617"
+    fill="#f0f5ed"
+    stroke="#47654e"
+    stroke-width="5"
+    stroke-linejoin="round"
+  />
+
+  <!-- Document content stays conceptual; it is not an example application. -->
+  <g
+    id="request-content"
+    fill="#47654e"
+    font-family="Arial, Helvetica, sans-serif"
+  >
+    <text x="183" y="515" font-size="28" letter-spacing="2" fill="#617889">
+      COURSE REQUEST
+    </text>
+    <path d="M183 547H563" fill="none" stroke="#47654e" stroke-width="3" />
+    <text x="183" y="610" font-size="36">Purpose</text>
+    <path
+      d="M183 639H536M183 660H463"
+      fill="none"
+      stroke="#c8d3da"
+      stroke-width="3"
+    />
+    <text x="183" y="730" font-size="36">Dates</text>
+    <g
+      id="date-fields"
+      stroke="#47654e"
+      stroke-width="3"
+      stroke-linejoin="round"
+    >
+      <rect x="183" y="754" width="140" height="73" fill="#f0f5ed" />
+      <rect x="366" y="754" width="140" height="73" fill="#f0f5ed" />
+      <path
+        d="M341 789H351M346 784L351 789L346 794M207 778H299M207 801H275M390 778H482M390 801H458"
+        fill="none"
+      />
+    </g>
+    <path d="M183 882H360" fill="none" stroke="#9eb3c2" stroke-width="3" />
+    <path d="M407 882H555" fill="none" stroke="#47654e" stroke-width="3" />
+  </g>
+
+  <!-- A review path links the document, lens and decision motif. -->
+  <g
+    id="review-path"
+    fill="none"
+    stroke="#617889"
+    stroke-width="4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M679 493H752V603M752 731V805H683" />
+    <path d="M745 596L752 603L759 596M690 798L683 805L690 812" />
+    <circle cx="679" cy="493" r="6" fill="#617889" />
+  </g>
+  <g id="review-lens" stroke="#47654e" stroke-width="5" stroke-linecap="round">
+    <circle cx="752" cy="663" r="48" fill="#f9f9f7" />
+    <path
+      d="M786 697L820 731M733 650H771M733 665H771M733 680H755"
+      fill="none"
+    />
+  </g>
+  <g
+    id="decision-symbol"
+    stroke="#47654e"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <circle cx="669" cy="877" r="68" fill="#dce6eb" stroke-width="5" />
+    <path d="M638 876L660 898L704 852" fill="none" stroke-width="8" />
+  </g>
+
+  
+  </g>
+</svg>

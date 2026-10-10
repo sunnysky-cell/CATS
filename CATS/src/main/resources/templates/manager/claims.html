@@ -1,0 +1,130 @@
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Fee claims')}"></head>
+  <body>
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside th:replace="~{fragments/chrome :: sidebar('claims')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Fee claims')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <h1>Fee claims</h1>
+            <p>Review submitted course expenses and supporting document references.</p>
+          </div>
+          <a
+            class="button text"
+            th:href="@{/manager/pending}"
+          >
+            Applications
+          </a>
+        </header>
+        <div class="page-body">
+          <p
+            class="success"
+            th:if="${success}"
+            th:text="${success}"
+            role="status"
+          ></p>
+          <p
+            class="error"
+            th:if="${error}"
+            th:text="${error}"
+            role="alert"
+          ></p>
+          <section
+            class="section"
+            aria-labelledby="claims-title"
+          >
+            <div class="section-heading">
+              <h2 id="claims-title">Pending claims</h2>
+              <p>Compare the claimed amount with the related course before deciding.</p>
+            </div>
+            <div class="table-wrapper">
+              <table data-searchable="true">
+                <caption class="sr-only">Submitted course fee claims</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Course</th>
+                    <th scope="col">Employee</th>
+                    <th
+                      scope="col"
+                      class="numeric"
+                    >
+                      Claim amount
+                    </th>
+                    <th scope="col">Submitted</th>
+                    <th scope="col">Status</th>
+                    <th scope="col"><span class="sr-only">Action</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="c : ${claims}">
+                    <td data-label="Course">
+                      <strong
+                        th:text="${c.application != null ? c.application.courseTitle : '-'}"
+                      ></strong>
+                      <small>
+                        Claim #
+                        <span th:text="${c.id}"></span>
+                      </small>
+                    </td>
+                    <td
+                      data-label="Employee"
+                      th:text="${c.claimant != null ? c.claimant.name : '-'}"
+                    ></td>
+                    <td
+                      data-label="Claim amount"
+                      class="numeric"
+                      th:text="${c.claimAmount}"
+                    ></td>
+                    <td
+                      data-label="Submitted"
+                      th:text="${c.submittedAt != null ? #temporals.format(c.submittedAt, 'yyyy-MM-dd HH:mm') : '-'}"
+                    ></td>
+                    <td data-label="Status">
+                      <span
+                        class="status-badge"
+                        th:text="${c.status}"
+                        th:attr="data-status=${c.status}"
+                      ></span>
+                    </td>
+                    <td data-label="Action">
+                      <a
+                        class="button text"
+                        th:href="@{/manager/claims/{id}(id=${c.id})}"
+                      >
+                        Review
+                      </a>
+                    </td>
+                  </tr>
+                  <tr th:if="${#lists.isEmpty(claims)}">
+                    <td
+                      colspan="6"
+                      class="empty"
+                    >
+                      No fee claims are waiting for your review.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <p class="context-links"><a th:href="@{/manager/history}">Browse team history</a></p>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
+    </div>
+  </body>
+</html>

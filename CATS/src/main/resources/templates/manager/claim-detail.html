@@ -1,0 +1,175 @@
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Review fee claim')}"></head>
+  <body>
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside th:replace="~{fragments/chrome :: sidebar('claims')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Review fee claim')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <h1>
+              Fee claim #
+              <span th:text="${claim.id}"></span>
+            </h1>
+            <p>Check the course fee, claimed amount, and supporting references.</p>
+          </div>
+          <a
+            class="button text"
+            th:href="@{/manager/claims}"
+          >
+            Back to fee claims
+          </a>
+        </header>
+        <div class="page-body">
+          <p
+            class="success"
+            th:if="${success}"
+            th:text="${success}"
+            role="status"
+          ></p>
+          <p
+            class="error"
+            th:if="${error}"
+            th:text="${error}"
+            role="alert"
+          ></p>
+          <section
+            class="section"
+            aria-labelledby="claim-details-title"
+          >
+            <div class="section-heading">
+              <h2 id="claim-details-title">Claim details</h2>
+              <span
+                class="status-badge"
+                th:text="${claim.status}"
+                th:attr="data-status=${claim.status}"
+              ></span>
+            </div>
+            <dl class="detail-list">
+              <div>
+                <dt>Employee</dt>
+                <dd th:text="${claim.claimant != null ? claim.claimant.name : '-'}"></dd>
+              </div>
+              <div>
+                <dt>Course</dt>
+                <dd
+                  th:text="${claim.application != null ? claim.application.courseTitle : '-'}"
+                ></dd>
+              </div>
+              <div>
+                <dt>Category</dt>
+                <dd
+                  th:text="${claim.application != null and claim.application.category != null ? claim.application.category.name : '-'}"
+                ></dd>
+              </div>
+              <div>
+                <dt>Course fee</dt>
+                <dd th:text="${claim.application != null ? claim.application.courseFee : '-'}"></dd>
+              </div>
+              <div>
+                <dt>Claim amount</dt>
+                <dd th:text="${claim.claimAmount}"></dd>
+              </div>
+              <div>
+                <dt>Submitted</dt>
+                <dd
+                  th:text="${claim.submittedAt != null ? #temporals.format(claim.submittedAt, 'yyyy-MM-dd HH:mm') : '-'}"
+                ></dd>
+              </div>
+              <div>
+                <dt>Receipt reference</dt>
+                <dd th:text="${claim.receiptFilePath}"></dd>
+              </div>
+              <div>
+                <dt>Certificate reference</dt>
+                <dd th:text="${claim.certificateFilePath}"></dd>
+              </div>
+            </dl>
+          </section>
+          <section
+            class="section"
+            th:if="${claim.managerComment != null or claim.decisionDate != null}"
+            aria-labelledby="claim-recorded-decision-title"
+          >
+            <h2 id="claim-recorded-decision-title">Recorded decision</h2>
+            <p
+              th:if="${claim.managerComment != null}"
+              th:text="${claim.managerComment}"
+            ></p>
+            <p
+              class="muted"
+              th:if="${claim.decisionDate != null}"
+            >
+              Decided
+              <span
+                th:text="${claim.decisionDate != null ? #temporals.format(claim.decisionDate, 'yyyy-MM-dd HH:mm') : '-'}"
+              ></span>
+            </p>
+          </section>
+          <section
+            class="section"
+            th:if="${claim.status != null and claim.status.name() == 'SUBMITTED'}"
+            aria-labelledby="claim-decision-title"
+          >
+            <h2 id="claim-decision-title">Decision</h2>
+            <p id="claim-decision-hint">
+              A clear reason is required for both approval and rejection.
+            </p>
+            <form
+              method="post"
+              th:action="@{/manager/claims/{id}/approve(id=${claim.id})}"
+            >
+              <div class="field">
+                <label for="claim-comment">Decision comment</label>
+                <textarea
+                  id="claim-comment"
+                  name="comment"
+                  rows="4"
+                  required
+                  aria-describedby="claim-decision-hint"
+                  placeholder="Explain your decision for the employee."
+                ></textarea>
+              </div>
+              <div class="actions">
+                <button
+                  class="button secondary"
+                  type="submit"
+                  th:formaction="@{/manager/claims/{id}/reject(id=${claim.id})}"
+                >
+                  Reject claim
+                </button>
+                <button
+                  class="button primary"
+                  type="submit"
+                >
+                  Approve claim
+                </button>
+              </div>
+            </form>
+          </section>
+          <p
+            class="info"
+            th:if="${claim.status == null or claim.status.name() != 'SUBMITTED'}"
+          >
+            This claim has already been decided and is read only.
+          </p>
+          <p class="context-links"><a th:href="@{/manager/pending}">Browse applications</a></p>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
+    </div>
+  </body>
+</html>

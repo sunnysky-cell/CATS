@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="960"
+  viewBox="0 0 960 960" role="img" aria-labelledby="title description">
+  <title id="title">Learning Progress</title>
+  <desc id="description">Original CATS course artwork, shown on a circular color field. Illustrative artwork.</desc>
+  <!-- A blue, green or lilac circle replaces the previous rectangular poster. -->
+  <circle cx="480" cy="480" r="480" fill="#ece2f2" />
+  <g transform="translate(0 -180)">
+<!-- Calendar rhythm: deliberately no month, date, percentage or user record. -->
+  
+  <rect
+    x="115"
+    y="408"
+    width="730"
+    height="445"
+    fill="#f9f9f7"
+    stroke="#6c547e"
+    stroke-width="5"
+  />
+  <path d="M115 490H845" fill="none" stroke="#6c547e" stroke-width="4" />
+  <g
+    id="calendar-binding"
+    fill="#f9f9f7"
+    stroke="#6c547e"
+    stroke-width="5"
+    stroke-linecap="round"
+  >
+    <path d="M210 383V428M750 383V428" />
+    <circle cx="210" cy="428" r="8" fill="#6c547e" />
+    <circle cx="750" cy="428" r="8" fill="#6c547e" />
+  </g>
+  <text
+    x="480"
+    y="460"
+    text-anchor="middle"
+    fill="#6c547e"
+    font-family="Georgia, Times New Roman, serif"
+    font-size="42"
+  >
+    A learning rhythm
+  </text>
+  <g id="calendar-grid" fill="none" stroke="#c8d3da" stroke-width="3">
+    <path d="M261 490V853M407 490V853M553 490V853M699 490V853" />
+    <path d="M115 611H845M115 732H845" />
+  </g>
+  <g id="calendar-paper-marks" fill="#f5f0f8">
+    <rect x="134" y="509" width="108" height="82" />
+    <rect x="426" y="630" width="108" height="82" />
+    <rect x="718" y="751" width="108" height="82" />
+  </g>
+
+  <!-- A precise, open path guides the eye through the calendar. -->
+  <g
+    id="learning-path"
+    fill="none"
+    stroke="#6c547e"
+    stroke-width="5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path
+      d="M188 550H306C340 550 352 574 352 605V629C352 660 374 671 407 671H570C601 671 626 693 626 724V752C626 782 650 792 699 792H772"
+    />
+    <path d="M761 781L772 792L761 803" />
+  </g>
+  <g id="learning-stations" fill="#f9f9f7" stroke="#6c547e" stroke-width="4">
+    <circle cx="188" cy="550" r="21" />
+    <circle cx="480" cy="671" r="21" />
+    <circle cx="772" cy="792" r="21" fill="#6c547e" />
+  </g>
+
+  <!-- Three conceptual steps use the same visual grammar, not KPI badges. -->
+  <g
+    id="learning-steps"
+    fill="#6c547e"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="30"
+  >
+    <text x="187" y="920" text-anchor="middle">Learn</text>
+    <text x="480" y="920" text-anchor="middle">Reflect</text>
+    <text x="773" y="920" text-anchor="middle">Continue</text>
+    <path
+      d="M272 910H390M573 910H688"
+      fill="none"
+      stroke="#9eb3c2"
+      stroke-width="3"
+    />
+  </g>
+  
+  </g>
+</svg>

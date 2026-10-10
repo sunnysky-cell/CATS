@@ -1,0 +1,65 @@
+.agent-dialog {
+  max-width: 680px;
+}
+.agent-dialog > p {
+  max-width: 58ch;
+}
+.agent-permissions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 32px;
+  margin: 28px 0;
+}
+.agent-permissions dt {
+  font: 400 22px var(--serif);
+  margin-bottom: 8px;
+}
+.agent-permissions dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.agent-steps {
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 1.75;
+}
+.agent-steps li {
+  margin: 10px 0;
+}
+.agent-dialog label {
+  display: block;
+  font-size: 12px;
+  margin: 20px 0 8px;
+}
+.agent-dialog textarea {
+  width: 100%;
+  resize: vertical;
+  background: var(--wash);
+  color: var(--ink);
+  border: 1px solid var(--control-line);
+  border-radius: 6px;
+  font:
+    12px/1.7 Consolas,
+    monospace;
+  padding: 16px;
+}
+.agent-dialog .actions {
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.agent-dialog .muted {
+  font-size: 12px;
+}
+.agent-feedback {
+  min-height: 1.6em;
+  font-size: 12px;
+  color: var(--accent);
+}
+@media (max-width: 600px) {
+  .agent-permissions {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}

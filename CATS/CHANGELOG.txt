@@ -1,4 +1,66 @@
 # 更新日志
+## 2026-10-11 - 合并队友重做的前端、补齐 CA 六项必做核心缺口、修复七项前端缺陷
+
+### 一、前端整体合并（来自队友交接包 CATS-Academy-Handoff-20261010）
+
+- 队友基于本仓库源码重做了整套前端，本次按原样合并，未改动其设计与页面结构。
+- 合并来源为交接包内 `ui/templates` 与 `ui/static`（并非包内 `runtime/CATS-1.0.0.jar`，JAR 内的模板是编译时打入的旧版）。
+- `templates/` 共 26 个文件全部替换为队友版本，逐一以 md5 校验与来源一致；新增 `templates/fragments/chrome.html`（head / sidebar / topbar / footer 四个共享片段，22 个页面通过 `th:replace` 继承）、`templates/agent-demo.html`。
+- `static/` 由 4 个文件扩充到 65 个（16.54 MB），含 `app.css`、`admin.css`、`workspace.css`、`agent-workspace.css`、`calendar-workspace.css`、`course-workspace.css` 及对应 JS、字体（Inter、SourceSerif4）与 SVG 图形。逐文件字节校验与来源一致。
+- 第三方许可：交接包内含 `THIRD-PARTY-LICENSES.txt` 与字体 OFL 声明，引用了 Tailwind、shadcn/ui、Codrops、Three.js 等；本次一并纳入仓库以满足其分发条款。
+- 合并后校验：模板引用的 38 个 `/assets/*` 资源在磁盘上零缺失；fragment 引用零悬空；`clean compile` 与 `mvn test` 通过；三种角色（employee / manager / admin）共 13 个页面实测 HTTP 200，无错误页。
+
+### 二、配合前端合并所需的后端调整
+
+- `SecurityConfig`：`authorizeHttpRequests` 中新增 `.requestMatchers("/assets/**").permitAll()`。登录页自身在匿名状态下即引用 `/assets/*.svg`，若不放行会被 `anyRequest().authenticated()` 拦成 403，导致登录页样式与图形全部加载失败。此为本次前端合并唯一的必需后端改动。
+- `workspace.css` 第 99 行：`.app-frame` 的 `margin-right` 由 `max(32px, calc((100vw - 1420px) / 2))` 改为 `clamp(32px, calc((100vw - 1420px) / 6), 180px)`。原公式为半速增长，视口每宽 2px 内容只宽 1px，在 2552px 宽屏下右侧留白达 566px（内容填充率仅 72%）。改后各视口填充率稳定在 87%-90%。经 7 个视口 × 24 个页面共 168 组实测，横向溢出 0 处；另测 6 个窄屏宽度（375/600/760/900/1024/1180）× 4 个页面，溢出同为 0，窄屏抽屉侧边栏行为未受影响。
+- 新增 `sg.edu.iss.demo.calendar` 包共 9 个类（原样取自交接包 `backend-extensions/src`，md5 一致）：`AgentDemoController`、`CalendarEventController`、`CalendarEventInput`、`PersonalCalendarEvent`、`PersonalCalendarEventRepository`、`PersonalCalendarService`、`CalendarApiSecurity`、`CalendarApiErrors`、`CalendarApiException`。队友前端的侧边栏链接 `/agent-demo` 与 `calendar-workspace.js` 调用的 `/api/calendar/session`、`/api/calendar/events` 均由此包提供，不并入则侧边栏出现死链接、日历页取不到数据。
+  - `CalendarApiSecurity` 使用 `@Order(0)` 与 `securityMatcher("/api/calendar/**")`，仅拦截日历 API，不影响既有安全链；匿名访问日历 API 返回 401。
+  - `PersonalCalendarEvent` 为新实体，`ddl-auto=update` 会自动建表 `personal_calendar_event`。交接包 README 提示其 schema 迁移未经生产验证，上线前建议先审查新表与索引。
+
+### 三、补齐 CA 六项必做核心缺口
+
+对照 `SA63 CA Instructions.pdf` 第 6、7 页 Mandatory Features 逐条核实后补齐：
+
+1. **课程必须开始于未来日期**（CA p6：`the course must start on a future date`）。`CourseApplicationService.validate()` 新增校验，开始日期不晚于当天即报错且不写库。实测提交 `startDate=2026-01-05` 被拦并提示，数据库零写入。
+2. **Internal Training 半天粒度**（CA p6：`Half-day sessions are allowed for Internal Training only`；p3：`the granularity is half a day`）。`CourseApplication` 新增 `boolean halfDay` 字段（自动建列 `half_day bit(1)`）；`validate()` 中当勾选半天时，校验分类必须 `allowHalfDay`、且课程必须为单日，通过后天数计为 `0.5`；`update()` 同步补拷该字段；`employee/form.html` 在 Course details 段末新增复选框与说明文字。实测四组：内部分类+勾半天+单日 → `training_days=0.5` 且 `half_day=1` 写库；内部分类+不勾+单日 → `1.0` / `0`；外部分类+勾半天 → 拒绝；内部分类+勾半天+跨两日 → 拒绝。批准后 CSV 报表 `Days Used` 列正确显示 `0.5`，说明半天已进入年度额度累加。
+3. **课程结束后才能标记完成**（CA p6：`Once an approved course has ended, the Employee marks it as attended`）。`markCompleted()` 在状态校验之后新增结束日期校验。实测对结束日为未来（2026-10-23）的 APPROVED 申请执行完成，状态保持 APPROVED 并提示需等课程结束。
+4. **待审批列表按下属姓名分组**（CA p7：`This page shows applications grouped by subordinate name`）。`ManagerCourseController.pendingApplications()` 用 `LinkedHashMap` 保序分组后放入 model；`manager/pending.html` 以 `<th:block>` 嵌套两层循环渲染，组标题行使用 `colspan`，与队友 `app.js` 的表格搜索逻辑（跳过含 colspan 的行）兼容。实测分组标题正确渲染，数据行员工名均落在对应分组下，无裸标签泄漏。
+5. **审批详情显示下属本年度已用天数与预算**（CA p7：`the system shows the subordinate's training days and budget used so far this year`）。`ManagerCourseController.applicationDetail()` 调用既有但此前无人使用的 `CourseApplicationService.Summary()`，年份取课程开始日期所属年度，与 `validate()` 的额度核算口径一致；`manager/detail.html` 在 Course fee 之后新增一行展示。实测经理打开详情页显示 `Days: 10.0 / 10.0    Budget used: 1533.00 / 2000.00`。
+6. **同期已批准课程限定为"其他直属下属"**（CA p7：`lists other subordinates' approved courses during the same course period`）。原 `findApprovedOverlapping` 查询无归属限制，会返回全组织所有人的课程，且会把申请人自己的课程也列出来。JPQL 增加 `ca.applicant.manager.id = :managerId` 与 `ca.applicant.id <> :excludeApplicantId` 两个条件并补充排序；Service 与 Controller 同步调整签名，`/manager/approved-overlapping` 新增可选参数 `excludeApplicant`（未传时以 `-1` 兜底，因 JPQL 的 `<> null` 恒不成立），`manager/detail.html` 的链接带上当前申请人 id。实测排除 emp1 后仅显示 emp2 的同期课程、页面不含 emp1 姓名；不传该参数时向后兼容返回 200；传入不相关 id 时结果仍限定在本经理下属范围内。
+
+### 四、前端缺陷修复（七项）
+
+1. `dto/CalendarCourseView.java`：方法名 `getCourseTtitle()` 拼写错误，与 `training-calendar.html` 中 `${row.courseTitle}` 不匹配，导致课程日历在有数据月份抛 `Exception evaluating SpringEL expression: "row.courseTitle"` 返回 500。更正为 `getCourseTitle()`。实测含真实数据的 2026 年 10 月由 500 变 200 并渲染出课程名，空数据月份同样 200。
+2. `GlobalExceptionHandler.java`：异常处理未设置响应状态码，不存在的资源返回 200、越权访问返回 200、系统异常与 `/error` 兜底状态码为 999。补充 `setStatus`，并新增 `ResponseStatusException`、`MissingServletRequestParameterException`、`NoResourceFoundException` 三个处理器，使 403 / 404 / 500 各归其位。
+3. `templates/error.html`：页面唯一出口为 `javascript:history.back()`，在无历史或来源已失效时形成死路。改为提供 `Back to Home`（`/home`）与 `Logout`（`/logout`）两个出口。
+4. 表单空提交泄漏内部异常：申请页未选分类直接提交时，Spring 会绑出一个 id 为 null 的空壳 `CourseCategory`，它非 null 因而绕过全部判空，直到 `save` 才抛 `org.hibernate.TransientPropertyValueException` 并把类名显示给用户。`validate()` 开头新增分类判空规则提前拦截；`EmployeeCourseController.submitClaim()` 的 `claimAmount` 改为 `@RequestParam(required = false)`，留空时交由 `CourseFeeClaimService` 既有金额校验返回友好提示，不再抛 `Required request parameter ... converted to null`。
+5. 时间字段显示为 `LocalDateTime` 原始格式。6 处改为 `#temporals.format(..., 'yyyy-MM-dd HH:mm')`，分布于 `employee/claims.html`、`manager/claims.html`、`manager/claim-detail.html`（两处）、`employee/detail.html`、`manager/detail.html`。该六处在本次前端合并中已由队友版本完整保留。
+6. 课程费用报销入口缺失（CA p8 选做项 Course Fee Claim Management）。`CourseFeeClaimService` 原为无人调用的死代码，本次接线：`EmployeeCourseController` 新增 `/employee/claims`、`/employee/claim/{id}`、`/employee/applications/{id}/complete` 相关端点，`ManagerCourseController` 新增 `/manager/claims`、`/manager/claims/{id}` 与批准/驳回端点，并新增 4 个模板 `employee/claims.html`、`employee/claim-form.html`、`manager/claims.html`、`manager/claim-detail.html`；首页与侧边栏导航按角色补充报销入口。报销按钮仅在 `COMPLETED` 状态且分类收费时出现，符合 CA "once the course is completed" 的要求。重复提交报销时 Service 层拦截并提示 `This application already has a claim`，实测报销单数量不增加。
+7. 部分页面缺少 Logout 链接。`employee/claim-form.html`、`employee/history.html`、`manager/history.html`、`manager/claim-detail.html`、`manager/pending.html` 补齐；本次合并后 Logout 已由 `fragments/chrome.html` 侧边栏统一提供，22 个页面自动继承，无需逐页维护。
+
+### 五、其他
+
+- `AdminController.java` 4 行变化为 IDE 自动格式化（方法签名折行合并），无逻辑改动。
+- 清理此前遗留在 Java 源码中的行内注释，使本次提交的新增代码不含 `//` 注释。
+- `EmployeeCourseController` 的 Delete 功能此前不可达且模板显示条件写反，本次已修复，`employee/detail.html` 在 APPLIED / UPDATED 状态下正确显示 Delete。
+- 已知未处理项：手机端（375px）侧边栏中 10 个链接尺寸为 0x0 不可点，其中包含 `/logout`。根因是 `workspace.css` 的 `.topbar .menu-toggle { display: none }` 特异性高于 `paper.css` 媒体查询内的 `.menu-toggle { display: grid }`，且 `app.js` 未绑定 `nav-open` 状态。此为前端合并前的既有问题，未在本次范围内处理。
+- `training_entitlement` 表存在历史遗留空列 `year`（全为 NULL），实体实际映射的是 `entitlement_year`；`ddl-auto=update` 只增列不删列所致，不影响功能。
+- `admin` 账号（designation = Administrative）在 `training_entitlement` 中无记录，额度显示为 NULL，CSV 报表渲染为 0。CA 仅规定 employee 的额度，未涉及 admin，故未改动，待确认。
+
+### 六、验证
+
+- `mvn -o clean test`：30 个测试通过，1 个按设计跳过（`CalendarEventTests.browserMyEventsWorkflow` 为可选的浏览器联动检查，未传 `-Dcats.calendar.browserScript` 时以 `Assumptions` 优雅跳过）。测试类含既有 `CatsApplicationTests`、`ManagerFlowViewTests`、`SecurityIntegrationTests`，以及 `CalendarEventTests`、`CourseApplicationDateBindingTests`、`DashboardAllowanceTests`。
+- 独立实例（端口 8081）真实 HTTP 端到端验证：三种角色登录、13 个页面渲染、越权访问返回 403、日历 API 契约（`schemaVersion` / `csrf.header` / 年月回显）、CSV 导出内容与数字正确性、报销全流程、审批全流程。
+- 跨周末课程专项验证（7 个场景）：两周整（跨 1 个周末）一次申请成功且天数计为 10.0；一周半计为 8.0；三周因 15 个工作日超出 10 天年度额度被正确拦下；开始日为周六、结束日为周日均被拦下；拆成两个一周分别申请亦无重叠冲突。确认工作日校验只检查起止两天、中间周末由 `calculateTrainingDays()` 逐日跳过，前端 `forms.js` 的天数预览明确标注 "before holidays" 表示仅为粗估，与后端口径一致。
+- 响应式改动经 7 视口 × 24 页面 = 168 组测量，横向溢出 0 处。
+- 所有测试数据已从本地开发数据库清理，保留既有 3 条 SPT 申请记录（id 1 CANCELLED、id 12 COMPLETED 及其已批准报销、id 13 APPROVED）；测试期间改动的课程分类状态已还原。
+- 提交前核查：`application.properties` 保持 `skip-worktree` 标记，未进入暂存区，远程仓库中该文件仅含 `spring.application.name=CATS`，不含任何数据库凭据；全部待提交文件经敏感信息扫描，无密码、密钥、令牌或本地绝对路径（最大单文件 2.84 MB，远低于 GitHub 100 MB 限制）。
+
+### AI 使用声明
+
+本次开发在 Hermes Agent（Nous Research）协助下完成，AI 参与范围包括：缺陷定位与根因分析、CA 需求逐条比对、代码修改与重构、自动化验证脚本编写与执行、文档撰写。全部改动均经人工复核后提交，业务规则以 `SA63 CA Instructions.pdf` 原文为准，所有验证结论均来自真实执行的编译、单元测试与 HTTP 端到端测试，未使用推测或虚构的结果。
+
 
 ## 2026-10-09 - 修复 Manager 审批流 500 错误（补齐模板 + Thymeleaf 变量遮蔽 bug）
 

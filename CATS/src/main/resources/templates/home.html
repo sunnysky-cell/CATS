@@ -1,22 +1,732 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width,initial-scale=1">
-		<title>Home - CATS</title>
-	</head>
-	<body>
-		<h1>CATS</h1>
-		<p>Welcome,<span th:text="${user.name}"></span>.</p>
-		<nav aria-label="Main navigation">
-			<ul>
-				<li><a th:href="@{/training-calendar}">Training Calendar</a></li>
-				<li><a th:href="@{/employee/applications}">My Course Applications</a></li>
-				<li th:if="${manager}"><a th:href="@{/manager/report}">Report Center</a></li>
-				<li><a th:href="@{/logout}">Logout</a></li>
-			</ul>
-		</nav>
-	</body>
-	</html>
-	<!--将来已有角色首页时，把下面的菜单连接加入各首页即可-->
-	<!-- <a th:href="@{/training-calendar}">Training Calendar</a> -->
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Dashboard')}"></head>
+  <body class="home-page">
+    <link
+      rel="stylesheet"
+      th:if="${!admin}"
+      th:href="@{/assets/course-workspace.css}"
+    />
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside th:replace="~{fragments/chrome :: sidebar('overview')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Dashboard')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <h1>Dashboard</h1>
+            <p class="dashboard-account">
+              <span
+                class="user-avatar"
+                th:attr="data-avatar-name=${user.name}"
+                aria-hidden="true"
+              ></span>
+              <span
+                th:text="${#strings.isEmpty(user.name) ? 'Welcome back.' : 'Welcome back, ' + user.name + '.'}"
+              >
+                Welcome back.
+              </span>
+              <span
+                class="dashboard-role"
+                th:text="${admin ? 'Admin' : (manager ? 'Manager' : 'Employee')}"
+              ></span>
+            </p>
+          </div>
+        </header>
+        <div
+          class="page-body"
+          id="cats-dashboard"
+          th:attr="data-role=${user.role.name()},data-user-id=${user.id}"
+        >
+          <div class="dashboard-workspace-layout" th:if="${!admin}">
+          <!-- React reads the same Java-authorised HTML snapshot as the request list. -->
+          <section
+            id="course-catalog"
+            th:if="${!admin}"
+            data-course-workspace
+            th:attr="data-role=${user.role.name()},data-user-id=${user.id},data-source=${manager ? '/manager/history' : '/employee/applications'}"
+            aria-label="Course request workspace"
+          ></section>
+          <aside class="dashboard-entitlements" aria-labelledby="entitlement-heading">
+            <header class="dashboard-entitlement-heading">
+              <div>
+                <h2 id="entitlement-heading" th:text="${manager ? 'Your personal allowance' : 'Your annual allowance'}">Your annual allowance</h2>
+                <p th:text="${manager ? 'For your own course applications.' : 'A little room for your next course.'}">A little room for your next course.</p>
+              </div>
+              <span class="dashboard-entitlement-year" th:text="${entitlementYear}">2026</span>
+            </header>
+            <th:block th:if="${annualEntitlement != null}">
+              <div class="dashboard-entitlement-cards">
+                <section class="dashboard-allowance-card dashboard-allowance-days" aria-labelledby="allowance-days-heading">
+                  <header class="dashboard-allowance-band"><span data-icon="calendar" aria-hidden="true"></span><h3 id="allowance-days-heading">Training days</h3></header>
+                  <div class="dashboard-allowance-body">
+                    <span class="dashboard-allowance-label">Remaining this year</span>
+                    <div class="dashboard-allowance-value" th:classappend="${remainingTrainingDays.signum() < 0 ? 'allowance-exceeded' : ''}"><strong th:text="${#numbers.formatDecimal(remainingTrainingDays, 1, 1)}">5.0</strong><span>days</span></div>
+                    <progress class="dashboard-allowance-progress" max="100" th:value="${daysRemainingPercent}" th:attr="aria-label=${'Training days remaining: ' + remainingTrainingDays + '; annual entitlement: ' + annualEntitlement.entitledDays}"></progress>
+                    <dl class="dashboard-allowance-facts">
+                      <div><dt>Annual entitlement</dt><dd th:text="${#numbers.formatDecimal(annualEntitlement.entitledDays, 1, 1) + ' days'}">10.0 days</dd></div>
+                      <div><dt>Used or reserved</dt><dd th:text="${#numbers.formatDecimal(usedTrainingDays, 1, 1) + ' days'}">5.0 days</dd></div>
+                    </dl>
+                    <p class="dashboard-allowance-warning" th:if="${remainingTrainingDays.signum() < 0}">Your recorded applications exceed this year's day entitlement.</p>
+                  </div>
+                </section>
+                <section class="dashboard-allowance-card dashboard-allowance-budget" aria-labelledby="allowance-budget-heading">
+                  <header class="dashboard-allowance-band"><span data-icon="receipt" aria-hidden="true"></span><h3 id="allowance-budget-heading">Training budget</h3></header>
+                  <div class="dashboard-allowance-body">
+                    <span class="dashboard-allowance-label">Available for course fees</span>
+                    <div class="dashboard-allowance-value" th:classappend="${remainingTrainingBudget.signum() < 0 ? 'allowance-exceeded' : ''}"><span class="dashboard-allowance-currency">S$</span><strong th:text="${#numbers.formatDecimal(remainingTrainingBudget, 1, 'COMMA', 2, 'POINT')}">2,000.00</strong></div>
+                    <progress class="dashboard-allowance-progress" max="100" th:value="${budgetRemainingPercent}" th:attr="aria-label=${'Training budget remaining: S$' + remainingTrainingBudget + '; annual budget: S$' + annualEntitlement.annualBudget}"></progress>
+                    <dl class="dashboard-allowance-facts">
+                      <div><dt>Annual budget</dt><dd th:text="${'S$' + #numbers.formatDecimal(annualEntitlement.annualBudget, 1, 'COMMA', 2, 'POINT')}">S$2,000.00</dd></div>
+                      <div><dt>Used or reserved</dt><dd th:text="${'S$' + #numbers.formatDecimal(usedTrainingBudget, 1, 'COMMA', 2, 'POINT')}">S$0.00</dd></div>
+                    </dl>
+                    <p class="dashboard-allowance-warning" th:if="${remainingTrainingBudget.signum() < 0}">Your recorded course fees exceed this year's budget.</p>
+                  </div>
+                </section>
+              </div>
+              <p class="dashboard-allowance-note">Pending applications reserve allowance. Approved and completed courses count towards usage; rejected, deleted and cancelled applications do not.</p>
+              <a class="dashboard-allowance-link" th:href="@{/employee/applications}">View your applications<span data-icon="arrowRight" aria-hidden="true"></span></a>
+            </th:block>
+            <section class="dashboard-allowance-empty" th:if="${annualEntitlement == null}">
+              <span data-icon="calendar" aria-hidden="true"></span>
+              <h3>Allowance not configured</h3>
+              <p th:text="${'Ask your administrator to set your training days and budget for ' + entitlementYear + '.'}">Ask your administrator to set this year's allowance.</p>
+            </section>
+          </aside>
+          </div>
+          <div
+            class="dashboard-layout"
+            data-course-workspace-fallback
+            th:if="${!admin}"
+          >
+            <section
+              class="dashboard-requests"
+              th:if="${!admin}"
+              aria-labelledby="request-heading"
+              data-dashboard-requests
+            >
+              <div class="section-heading dashboard-heading">
+                <div>
+                  <h2
+                    id="request-heading"
+                    th:text="${manager ? 'Assigned employees’ requests' : 'Current-year course requests'}"
+                  ></h2>
+                  <p th:if="${!manager}">
+                    Your applications for courses starting in the current server year.
+                  </p>
+                  <p th:if="${manager}">
+                    All requests from your assigned employees. Decisions stay in the review
+                    workspace.
+                  </p>
+                </div>
+                <div class="actions">
+                  <a
+                    class="button primary"
+                    th:if="${!manager}"
+                    th:href="@{/employee/applications/new}"
+                  >
+                    <span
+                      data-icon="plus"
+                      aria-hidden="true"
+                    ></span>
+                    New application
+                  </a>
+                  <a
+                    class="button secondary"
+                    th:if="${manager}"
+                    th:href="@{/manager/pending}"
+                  >
+                    <span
+                      data-icon="check"
+                      aria-hidden="true"
+                    ></span>
+                    Review requests
+                  </a>
+                  <a
+                    class="text-link"
+                    data-dashboard-source
+                    th:href="${manager} ? @{/manager/history} : @{/employee/applications}"
+                  >
+                    <span
+                      data-icon="archive"
+                      aria-hidden="true"
+                    ></span>
+                    All requests
+                  </a>
+                </div>
+              </div>
+              <div
+                class="dashboard-summary"
+                data-dashboard-summary
+                hidden
+              ></div>
+              <div
+                class="dashboard-filters"
+                data-dashboard-filters
+                hidden
+              >
+                <label class="search-field">
+                  <span
+                    data-icon="search"
+                    aria-hidden="true"
+                  ></span>
+                  <input
+                    type="search"
+                    data-dashboard-search
+                    placeholder="Search course, provider or reference"
+                    aria-label="Search requests"
+                    autocomplete="off"
+                  />
+                </label>
+                <label class="select-field">
+                  <span>Status</span>
+                  <select
+                    data-dashboard-status
+                    aria-label="Request status"
+                  >
+                    <option value="">All statuses</option>
+                    <option value="APPLIED,UPDATED">Awaiting review</option>
+                    <option value="APPROVED">Approved</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="REJECTED">Rejected</option>
+                    <option value="CANCELLED">Cancelled</option>
+                    <option value="DELETED">Deleted</option>
+                  </select>
+                </label>
+                <button
+                  class="button text"
+                  type="button"
+                  data-dashboard-reset
+                  hidden
+                >
+                  Clear filters
+                </button>
+              </div>
+              <p
+                class="dashboard-load"
+                role="status"
+                aria-live="polite"
+                data-dashboard-message
+              >
+                Open All requests to view the complete request list.
+              </p>
+              <div
+                class="dashboard-error"
+                data-dashboard-error
+                hidden
+              >
+                <p
+                  role="alert"
+                  data-dashboard-error-text
+                ></p>
+                <button
+                  class="button secondary"
+                  type="button"
+                  data-dashboard-retry
+                >
+                  <span
+                    data-icon="reload"
+                    aria-hidden="true"
+                  ></span>
+                  Try again
+                </button>
+                <a
+                  class="text-link"
+                  th:href="${manager} ? @{/manager/history} : @{/employee/applications}"
+                >
+                  Open the request list
+                </a>
+              </div>
+              <div
+                class="dashboard-course-grid"
+                data-dashboard-cards
+              ></div>
+              <div
+                class="dashboard-empty"
+                data-dashboard-empty
+                hidden
+              >
+                <span
+                  data-icon="reader"
+                  aria-hidden="true"
+                ></span>
+                <h3 data-dashboard-empty-title></h3>
+                <p data-dashboard-empty-text></p>
+              </div>
+              <div
+                class="dashboard-pagination"
+                data-dashboard-pagination
+                hidden
+              >
+                <span
+                  data-dashboard-page-label
+                  aria-live="polite"
+                ></span>
+                <div class="actions">
+                  <button
+                    class="button secondary"
+                    type="button"
+                    data-dashboard-previous
+                  >
+                    <span
+                      data-icon="arrowLeft"
+                      aria-hidden="true"
+                    ></span>
+                    Previous
+                  </button>
+                  <button
+                    class="button secondary"
+                    type="button"
+                    data-dashboard-next
+                  >
+                    Next
+                    <span
+                      data-icon="arrowRight"
+                      aria-hidden="true"
+                    ></span>
+                  </button>
+                </div>
+              </div>
+              <p
+                class="dashboard-snapshot"
+                data-dashboard-snapshot
+                hidden
+              ></p>
+              <noscript>
+                <p>
+                  Open
+                  <a th:href="${manager} ? @{/manager/history} : @{/employee/applications}">
+                    your request list
+                  </a>
+                  to view your records without JavaScript.
+                </p>
+              </noscript>
+            </section>
+            <aside
+              class="dashboard-sidebar"
+              data-dashboard-sidebar
+              hidden
+              aria-label="Request snapshot details"
+            >
+              <section
+                class="dashboard-side-section"
+                th:if="${manager}"
+              >
+                <h2>
+                  <span
+                    data-icon="person"
+                    aria-hidden="true"
+                  ></span>
+                  Employees in this snapshot
+                </h2>
+                <p>Only assigned employees with requests are included.</p>
+                <div
+                  class="dashboard-student-list"
+                  data-dashboard-students
+                ></div>
+              </section>
+              <section
+                class="dashboard-side-section dashboard-queue"
+                th:if="${manager}"
+              >
+                <h2>
+                  <span
+                    data-icon="clock"
+                    aria-hidden="true"
+                  ></span>
+                  Review queue
+                </h2>
+                <p data-dashboard-queue-count></p>
+                <a
+                  class="text-link"
+                  th:href="@{/manager/pending}"
+                >
+                  Open review queue
+                  <span
+                    data-icon="arrowRight"
+                    aria-hidden="true"
+                  ></span>
+                </a>
+              </section>
+              <section
+                class="dashboard-side-section"
+                th:if="${!manager}"
+              >
+                <h2>
+                  <span
+                    data-icon="barChart"
+                    aria-hidden="true"
+                  ></span>
+                  Request overview
+                </h2>
+                <p>All requests in your current-year snapshot.</p>
+                <div
+                  class="dashboard-status-overview"
+                  data-dashboard-status-overview
+                ></div>
+              </section>
+              <section
+                class="dashboard-side-section dashboard-upcoming"
+                th:if="${!manager}"
+              >
+                <h2>
+                  <span
+                    data-icon="calendar"
+                    aria-hidden="true"
+                  ></span>
+                  Upcoming approved course
+                </h2>
+                <div data-dashboard-upcoming></div>
+              </section>
+            </aside>
+          </div>
+          <nav
+            class="dashboard-shortcuts"
+            aria-label="Learning tools"
+            th:if="${!admin}"
+          >
+            <a th:href="${manager} ? @{/manager/claims} : @{/employee/claims}">
+              <span
+                data-icon="receipt"
+                aria-hidden="true"
+              ></span>
+              Fee claims
+              <span
+                data-icon="arrowRight"
+                aria-hidden="true"
+              ></span>
+            </a>
+            <a th:href="@{/training-calendar}">
+              <span
+                data-icon="calendar"
+                aria-hidden="true"
+              ></span>
+              Training calendar
+              <span
+                data-icon="arrowRight"
+                aria-hidden="true"
+              ></span>
+            </a>
+            <a
+              th:if="${manager}"
+              th:href="@{/manager/history}"
+            >
+              <span
+                data-icon="barChart"
+                aria-hidden="true"
+              ></span>
+              Learning insights
+              <span
+                data-icon="arrowRight"
+                aria-hidden="true"
+              ></span>
+            </a>
+            <a
+              th:if="${manager}"
+              th:href="@{/manager/report}"
+            >
+              <span
+                data-icon="fileText"
+                aria-hidden="true"
+              ></span>
+              Organisation reports
+              <span
+                data-icon="arrowRight"
+                aria-hidden="true"
+              ></span>
+            </a>
+          </nav>
+          <th:block th:if="${!manager and !admin}">
+            <section
+              class="section catalog-view"
+              id="course-catalog-fallback"
+              data-catalog
+              data-course-workspace-fallback
+              aria-labelledby="catalog-heading"
+            >
+              <div class="section-heading"><h2 id="catalog-heading">Example courses</h2></div>
+              <p class="dashboard-example-note">
+                Browse sample course notes, then confirm the details with the provider before
+                applying.
+              </p>
+              <div class="catalog-controls">
+                <nav
+                  class="category-tabs"
+                  aria-label="Course category"
+                >
+                  <button
+                    type="button"
+                    data-category="all"
+                    aria-pressed="true"
+                  >
+                    All courses
+                  </button>
+                  <button
+                    type="button"
+                    data-category="internal"
+                    aria-pressed="false"
+                  >
+                    Internal
+                  </button>
+                  <button
+                    type="button"
+                    data-category="external"
+                    aria-pressed="false"
+                  >
+                    External
+                  </button>
+                  <button
+                    type="button"
+                    data-category="certification"
+                    aria-pressed="false"
+                  >
+                    Certifications
+                  </button>
+                </nav>
+                <div class="filter-line">
+                  <label class="search-field">
+                    <span
+                      data-icon="search"
+                      aria-hidden="true"
+                    ></span>
+                    <input
+                      id="course-search"
+                      type="search"
+                      placeholder="Search courses or skills"
+                      aria-label="Search courses or skills"
+                      autocomplete="off"
+                    />
+                    <kbd>/</kbd>
+                  </label>
+                  <label class="select-field">
+                    <span>Duration</span>
+                    <select
+                      data-duration
+                      aria-label="Duration"
+                    >
+                      <option value="all">Any</option>
+                      <option value="one">1 day</option>
+                      <option value="many">2+ days</option>
+                    </select>
+                  </label>
+                  <label class="select-field">
+                    <span>Fee</span>
+                    <select
+                      data-fee
+                      aria-label="Fee"
+                    >
+                      <option value="all">Any</option>
+                      <option value="free">No fee</option>
+                      <option value="paid">Paid</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="result-line">
+                  <span
+                    data-result-count
+                    role="status"
+                  ></span>
+                  <button
+                    type="button"
+                    data-reset
+                    hidden
+                  >
+                    Clear filters
+                  </button>
+                </div>
+              </div>
+              <div
+                class="course-list"
+                data-course-list
+              ></div>
+              <div
+                class="empty-state"
+                data-catalog-empty
+                hidden
+              >
+                <h3>No courses found</h3>
+                <p>Try another keyword, or clear your filters.</p>
+              </div>
+              <p class="catalog-note">
+                Example course directory. Verify the provider, dates and fee before applying.
+              </p>
+              <noscript>
+                <p>
+                  The course directory needs JavaScript. You can still
+                  <a th:href="@{/employee/applications/new}">apply for a course</a>
+                  .
+                </p>
+              </noscript>
+            </section>
+            <dialog
+              class="paper-dialog"
+              data-course-dialog
+              data-course-workspace-fallback
+              aria-labelledby="course-dialog-title"
+            >
+              <header class="dialog-header">
+                <h2
+                  id="course-dialog-title"
+                  data-course-title
+                ></h2>
+                <button
+                  class="dialog-close"
+                  type="button"
+                  data-course-close
+                  aria-label="Close course details"
+                >
+                  ×
+                </button>
+              </header>
+              <p data-course-summary></p>
+              <dl class="detail-list">
+                <div>
+                  <dt>Training provider</dt>
+                  <dd data-course-provider></dd>
+                </div>
+                <div>
+                  <dt>Category</dt>
+                  <dd data-course-category></dd>
+                </div>
+                <div>
+                  <dt>Dates</dt>
+                  <dd data-course-dates></dd>
+                </div>
+                <div>
+                  <dt>Course fee</dt>
+                  <dd data-course-fee></dd>
+                </div>
+              </dl>
+              <section class="section">
+                <h3>What you’ll learn</h3>
+                <ul data-course-outcomes></ul>
+              </section>
+              <p class="catalog-note">
+                This course note supplies editable defaults. Your request is submitted to your
+                manager for approval.
+              </p>
+              <a
+                class="button"
+                data-course-apply
+              >
+                Apply for course
+                <span aria-hidden="true">↗</span>
+              </a>
+            </dialog>
+          </th:block>
+          <section
+            class="dashboard-admin"
+            th:if="${admin}"
+            aria-labelledby="administration-heading"
+          >
+            <div class="section-heading">
+              <div>
+                <h2 id="administration-heading">Administration</h2>
+                <p>Manage the accounts and policies used by the learning service.</p>
+              </div>
+            </div>
+            <div class="dashboard-course-grid">
+              <a
+                class="dashboard-admin-card dashboard-tone-0"
+                th:href="@{/admin/users}"
+              >
+                <div class="dashboard-card-band">
+                  <span
+                    data-icon="person"
+                    aria-hidden="true"
+                  ></span>
+                  <span>Accounts</span>
+                  <span
+                    data-icon="arrowRight"
+                    aria-hidden="true"
+                  ></span>
+                </div>
+                <div class="dashboard-card-body">
+                  <h3>People &amp; access</h3>
+                  <p>Accounts, roles, reporting relationships and annual entitlements.</p>
+                </div>
+              </a>
+              <a
+                class="dashboard-admin-card dashboard-tone-1"
+                th:href="@{/admin/categories}"
+              >
+                <div class="dashboard-card-band">
+                  <span
+                    data-icon="cube"
+                    aria-hidden="true"
+                  ></span>
+                  <span>Course policies</span>
+                  <span
+                    data-icon="arrowRight"
+                    aria-hidden="true"
+                  ></span>
+                </div>
+                <div class="dashboard-card-body">
+                  <h3>Course categories</h3>
+                  <p>Application categories and fee limits used by real requests.</p>
+                </div>
+              </a>
+              <a
+                class="dashboard-admin-card dashboard-tone-2"
+                th:href="@{/admin/holidays}"
+              >
+                <div class="dashboard-card-band">
+                  <span
+                    data-icon="calendar"
+                    aria-hidden="true"
+                  ></span>
+                  <span>Calendar</span>
+                  <span
+                    data-icon="arrowRight"
+                    aria-hidden="true"
+                  ></span>
+                </div>
+                <div class="dashboard-card-body">
+                  <h3>Public holidays</h3>
+                  <p>Holiday dates used when calculating training days.</p>
+                </div>
+              </a>
+              <a
+                class="dashboard-admin-card dashboard-tone-3"
+                th:href="@{/admin/home}"
+              >
+                <div class="dashboard-card-band">
+                  <span
+                    data-icon="barChart"
+                    aria-hidden="true"
+                  ></span>
+                  <span>Service overview</span>
+                  <span
+                    data-icon="arrowRight"
+                    aria-hidden="true"
+                  ></span>
+                </div>
+                <div class="dashboard-card-body">
+                  <h3>Administration overview</h3>
+                  <p>View the account and category counts supplied by the service.</p>
+                </div>
+              </a>
+            </div>
+          </section>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
+    </div>
+    <script
+      type="module"
+      th:if="${!admin}"
+      th:src="@{/assets/course-workspace.js}"
+    ></script>
+  </body>
+</html>

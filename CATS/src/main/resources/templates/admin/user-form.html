@@ -1,675 +1,444 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
-<head>
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>CATS - User Form</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #f4f6f8;
-            color: #222;
-        }
-
-        header {
-            background-color: #1f3a5f;
-            color: white;
-            padding: 18px 30px;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        main {
-            max-width: 900px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        .panel {
-            background-color: white;
-            padding: 25px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        }
-
-        h2,
-        h3 {
-            margin-top: 0;
-        }
-
-        .error {
-            background-color: #ffe5e5;
-            color: #a00000;
-            padding: 12px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .form-row {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: bold;
-        }
-
-        input,
-        select {
-            width: 100%;
-            padding: 9px;
-            border: 1px solid #bbb;
-            border-radius: 4px;
-        }
-
-        input:focus,
-        select:focus {
-            border-color: #1f3a5f;
-            outline: none;
-        }
-
-        .required {
-            color: #b42318;
-        }
-
-        .button {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .primary {
-            background-color: #1f3a5f;
-            color: white;
-        }
-
-        .secondary {
-            background-color: #68737d;
-            color: white;
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        th,
-        td {
-            border-bottom: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #e9eef3;
-        }
-
-        .help {
-            color: #666;
-            font-size: 13px;
-            margin-top: 5px;
-        }
-
-        .entitlement-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(auto-fit, minmax(160px, 1fr));
-            gap: 12px;
-        }
-    </style>
-</head>
-
-<body>
-
-<header>
-
-    <h1 th:text="${user.id == null}
-        ? 'Create User'
-        : 'Edit User'">
-        User
-    </h1>
-
-</header>
-
-
-<main>
-
-    <a class="button secondary"
-       th:href="@{/admin/users}">
-        ← Back to Users
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('User profile')}"></head>
+  <body class="admin-page">
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
     </a>
-
-    <br><br>
-
-
-    <div class="error"
-         th:if="${error}"
-         th:text="${error}">
-    </div>
-
-
-    <!-- =====================================================
-         CREATE USER
-         ===================================================== -->
-
-    <section class="panel"
-             th:if="${user.id == null}">
-
-        <h2>
-            New User
-        </h2>
-
-
-        <form method="post"
-              th:action="@{/admin/users/new}">
-
-
-            <div class="form-row">
-
-                <label>
-                    Username
-                    <span class="required">*</span>
-                </label>
-
-                <input type="text"
-                       name="username"
-                       th:value="${user.username}"
-                       minlength="3"
-                       maxlength="50"
-                       required>
-
-            </div>
-
-
-            <div class="form-row">
-
-                <label>
-                    Password
-                    <span class="required">*</span>
-                </label>
-
-                <input type="password"
-                       name="password"
-                       minlength="8"
-                       maxlength="72"
-                       required>
-
-                <div class="help">
-                    Minimum 8 characters.
+    <aside th:replace="~{fragments/chrome :: sidebar('users')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('User profile')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <a
+          class="admin-back-link"
+          th:href="@{/admin/users}"
+        >
+          ← Users &amp; allowances
+        </a>
+        <header class="page-header">
+          <div>
+            <h1 th:text="${user.id == null} ? 'Add user' : 'Edit user'">User profile</h1>
+            <p
+              th:text="${user.id == null}
+              ? 'Create an account and assign its designation and reporting manager.'
+              : 'Maintain profile details, access and annual training entitlements.'"
+            ></p>
+          </div>
+        </header>
+        <div class="page-body admin-profile">
+          <div
+            class="error"
+            th:if="${error}"
+            th:text="${error}"
+            role="alert"
+          ></div>
+          <section
+            class="section admin-edit-section"
+            th:if="${user.id == null}"
+          >
+            <form
+              method="post"
+              th:action="@{/admin/users/new}"
+            >
+              <fieldset class="admin-fieldset">
+                <legend>Account details</legend>
+                <div class="admin-form-grid">
+                  <div class="field">
+                    <label for="new-username">
+                      Username
+                      <span class="required">*</span>
+                    </label>
+                    <input
+                      id="new-username"
+                      type="text"
+                      name="username"
+                      th:value="${user.username}"
+                      minlength="3"
+                      maxlength="50"
+                      required
+                      autocomplete="username"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="new-password">
+                      Password
+                      <span class="required">*</span>
+                    </label>
+                    <input
+                      id="new-password"
+                      type="password"
+                      name="password"
+                      minlength="8"
+                      maxlength="72"
+                      required
+                      autocomplete="new-password"
+                      aria-describedby="new-password-note"
+                    />
+                    <p
+                      class="help"
+                      id="new-password-note"
+                    >
+                      At least 8 characters.
+                    </p>
+                  </div>
+                  <div class="field">
+                    <label for="new-name">
+                      Full name
+                      <span class="required">*</span>
+                    </label>
+                    <input
+                      id="new-name"
+                      type="text"
+                      name="name"
+                      th:value="${user.name}"
+                      maxlength="100"
+                      required
+                      autocomplete="name"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="new-email">Email</label>
+                    <input
+                      id="new-email"
+                      type="email"
+                      name="email"
+                      th:value="${user.email}"
+                      maxlength="150"
+                      autocomplete="email"
+                    />
+                  </div>
                 </div>
-
-            </div>
-
-
-            <div class="form-row">
-
-                <label>
-                    Name
-                    <span class="required">*</span>
-                </label>
-
-                <input type="text"
-                       name="name"
-                       th:value="${user.name}"
-                       maxlength="100"
-                       required>
-
-            </div>
-
-
-            <div class="form-row">
-
-                <label>
-                    Email
-                </label>
-
-                <input type="email"
-                       name="email"
-                       th:value="${user.email}"
-                       maxlength="150">
-
-            </div>
-
-
-            <div class="form-row">
-
-                <label>
-                    Designation
-                    <span class="required">*</span>
-                </label>
-
-                <select name="designation"
-                        required>
-
-                    <option value="">
-                        -- Select Designation --
-                    </option>
-
-                    <option value="Administrative"
-                            th:selected="${user.designation == 'Administrative'}">
+              </fieldset>
+              <fieldset class="admin-fieldset">
+                <legend>Designation &amp; reporting</legend>
+                <div class="admin-form-grid">
+                  <div class="field">
+                    <label for="new-designation">
+                      Designation
+                      <span class="required">*</span>
+                    </label>
+                    <select
+                      id="new-designation"
+                      name="designation"
+                      required
+                      aria-describedby="new-designation-note"
+                    >
+                      <option value="">Choose a designation</option>
+                      <option
+                        value="Administrative"
+                        th:selected="${user.designation == 'Administrative'}"
+                      >
                         Administrative
-                    </option>
-
-                    <option value="Professional"
-                            th:selected="${user.designation == 'Professional'}">
+                      </option>
+                      <option
+                        value="Professional"
+                        th:selected="${user.designation == 'Professional'}"
+                      >
                         Professional
-                    </option>
-
-                </select>
-
-                <div class="help">
-                    Administrative users receive the configured
-                    administrative entitlement; Professional users
-                    receive the professional entitlement.
+                      </option>
+                    </select>
+                    <p
+                      class="help"
+                      id="new-designation-note"
+                    >
+                      Initial training entitlements follow the configured designation policy.
+                    </p>
+                  </div>
+                  <div class="field">
+                    <label for="new-role">
+                      Role
+                      <span class="required">*</span>
+                    </label>
+                    <select
+                      id="new-role"
+                      name="role"
+                      required
+                    >
+                      <option
+                        th:each="r : ${roles}"
+                        th:value="${r}"
+                        th:text="${r.name() == 'ADMIN' ? 'Admin' : #strings.capitalize(#strings.toLowerCase(r.name()))}"
+                        th:selected="${user.role != null ? r == user.role : r.name() == 'EMPLOYEE'}"
+                      ></option>
+                    </select>
+                  </div>
+                  <div class="field admin-full-width">
+                    <label for="new-manager">Reporting manager</label>
+                    <select
+                      id="new-manager"
+                      name="managerId"
+                    >
+                      <option value="">No reporting manager</option>
+                      <option
+                        th:each="m : ${managers}"
+                        th:value="${m.id}"
+                        th:text="${m.name + ' (' + m.username + ')'}"
+                      ></option>
+                    </select>
+                  </div>
                 </div>
-
-            </div>
-
-
-            <div class="form-row">
-
-                <label>
-                    Role
-                    <span class="required">*</span>
-                </label>
-
-                <select name="role"
-                        required>
-
-                    <option th:each="r : ${roles}"
-                            th:value="${r}"
-                            th:text="${r}"
-                            th:selected="${user.role != null
-                                ? r == user.role
-                                : r.name() == 'EMPLOYEE'}">
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="form-row">
-
-                <label>
-                    Manager
-                </label>
-
-                <select name="managerId">
-
-                    <option value="">
-                        -- No Manager --
-                    </option>
-
-                    <option th:each="m : ${managers}"
-                            th:value="${m.id}"
-                            th:text="${m.name + ' (' + m.username + ')'}">
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="actions">
-
-                <button type="submit"
-                        class="button primary">
-                    Create User
+              </fieldset>
+              <div class="actions admin-form-actions">
+                <button
+                  type="submit"
+                  class="button primary"
+                >
+                  Create user
                 </button>
-
-                <a class="button secondary"
-                   th:href="@{/admin/users}">
-                    Cancel
+                <a
+                  class="button text"
+                  th:href="@{/admin/users}"
+                >
+                  Cancel
                 </a>
-
-            </div>
-
-        </form>
-
-    </section>
-
-
-    <!-- =====================================================
-         EDIT USER
-         ===================================================== -->
-
-    <section class="panel"
-             th:unless="${user.id == null}">
-
-        <h2>
-            User Profile
-        </h2>
-
-
-        <form method="post"
-              th:action="@{/admin/users/{id}/edit(id=${user.id})}">
-
-
-            <div class="form-row">
-
-                <label>
-                    Username
-                </label>
-
-                <input type="text"
-                       th:value="${user.username}"
-                       disabled>
-
-                <div class="help">
-                    Username cannot be changed here.
-                </div>
-
-            </div>
-
-
-            <div class="form-row">
-
-                <label>
-                    Name
-                    <span class="required">*</span>
-                </label>
-
-                <input type="text"
-                       name="name"
-                       th:value="${user.name}"
-                       maxlength="100"
-                       required>
-
-            </div>
-
-
-            <div class="form-row">
-
-                <label>
-                    Email
-                </label>
-
-                <input type="email"
-                       name="email"
-                       th:value="${user.email}"
-                       maxlength="150">
-
-            </div>
-
-
-            <div class="form-row">
-
-                <label>
-                    Designation
-                    <span class="required">*</span>
-                </label>
-
-                <select name="designation"
-                        required>
-
-                    <option value="Administrative"
-                            th:selected="${user.designation == 'Administrative'}">
+              </div>
+            </form>
+          </section>
+          <th:block th:unless="${user.id == null}">
+            <section class="section admin-edit-section">
+              <div class="admin-section-heading">
+                <h2>Profile</h2>
+                <p>Keep account and reporting details up to date.</p>
+              </div>
+              <form
+                method="post"
+                th:action="@{/admin/users/{id}/edit(id=${user.id})}"
+              >
+                <div class="admin-form-grid">
+                  <div class="field">
+                    <label for="profile-username">Username</label>
+                    <input
+                      id="profile-username"
+                      type="text"
+                      th:value="${user.username}"
+                      disabled
+                      aria-describedby="profile-username-note"
+                    />
+                    <p
+                      class="help"
+                      id="profile-username-note"
+                    >
+                      The username cannot be changed.
+                    </p>
+                  </div>
+                  <div class="field">
+                    <label for="profile-name">
+                      Full name
+                      <span class="required">*</span>
+                    </label>
+                    <input
+                      id="profile-name"
+                      type="text"
+                      name="name"
+                      th:value="${user.name}"
+                      maxlength="100"
+                      required
+                      autocomplete="name"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="profile-email">Email</label>
+                    <input
+                      id="profile-email"
+                      type="email"
+                      name="email"
+                      th:value="${user.email}"
+                      maxlength="150"
+                      autocomplete="email"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="profile-designation">
+                      Designation
+                      <span class="required">*</span>
+                    </label>
+                    <select
+                      id="profile-designation"
+                      name="designation"
+                      required
+                    >
+                      <option
+                        value="Administrative"
+                        th:selected="${user.designation == 'Administrative'}"
+                      >
                         Administrative
-                    </option>
-
-                    <option value="Professional"
-                            th:selected="${user.designation == 'Professional'}">
+                      </option>
+                      <option
+                        value="Professional"
+                        th:selected="${user.designation == 'Professional'}"
+                      >
                         Professional
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="form-row">
-
-                <label>
-                    Manager
-                </label>
-
-                <select name="managerId">
-
-                    <option value="">
-                        -- No Manager --
-                    </option>
-
-                    <option th:each="m : ${managers}"
-                            th:if="${m.id != user.id}"
-                            th:value="${m.id}"
-                            th:text="${m.name + ' (' + m.username + ')'}"
-                            th:selected="${user.manager != null
-                                and m.id == user.manager.id}">
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="actions">
-
-                <button type="submit"
-                        class="button primary">
-                    Save Profile
-                </button>
-
-                <a class="button secondary"
-                   th:href="@{/admin/users}">
-                    Cancel
-                </a>
-
-            </div>
-
-        </form>
-
-    </section>
-
-
-    <!-- =====================================================
-         ROLE MANAGEMENT
-         ===================================================== -->
-
-    <section class="panel"
-             th:unless="${user.id == null}">
-
-        <h3>
-            Role Management
-        </h3>
-
-
-        <form method="post"
-              th:action="@{/admin/users/{id}/role(id=${user.id})}">
-
-            <div class="form-row">
-
-                <label>
-                    Role
-                </label>
-
-                <select name="role"
-                        required>
-
-                    <option th:each="r : ${roles}"
-                            th:value="${r}"
-                            th:text="${r}"
-                            th:selected="${r == user.role}">
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <button type="submit"
+                      </option>
+                    </select>
+                  </div>
+                  <div class="field admin-full-width">
+                    <label for="profile-manager">Reporting manager</label>
+                    <select
+                      id="profile-manager"
+                      name="managerId"
+                    >
+                      <option value="">No reporting manager</option>
+                      <option
+                        th:each="m : ${managers}"
+                        th:if="${m.id != user.id}"
+                        th:value="${m.id}"
+                        th:text="${m.name + ' (' + m.username + ')'}"
+                        th:selected="${user.manager != null and m.id == user.manager.id}"
+                      ></option>
+                    </select>
+                  </div>
+                </div>
+                <div class="actions admin-form-actions">
+                  <button
+                    type="submit"
                     class="button primary"
-                    onclick="return confirm(
-                        'Change this user role?')">
-
-                Change Role
-
-            </button>
-
-        </form>
-
-    </section>
-
-
-    <!-- =====================================================
-         TRAINING ENTITLEMENT
-         ===================================================== -->
-
-    <section class="panel"
-             th:unless="${user.id == null}">
-
-        <h3>
-            Training Entitlements
-        </h3>
-
-
-        <table>
-
-            <thead>
-            <tr>
-                <th>Year</th>
-                <th>Entitled Days</th>
-                <th>Annual Budget</th>
-            </tr>
-            </thead>
-
-
-            <tbody>
-
-            <tr th:each="e : ${entitlements}">
-
-                <td th:text="${e.year}">
-                </td>
-
-                <td th:text="${e.entitledDays}">
-                </td>
-
-                <td th:text="${'S$ ' + e.annualBudget}">
-                </td>
-
-            </tr>
-
-
-            <tr th:if="${#lists.isEmpty(entitlements)}">
-
-                <td colspan="3">
-                    No training entitlement records.
-                </td>
-
-            </tr>
-
-            </tbody>
-
-        </table>
-
-
-        <h4>
-            Add / Update Entitlement
-        </h4>
-
-
-        <form method="post"
-              th:action="@{/admin/users/{id}/entitlement(id=${user.id})}">
-
-
-            <div class="entitlement-grid">
-
-                <div class="form-row">
-
-                    <label>
-                        Year
-                    </label>
-
-                    <input type="number"
-                           id="entitlementYear"
-                           name="year"
-                           min="2000"
-                           max="2100"
-                           required>
-
+                  >
+                    Save profile
+                  </button>
+                  <a
+                    class="button text"
+                    th:href="@{/admin/users}"
+                  >
+                    Cancel
+                  </a>
                 </div>
-
-
-                <div class="form-row">
-
-                    <label>
-                        Training Days
-                    </label>
-
-                    <input type="number"
-                           name="entitledDays"
-                           step="0.5"
-                           min="0"
-                           required>
-
+              </form>
+            </section>
+            <section class="section admin-edit-section">
+              <div class="admin-section-heading">
+                <h2>Role</h2>
+                <p>Change which workspace this account can access.</p>
+              </div>
+              <!-- Role changes use a separate endpoint from profile changes. -->
+              <form
+                method="post"
+                th:action="@{/admin/users/{id}/role(id=${user.id})}"
+                data-confirm="Change this user's role?"
+              >
+                <div class="field admin-role-field">
+                  <label for="profile-role">Role</label>
+                  <select
+                    id="profile-role"
+                    name="role"
+                    required
+                  >
+                    <option
+                      th:each="r : ${roles}"
+                      th:value="${r}"
+                      th:text="${r.name() == 'ADMIN' ? 'Admin' : #strings.capitalize(#strings.toLowerCase(r.name()))}"
+                      th:selected="${r == user.role}"
+                    ></option>
+                  </select>
                 </div>
-
-
-                <div class="form-row">
-
-                    <label>
-                        Annual Budget (S$)
-                    </label>
-
-                    <input type="number"
-                           name="annualBudget"
-                           step="0.01"
-                           min="0"
-                           required>
-
+                <div class="actions admin-form-actions">
+                  <button
+                    type="submit"
+                    class="button"
+                  >
+                    Change role
+                  </button>
                 </div>
-
-            </div>
-
-
-            <button type="submit"
-                    class="button primary">
-
-                Save Entitlement
-
-            </button>
-
-        </form>
-
-    </section>
-
-</main>
-
-
-<script>
-    const yearInput =
-        document.getElementById("entitlementYear");
-
-    if (yearInput && !yearInput.value) {
-        yearInput.value =
-            new Date().getFullYear();
-    }
-</script>
-
-</body>
+              </form>
+            </section>
+            <section
+              class="section admin-edit-section"
+              id="annual-allowances"
+            >
+              <div class="admin-section-heading">
+                <h2>Annual allowances</h2>
+                <p>Training days and budget are recorded separately for each year.</p>
+              </div>
+              <div class="table-wrapper">
+                <table class="table admin-allowances-table">
+                  <caption class="sr-only">Recorded annual training allowances</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Year</th>
+                      <th scope="col">Training days</th>
+                      <th scope="col">Budget</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="e : ${entitlements}">
+                      <td th:text="${e.year}"></td>
+                      <td th:text="${e.entitledDays}"></td>
+                      <td th:text="${'S$ ' + e.annualBudget}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(entitlements)}">
+                      <td
+                        colspan="3"
+                        class="empty"
+                      >
+                        No annual allowance records.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <h3 class="admin-form-subheading">Add or update a year</h3>
+              <!-- Keep these service parameter names: year, entitledDays and annualBudget. -->
+              <form
+                method="post"
+                th:action="@{/admin/users/{id}/entitlement(id=${user.id})}"
+              >
+                <div class="admin-form-grid admin-entitlement-grid">
+                  <div class="field">
+                    <label for="entitlementYear">Year</label>
+                    <input
+                      id="entitlementYear"
+                      type="number"
+                      name="year"
+                      min="2000"
+                      max="2100"
+                      required
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="entitlement-days">Training days</label>
+                    <input
+                      id="entitlement-days"
+                      type="number"
+                      name="entitledDays"
+                      step="0.5"
+                      min="0"
+                      required
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="entitlement-budget">Budget (SGD)</label>
+                    <input
+                      id="entitlement-budget"
+                      type="number"
+                      name="annualBudget"
+                      step="0.01"
+                      min="0"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="actions admin-form-actions">
+                  <button
+                    type="submit"
+                    class="button primary"
+                  >
+                    Save annual allowance
+                  </button>
+                </div>
+              </form>
+            </section>
+          </th:block>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
+    </div>
+  </body>
 </html>

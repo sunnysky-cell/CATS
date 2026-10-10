@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -55,10 +56,12 @@ public class CourseApplication {
 
 	@NotNull(message = "The start date cannot be left blank.")
 	@Column(nullable = false)
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 	private LocalDate startDate;
 
 	@NotNull(message = "The end date cannot be left blank.")
 	@Column(nullable = false)
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 	private LocalDate endDate;
 
 	@DecimalMin(value = "0.0" )
@@ -68,6 +71,8 @@ public class CourseApplication {
 	@DecimalMin(value = "0.0" )
 	@Digits(integer = 3, fraction = 1)
 	private BigDecimal trainingDays;
+
+	private boolean halfDay;
 
 	@NotBlank(message = "The reason for the application cannot be left blank.")
 	@Size(max = 2000)

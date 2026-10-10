@@ -1,34 +1,65 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
-<head>
-<meta charset="UTF-8">
-<title>Report Center - CATS</title>
-</head>
-
-<body>
-
-<h2>CATS - Report Center</h2>
-
-<hr/>
-
-<h3>Choose a report to generate:</h3>
-
-<p>
-  <a th:href="@{/manager/report/attendance}">
-    <button type="button">Attendance Report</button>
-  </a>
-</p>
-
-<p>
-  <a th:href="@{/manager/report/budget}">
-    <button type="button">Budget Utilisation Report</button>
-  </a>
-</p>
-
-<hr/>
-
-<p><a th:href="@{/logout}">Logout</a></p>
-
-</body>
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Reports')}"></head>
+  <body>
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside th:replace="~{fragments/chrome :: sidebar('reports')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Reports')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <h1>Reports</h1>
+            <p>Review training participation and annual budgets.</p>
+          </div>
+        </header>
+        <div class="page-body">
+          <section
+            class="section"
+            aria-labelledby="attendance-title"
+          >
+            <h2 id="attendance-title">Attendance</h2>
+            <p>
+              Find course participation for a selected date range, then export the records as CSV.
+            </p>
+            <a
+              class="button text"
+              th:href="@{/manager/report/attendance}"
+            >
+              Open attendance report
+            </a>
+          </section>
+          <section
+            class="section"
+            aria-labelledby="budget-title"
+          >
+            <h2 id="budget-title">Budget utilisation</h2>
+            <p>
+              Compare annual entitlements, training days, approved fees, claimed amounts, and
+              remaining budgets.
+            </p>
+            <a
+              class="button text"
+              th:href="@{/manager/report/budget}"
+            >
+              Open budget report
+            </a>
+          </section>
+          <p class="muted">Reports show organization-wide training and budget records.</p>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
+    </div>
+  </body>
 </html>

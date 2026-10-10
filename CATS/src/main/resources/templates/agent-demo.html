@@ -1,0 +1,64 @@
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Agent demo')}"></head>
+  <body class="agent-page">
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/agent-workspace.css}"
+    />
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside th:replace="~{fragments/chrome :: sidebar('agent')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Agent demo')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <h1>Agent demo</h1>
+            <p>A workspace for finding, analysing and exporting course requests.</p>
+          </div>
+          <button
+            class="button button-secondary"
+            type="button"
+            data-agent-open
+            th:if="${session.loggedInUser.role.name() == 'MANAGER'}"
+          >
+            <span
+              data-icon="sparkle"
+              aria-hidden="true"
+            ></span>
+            MCP access
+          </button>
+        </header>
+        <div class="page-body">
+          <section
+            data-agent-workspace
+            th:attr="data-role=${session.loggedInUser.role.name()},data-user-id=${session.loggedInUser.id},data-source=${session.loggedInUser.role.name() == 'MANAGER' ? '/manager/history' : (session.loggedInUser.role.name() == 'EMPLOYEE' ? '/employee/applications' : '')}"
+            aria-label="Agent demonstration workspace"
+          ></section>
+          <noscript>
+            <p>
+              This demonstration needs JavaScript. Your existing request and review pages remain
+              available from the navigation.
+            </p>
+          </noscript>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
+    </div>
+    <script
+      type="module"
+      th:src="@{/assets/agent-workspace.js}"
+    ></script>
+  </body>
+</html>

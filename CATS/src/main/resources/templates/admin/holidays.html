@@ -1,330 +1,194 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
-<head>
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>CATS - Public Holidays</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #f4f6f8;
-            color: #222;
-        }
-
-        header {
-            background-color: #1f3a5f;
-            color: white;
-            padding: 18px 30px;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        main {
-            max-width: 1000px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        .panel {
-            background-color: white;
-            padding: 24px;
-            margin-bottom: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        }
-
-        .button {
-            padding: 9px 14px;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .primary {
-            background-color: #1f3a5f;
-            color: white;
-        }
-
-        .secondary {
-            background-color: #68737d;
-            color: white;
-        }
-
-        .danger {
-            background-color: #b42318;
-            color: white;
-        }
-
-        .error {
-            background-color: #ffe5e5;
-            color: #a00000;
-            padding: 12px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-
-        .year-nav {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        input,
-        select {
-            padding: 8px;
-            border: 1px solid #bbb;
-            border-radius: 4px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 11px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background-color: #e9eef3;
-        }
-
-        .add-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: bold;
-        }
-    </style>
-</head>
-
-<body>
-
-<header>
-
-    <h1>
-        Public Holidays
-    </h1>
-
-</header>
-
-
-<main>
-
-    <a class="button secondary"
-       th:href="@{/admin/home}">
-        ← Admin Home
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Public holidays')}"></head>
+  <body class="admin-page">
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
     </a>
-
-
-    <div class="error"
-         th:if="${error}"
-         th:text="${error}">
-    </div>
-
-
-    <!-- =====================================================
-         YEAR SELECTION
-         ===================================================== -->
-
-    <section class="panel">
-
-        <h2>
-            Holiday Calendar -
-            <span th:text="${year}">
-                Year
-            </span>
-        </h2>
-
-
-        <div class="year-nav">
-
-            <a class="button secondary"
-               th:href="@{/admin/holidays(year=${year - 1})}">
-                ← Previous Year
-            </a>
-
-
-            <form method="get"
-                  th:action="@{/admin/holidays}">
-
-                <input type="number"
-                       name="year"
-                       min="2000"
-                       max="2100"
-                       th:value="${year}"
-                       required>
-
-                <button type="submit"
-                        class="button primary">
-
-                    View
-
+    <aside th:replace="~{fragments/chrome :: sidebar('holidays')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Public holidays')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <h1>Public holidays</h1>
+            <p>Exclude these dates when calculating training days.</p>
+          </div>
+          <a
+            class="button"
+            href="#add-holiday"
+          >
+            Add holiday
+          </a>
+        </header>
+        <div class="page-body">
+          <div
+            class="error"
+            th:if="${error}"
+            th:text="${error}"
+            role="alert"
+          ></div>
+          <section
+            class="section admin-records"
+            aria-label="Holiday calendar"
+          >
+            <div class="admin-year-nav">
+              <form
+                method="get"
+                th:action="@{/admin/holidays}"
+              >
+                <label for="holiday-year">Year</label>
+                <input
+                  id="holiday-year"
+                  type="number"
+                  name="year"
+                  min="2000"
+                  max="2100"
+                  th:value="${year}"
+                  required
+                />
+                <button
+                  type="submit"
+                  class="button"
+                >
+                  View
                 </button>
-
-            </form>
-
-
-            <a class="button secondary"
-               th:href="@{/admin/holidays(year=${year + 1})}">
-                Next Year →
-            </a>
-
-        </div>
-
-
-        <table>
-
-            <thead>
-            <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-
-
-            <tbody>
-
-            <tr th:each="h : ${holidays}">
-
-                <td th:text="${#temporals.format(
-                        h.holidayDate,
-                        'yyyy-MM-dd')}">
-                </td>
-
-                <td th:text="${h.description}">
-                </td>
-
-
-                <td>
-
-                    <form method="post"
-                          th:action="@{/admin/holidays/{id}/delete(id=${h.id})}">
-
-                        <!-- Preserve selected year after delete -->
-                        <input type="hidden"
-                               name="year"
-                               th:value="${year}">
-
-                        <button type="submit"
-                                class="button danger"
-                                onclick="return confirm(
-                                    'Delete this public holiday?')">
-
-                            Delete
-
-                        </button>
-
-                    </form>
-
-                </td>
-
-            </tr>
-
-
-            <tr th:if="${#lists.isEmpty(holidays)}">
-
-                <td colspan="3">
-
-                    No public holidays recorded
-                    for this year.
-
-                </td>
-
-            </tr>
-
-            </tbody>
-
-        </table>
-
-    </section>
-
-
-    <!-- =====================================================
-         ADD HOLIDAY
-         ===================================================== -->
-
-    <section class="panel">
-
-        <h2>
-            Add Public Holiday
-        </h2>
-
-
-        <form method="post"
-              th:action="@{/admin/holidays/new}">
-
-
-            <div class="add-grid">
-
-                <div>
-
-                    <label>
-                        Holiday Date *
-                    </label>
-
-                    <input type="date"
-                           name="holidayDate"
-                           required>
-
-                </div>
-
-
-                <div>
-
-                    <label>
-                        Description *
-                    </label>
-
-                    <input type="text"
-                           name="description"
-                           maxlength="150"
-                           required>
-
-                </div>
-
+              </form>
+              <div class="actions">
+                <a
+                  class="button text"
+                  th:href="@{/admin/holidays(year=${year - 1})}"
+                >
+                  Previous year
+                </a>
+                <a
+                  class="button text"
+                  th:href="@{/admin/holidays(year=${year + 1})}"
+                >
+                  Next year
+                </a>
+              </div>
             </div>
-
-
-            <button type="submit"
-                    class="button primary">
-
-                Add Holiday
-
-            </button>
-
-        </form>
-
-    </section>
-
-</main>
-
-</body>
+            <div class="table-wrapper">
+              <table
+                class="table admin-holidays-table"
+                data-searchable="true"
+              >
+                <caption class="sr-only">
+                  Public holidays for
+                  <span th:text="${year}">Year</span>
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Holiday</th>
+                    <th scope="col"><span class="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="h : ${holidays}">
+                    <td
+                      data-label="Date"
+                      class="admin-record-number"
+                      th:text="${#temporals.format(h.holidayDate, 'yyyy-MM-dd')}"
+                    ></td>
+                    <td
+                      data-label="Holiday"
+                      th:text="${h.description}"
+                    ></td>
+                    <td data-label="Actions">
+                      <form
+                        method="post"
+                        th:action="@{/admin/holidays/{id}/delete(id=${h.id})}"
+                        data-confirm="Delete this public holiday?"
+                      >
+                        <input
+                          type="hidden"
+                          name="year"
+                          th:value="${year}"
+                        />
+                        <button
+                          type="submit"
+                          class="button text danger"
+                        >
+                          Delete
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  <tr th:if="${#lists.isEmpty(holidays)}">
+                    <td
+                      colspan="3"
+                      class="empty"
+                    >
+                      No public holidays recorded for this year.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <section
+            id="add-holiday"
+            class="section admin-edit-section"
+          >
+            <div class="admin-section-heading">
+              <h2>Add holiday</h2>
+              <p>Add a date to the working calendar.</p>
+            </div>
+            <form
+              method="post"
+              th:action="@{/admin/holidays/new}"
+            >
+              <div class="admin-form-grid">
+                <div class="field">
+                  <label for="holiday-date">
+                    Holiday date
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    id="holiday-date"
+                    type="date"
+                    name="holidayDate"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="holiday-description">
+                    Holiday name
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    id="holiday-description"
+                    type="text"
+                    name="description"
+                    maxlength="150"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="actions admin-form-actions">
+                <button
+                  type="submit"
+                  class="button primary"
+                >
+                  Add holiday
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
+    </div>
+  </body>
 </html>

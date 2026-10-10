@@ -1,77 +1,212 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CATS - My Applications</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f6f8; color: #222; }
-        header { background-color: #1f3a5f; color: white; padding: 18px 30px; }
-        header h1 { margin: 0; font-size: 24px; }
-        main { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .button { display: inline-block; padding: 9px 14px; border: none; border-radius: 5px;
-                  text-decoration: none; cursor: pointer; font-size: 14px; }
-        .primary { background-color: #1f3a5f; color: white; }
-        .secondary { background-color: #68737d; color: white; }
-        .success { background-color: #e6f4ea; color: #1e6b32; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
-        .error { background-color: #ffe5e5; color: #a00000; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
-        .table-wrapper { overflow-x: auto; background-color: white; border-radius: 8px;
-                         box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: middle; }
-        th { background-color: #e9eef3; }
-        tr:hover { background-color: #f8fafc; }
-        .empty { text-align: center; color: #777; }
-    </style>
-</head>
-<body>
-<header>
-    <h1>My Course Applications</h1>
-</header>
-<main>
-    <div class="toolbar">
-        <a class="button secondary" th:href="@{/home}">&larr; Home</a>
-        <a class="button primary" th:href="@{/employee/applications/new}">+ New Application</a>
-    </div>
-
-    <div class="success" th:if="${success}" th:text="${success}"></div>
-    <div class="error" th:if="${error}" th:text="${error}"></div>
-
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Course</th>
-                    <th>Category</th>
-                    <th>Provider</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="a : ${applications}">
-                    <td th:text="${a.id}"></td>
-                    <td th:text="${a.courseTitle}"></td>
-                    <td th:text="${a.category != null ? a.category.name : '-'}"></td>
-                    <td th:text="${a.trainingProvider}"></td>
-                    <td th:text="${a.startDate}"></td>
-                    <td th:text="${a.endDate}"></td>
-                    <td th:text="${a.status}"></td>
-                    <td>
-                        <a class="button primary" th:href="@{/employee/applications/{id}(id=${a.id})}">View</a>
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('My applications')}"></head>
+  <body class="employee-workspace">
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside
+      th:replace="~{fragments/chrome :: sidebar(${session.loggedInUser.role.name() == 'MANAGER' ? 'personal-training' : 'applications'})}"
+    ></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('My applications')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <h1>My applications</h1>
+            <p>Your course requests and decisions for the current year.</p>
+          </div>
+          <a
+            class="button primary"
+            th:href="@{/employee/applications/new}"
+          >
+            New application
+          </a>
+        </header>
+        <div
+          class="page-body"
+          id="cats-student-data"
+          data-record-view="applications"
+          data-schema-version="1"
+          data-scope="current-year-course-start"
+          th:attr="data-role=${session.loggedInUser != null ? session.loggedInUser.role.name() : ''},data-user-id=${session.loggedInUser != null ? session.loggedInUser.id : ''}"
+        >
+          <p
+            class="success"
+            th:if="${success}"
+            th:text="${success}"
+            role="status"
+          ></p>
+          <p
+            class="error"
+            th:if="${error}"
+            th:text="${error}"
+            role="alert"
+          ></p>
+          <div th:unless="${#lists.isEmpty(applications)}">
+            <div class="record-controls employee-record-controls">
+              <div class="field">
+                <label for="application-search">Search applications</label>
+                <input
+                  type="search"
+                  id="application-search"
+                  data-record-search
+                  placeholder="Course, provider or reference"
+                />
+              </div>
+              <div class="field">
+                <label for="application-status">Status</label>
+                <select
+                  id="application-status"
+                  data-record-status
+                >
+                  <option value="">All statuses</option>
+                  <option value="APPLIED,UPDATED">Awaiting decision</option>
+                  <option value="APPROVED">Approved</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="REJECTED">Rejected</option>
+                  <option value="CANCELLED">Cancelled</option>
+                  <option value="DELETED">Deleted</option>
+                </select>
+              </div>
+            </div>
+            <p
+              class="record-results"
+              data-record-results
+              role="status"
+              aria-live="polite"
+              th:text="${#lists.size(applications)} + ' applications'"
+            ></p>
+            <div class="table-wrapper">
+              <table class="employee-record-table employee-application-table">
+                <caption class="sr-only">Your course applications for the current year</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Reference</th>
+                    <th scope="col">Course</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Dates</th>
+                    <th scope="col">Status</th>
+                    <th scope="col"><span class="sr-only">Details</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    th:each="a : ${applications}"
+                    data-record-row
+                    data-dashboard-record
+                    th:attr="data-record-status=${a.status},
+                      data-id=${a.id},
+                      data-title=${a.courseTitle != null ? a.courseTitle : ''},
+                      data-provider=${a.trainingProvider != null ? a.trainingProvider : ''},
+                      data-category=${a.category != null ? a.category.name : ''},
+                      data-applicant-id=${a.applicant != null ? a.applicant.id : ''},
+                      data-learner=${a.applicant != null ? a.applicant.name : ''},
+                      data-start=${a.startDate != null ? a.startDate.toString() : ''},
+                      data-end=${a.endDate != null ? a.endDate.toString() : ''},
+                      data-created=${a.createdAt != null ? a.createdAt.toString() : ''},
+                      data-status=${a.status != null ? a.status.name() : 'UNKNOWN'},
+                      data-fee=${a.courseFee != null ? a.courseFee.toPlainString() : ''},
+                      data-days=${a.trainingDays != null ? a.trainingDays.toPlainString() : ''}"
+                  >
+                    <td
+                      class="record-reference"
+                      data-label="Reference"
+                    >
+                      #
+                      <span th:text="${a.id}"></span>
                     </td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(applications)}">
-                    <td colspan="8" class="empty">You have no course applications this year.</td>
-                </tr>
-            </tbody>
-        </table>
+                    <td class="employee-record-course">
+                      <strong
+                        class="record-title"
+                        th:text="${a.courseTitle}"
+                      ></strong>
+                      <span
+                        class="record-secondary"
+                        th:text="${a.trainingProvider}"
+                      ></span>
+                    </td>
+                    <td
+                      data-label="Category"
+                      th:text="${a.category != null ? a.category.name : 'Not set'}"
+                    ></td>
+                    <td data-label="Dates">
+                      <time th:text="${a.startDate}"></time>
+                      <span class="record-secondary">
+                        to
+                        <time th:text="${a.endDate}"></time>
+                      </span>
+                    </td>
+                    <td class="employee-record-status">
+                      <span
+                        class="status-badge"
+                        th:text="${a.status}"
+                        th:attr="data-status=${a.status}"
+                      ></span>
+                    </td>
+                    <td class="employee-record-action">
+                      <a
+                        class="record-link"
+                        th:href="@{/employee/applications/{id}(id=${a.id})}"
+                        th:attr="aria-label=${'View ' + a.courseTitle}"
+                      >
+                        View details
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div
+              class="employee-empty"
+              data-record-empty
+              hidden
+            >
+              <h2>No matching applications</h2>
+              <p>Try another search or status.</p>
+              <button
+                type="button"
+                class="button secondary"
+                data-record-reset
+              >
+                Clear filters
+              </button>
+            </div>
+          </div>
+          <section
+            class="employee-empty"
+            th:if="${#lists.isEmpty(applications)}"
+          >
+            <h2>Your next course starts here</h2>
+            <p>There are no applications for this year yet.</p>
+            <div class="actions">
+              <a
+                class="button primary"
+                th:href="@{/employee/applications/new}"
+              >
+                Create an application
+              </a>
+              <a
+                class="button secondary"
+                th:href="@{/home#course-catalog}"
+                th:if="${session.loggedInUser.role.name() == 'EMPLOYEE'}"
+              >
+                Explore the example catalog
+              </a>
+            </div>
+          </section>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
     </div>
-</main>
-</body>
+  </body>
 </html>

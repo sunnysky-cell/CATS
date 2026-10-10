@@ -1,106 +1,407 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CATS - Course Application Form</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f6f8; color: #222; }
-        header { background-color: #1f3a5f; color: white; padding: 18px 30px; }
-        header h1 { margin: 0; font-size: 24px; }
-        main { max-width: 800px; margin: 30px auto; padding: 0 20px; }
-        .button { display: inline-block; padding: 9px 14px; border: none; border-radius: 5px;
-                  text-decoration: none; cursor: pointer; font-size: 14px; }
-        .primary { background-color: #1f3a5f; color: white; }
-        .secondary { background-color: #68737d; color: white; }
-        .error { background-color: #ffe5e5; color: #a00000; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
-        .error ul { margin: 6px 0 0 18px; padding: 0; }
-        .success { background-color: #e6f4ea; color: #1e6b32; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
-        .card { background-color: white; border-radius: 8px; padding: 24px;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-        .field { margin-bottom: 16px; }
-        label { display: block; font-weight: bold; margin-bottom: 6px; }
-        input[type="text"], input[type="date"], input[type="number"], select, textarea {
-            width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;
-        }
-        textarea { min-height: 90px; }
-        .hint { color: #666; font-size: 12px; margin-top: 4px; }
-        .actions { margin-top: 20px; display: flex; gap: 10px; }
-    </style>
-</head>
-<body>
-<header>
-    <h1 th:text="${isNew} ? 'New Course Application' : 'Edit Course Application'">Course Application</h1>
-</header>
-<main>
-    <a class="button secondary" th:href="@{/employee/applications}">&larr; My Applications</a>
-
-    <div class="error" th:if="${errors != null and !errors.isEmpty()}">
-        <strong>Please fix the following:</strong>
-        <ul>
-            <li th:each="e : ${errors}" th:text="${e}"></li>
-        </ul>
-    </div>
-
-    <div class="card">
-        <form method="post"
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Course application')}"></head>
+  <body class="employee-workspace application-editor">
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside
+      th:replace="~{fragments/chrome :: sidebar(${session.loggedInUser.role.name() == 'MANAGER' ? 'personal-training' : 'applications'})}"
+    ></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Course application')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <a
+              class="employee-back"
+              th:href="@{/employee/applications}"
+            >
+              Back to my applications
+            </a>
+            <h1 th:text="${isNew} ? 'New course application' : 'Edit course application'">
+              Course application
+            </h1>
+            <p>Make a clear case for your next course.</p>
+          </div>
+        </header>
+        <div class="page-body">
+          <!-- Service errors are authoritative; client validation only helps the form. -->
+          <div
+            class="error"
+            th:if="${errors != null and !errors.isEmpty()}"
+            role="alert"
+            tabindex="-1"
+            data-server-errors
+          >
+            <strong>Check your application before continuing.</strong>
+            <ul>
+              <li
+                th:each="e : ${errors}"
+                th:text="${e}"
+              ></li>
+            </ul>
+          </div>
+          <p
+            class="employee-prefill-note"
+            data-catalog-note
+            hidden
+            role="status"
+          ></p>
+          <div class="employee-layout">
+            <!-- Keep the form object and actions aligned with EmployeeCourseController. -->
+            <form
+              id="course-application-form"
+              class="employee-form"
+              data-application-form
+              data-processing-form
+              method="post"
+              th:attr="data-is-new=${isNew}"
               th:action="${isNew} ? @{/employee/applications} : @{/employee/applications/{id}(id=${form.id})}"
-              th:object="${form}">
-
-            <div class="field">
-                <label>Course Title</label>
-                <input type="text" th:field="*{courseTitle}" required maxlength="150">
-            </div>
-
-            <div class="field">
-                <label>Category</label>
-                <select th:field="*{category.id}" required>
-                    <option value="">-- Select category --</option>
-                    <option th:each="c : ${categories}"
-                            th:value="${c.id}"
-                            th:text="${c.name}">Category</option>
-                </select>
-            </div>
-
-            <div class="field">
-                <label>Training Provider</label>
-                <input type="text" th:field="*{trainingProvider}" required maxlength="150">
-            </div>
-
-            <div class="field">
-                <label>Start Date</label>
-                <input type="date" th:field="*{startDate}" required>
-            </div>
-
-            <div class="field">
-                <label>End Date</label>
-                <input type="date" th:field="*{endDate}" required>
-            </div>
-
-            <div class="field">
-                <label>Course Fee (SGD, only for paid categories)</label>
-                <input type="number" th:field="*{courseFee}" step="0.01" min="0">
-                <div class="hint">Free categories will be reset to 0 by the system.</div>
-            </div>
-
-            <div class="field">
-                <label>Justification / Reason</label>
-                <textarea th:field="*{justification}" required maxlength="2000"></textarea>
-            </div>
-
-            <div class="field">
-                <label>Work Dissemination Plan (how you will share learnings)</label>
-                <textarea th:field="*{workDissemination}"></textarea>
-            </div>
-
-            <div class="actions">
-                <button type="submit" class="button primary"
-                        th:text="${isNew} ? 'Submit Application' : 'Save Changes'">Submit</button>
-                <a class="button secondary" th:href="@{/employee/applications}">Cancel</a>
-            </div>
-        </form>
+              th:object="${form}"
+            >
+              <div
+                class="error"
+                data-error-summary
+                hidden
+                role="alert"
+                tabindex="-1"
+              >
+                <strong>Check the highlighted fields.</strong>
+                <ul data-error-list></ul>
+              </div>
+              <section
+                class="employee-section"
+                aria-labelledby="course-details-heading"
+              >
+                <div class="employee-section-heading">
+                  <h2 id="course-details-heading">Course details</h2>
+                  <p>Fields marked * are required.</p>
+                </div>
+                <div class="employee-field-grid">
+                  <div class="field employee-field-wide">
+                    <label for="courseTitle">
+                      Course title
+                      <span class="required">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      th:field="*{courseTitle}"
+                      required
+                      maxlength="150"
+                      placeholder="Full course title"
+                      aria-describedby="courseTitle-error"
+                      data-validate-text
+                    />
+                    <p
+                      class="field-error"
+                      id="courseTitle-error"
+                      data-field-error
+                      hidden
+                    ></p>
+                  </div>
+                  <div class="field">
+                    <label for="category.id">
+                      Category
+                      <span class="required">*</span>
+                    </label>
+                    <select
+                      th:field="*{category.id}"
+                      required
+                      aria-describedby="category-error"
+                    >
+                      <option value="">Select a category</option>
+                      <option
+                        th:each="c : ${categories}"
+                        th:value="${c.id}"
+                        th:text="${c.name}"
+                        th:attr="data-fee-required=${c.feeRequired}"
+                      >
+                        Category
+                      </option>
+                    </select>
+                    <p
+                      class="field-error"
+                      id="category-error"
+                      data-field-error
+                      hidden
+                    ></p>
+                  </div>
+                  <div class="field">
+                    <label for="trainingProvider">
+                      Training provider
+                      <span class="required">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      th:field="*{trainingProvider}"
+                      required
+                      maxlength="150"
+                      placeholder="Institution or provider"
+                      aria-describedby="trainingProvider-error"
+                      data-validate-text
+                    />
+                    <p
+                      class="field-error"
+                      id="trainingProvider-error"
+                      data-field-error
+                      hidden
+                    ></p>
+                  </div>
+                  <div class="field">
+                    <label for="startDate">
+                      Start date
+                      <span class="required">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      th:field="*{startDate}"
+                      required
+                      data-paper-date
+                      aria-describedby="date-hint startDate-error"
+                    />
+                    <p
+                      class="field-error"
+                      id="startDate-error"
+                      data-field-error
+                      hidden
+                    ></p>
+                  </div>
+                  <div class="field">
+                    <label for="endDate">
+                      End date
+                      <span class="required">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      th:field="*{endDate}"
+                      required
+                      data-paper-date
+                      aria-describedby="date-hint endDate-error"
+                    />
+                    <p
+                      class="field-error"
+                      id="endDate-error"
+                      data-field-error
+                      hidden
+                    ></p>
+                  </div>
+                  <p
+                    class="hint employee-field-wide"
+                    id="date-hint"
+                  >
+                    Choose working weekdays. Holidays, schedule conflicts and your allowance are
+                    checked on submission.
+                  </p>
+                  <div class="field employee-field-wide">
+                    <label for="courseFee">
+                      Course fee
+                      <span class="employee-unit">SGD</span>
+                      <span
+                        class="required"
+                        data-fee-required-mark
+                        hidden
+                      >
+                        *
+                      </span>
+                    </label>
+                    <input
+                      type="number"
+                      th:field="*{courseFee}"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      inputmode="decimal"
+                      aria-describedby="fee-hint courseFee-error"
+                    />
+                    <p
+                      class="hint"
+                      id="fee-hint"
+                      data-fee-hint
+                    >
+                      Choose a category to see its fee requirements.
+                    </p>
+                    <p
+                      class="field-error"
+                      id="courseFee-error"
+                      data-field-error
+                      hidden
+                    ></p>
+                  </div>
+                  <div class="field employee-field-wide">
+                    <label for="halfDay">
+                      Half-day session
+                    </label>
+                    <input
+                      type="checkbox"
+                      th:field="*{halfDay}"
+                    />
+                    <p
+                      class="hint"
+                      id="halfDay-hint"
+                    >
+                      Internal Training only, and only when the course runs on a single day.
+                      The system counts it as 0.5 day.
+                    </p>
+                  </div>
+                </div>
+              </section>
+              <section
+                class="employee-section"
+                aria-labelledby="learning-case-heading"
+              >
+                <div class="employee-section-heading">
+                  <h2 id="learning-case-heading">Learning objectives</h2>
+                  <p>Explain what this course will change in your work.</p>
+                </div>
+                <div class="field">
+                  <div class="employee-label-line">
+                    <label for="justification">
+                      Why this course?
+                      <span class="required">*</span>
+                    </label>
+                    <span
+                      class="employee-count"
+                      data-character-count="justification"
+                    >
+                      0 / 2000
+                    </span>
+                  </div>
+                  <textarea
+                    th:field="*{justification}"
+                    required
+                    maxlength="2000"
+                    rows="6"
+                    placeholder="The skills you will build and how you will use them."
+                    aria-describedby="justification-hint justification-error"
+                    data-validate-text
+                  ></textarea>
+                  <p
+                    class="hint"
+                    id="justification-hint"
+                  >
+                    A specific outcome helps your manager review the request.
+                  </p>
+                  <p
+                    class="field-error"
+                    id="justification-error"
+                    data-field-error
+                    hidden
+                  ></p>
+                </div>
+                <div class="field">
+                  <label for="workDissemination">
+                    Share your learning
+                    <span class="employee-unit">Optional</span>
+                  </label>
+                  <textarea
+                    th:field="*{workDissemination}"
+                    rows="4"
+                    placeholder="A team session, a practical guide or a change you will introduce."
+                  ></textarea>
+                </div>
+              </section>
+              <div class="employee-submit">
+                <p class="hint">
+                  This sends a request to your manager. Course booking is arranged separately.
+                </p>
+                <div class="actions">
+                  <a
+                    class="button secondary"
+                    th:href="@{/employee/applications}"
+                  >
+                    Cancel
+                  </a>
+                  <button
+                    type="submit"
+                    class="button primary"
+                    data-submit-label
+                    th:text="${isNew} ? 'Submit application' : 'Save changes'"
+                  >
+                    Submit application
+                  </button>
+                </div>
+                <p
+                  class="submission-status"
+                  data-submission-status
+                  role="status"
+                  aria-live="polite"
+                ></p>
+              </div>
+            </form>
+            <aside
+              class="employee-context"
+              aria-labelledby="application-summary-heading"
+            >
+              <h2 id="application-summary-heading">Your request</h2>
+              <p
+                class="employee-context-title"
+                data-summary="title"
+                th:text="${form.courseTitle != null and !#strings.isEmpty(form.courseTitle) ? form.courseTitle : 'No course title yet'}"
+              ></p>
+              <p
+                class="employee-context-provider"
+                data-summary="provider"
+                th:text="${form.trainingProvider}"
+              ></p>
+              <dl class="employee-facts">
+                <div>
+                  <dt>Category</dt>
+                  <dd
+                    data-summary="category"
+                    th:text="${form.category != null ? form.category.name : 'Not selected'}"
+                  ></dd>
+                </div>
+                <div>
+                  <dt>Dates</dt>
+                  <dd
+                    data-summary="dates"
+                    th:text="${form.startDate != null ? form.startDate + ' to ' + form.endDate : 'Choose your dates'}"
+                  ></dd>
+                </div>
+                <div>
+                  <dt>Weekdays estimate</dt>
+                  <dd data-summary="days">Not calculated</dd>
+                </div>
+                <div>
+                  <dt>Course fee</dt>
+                  <dd
+                    data-summary="fee"
+                    th:text="${form.courseFee != null ? 'S$' + #numbers.formatDecimal(form.courseFee, 1, 'COMMA', 2, 'POINT') : 'S$0.00'}"
+                  ></dd>
+                </div>
+              </dl>
+              <p class="hint">
+                Final training days and your allowance are checked when you submit.
+              </p>
+              <div
+                class="employee-context-reviewer"
+                th:if="${session.loggedInUser != null and session.loggedInUser.manager != null}"
+              >
+                <span>Reviewed by</span>
+                <strong th:text="${session.loggedInUser.manager.name}"></strong>
+              </div>
+              <a
+                class="employee-context-link"
+                th:href="@{/home#course-catalog}"
+                th:if="${session.loggedInUser.role.name() == 'EMPLOYEE'}"
+              >
+                Explore the example course catalog
+              </a>
+            </aside>
+          </div>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
     </div>
-</main>
-</body>
+  </body>
 </html>

@@ -1,0 +1,242 @@
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Claim course fee')}"></head>
+  <body class="employee-workspace">
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside
+      th:replace="~{fragments/chrome :: sidebar(${session.loggedInUser.role.name() == 'MANAGER' ? 'personal-training' : 'claims'})}"
+    ></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Claim course fee')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <a
+              class="employee-back"
+              th:href="@{/employee/claims}"
+            >
+              Back to my fee claims
+            </a>
+            <h1>Request reimbursement</h1>
+            <p>Claim the fee for your completed course.</p>
+          </div>
+        </header>
+        <div class="page-body">
+          <p
+            class="error"
+            th:if="${error}"
+            th:text="${error}"
+            role="alert"
+            tabindex="-1"
+            data-server-errors
+          ></p>
+          <div class="employee-layout">
+            <!-- These names are RequestParam bindings in EmployeeCourseController. -->
+            <form
+              class="employee-form"
+              method="post"
+              th:action="@{/employee/claim}"
+              data-claim-form
+              data-processing-form
+            >
+              <input
+                type="hidden"
+                name="applicationId"
+                th:value="${app.id}"
+              />
+              <div
+                class="error"
+                data-error-summary
+                hidden
+                role="alert"
+                tabindex="-1"
+              >
+                <strong>Check the highlighted fields.</strong>
+                <ul data-error-list></ul>
+              </div>
+              <section
+                class="employee-section"
+                aria-labelledby="claim-details-heading"
+              >
+                <div class="employee-section-heading">
+                  <h2 id="claim-details-heading">Claim details</h2>
+                  <p>Fields marked * are required.</p>
+                </div>
+                <div class="field">
+                  <label for="claims-claimAmount">
+                    Claim amount
+                    <span class="employee-unit">SGD</span>
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="claimAmount"
+                    id="claims-claimAmount"
+                    step="0.01"
+                    min="0.01"
+                    th:max="${app.courseFee}"
+                    th:value="${param.claimAmount != null ? param.claimAmount[0] : app.courseFee}"
+                    required
+                    inputmode="decimal"
+                    aria-describedby="claim-amount-hint claims-claimAmount-error"
+                  />
+                  <p
+                    class="hint"
+                    id="claim-amount-hint"
+                  >
+                    Greater than zero, up to your recorded course fee.
+                  </p>
+                  <p
+                    class="field-error"
+                    id="claims-claimAmount-error"
+                    data-field-error
+                    hidden
+                  ></p>
+                </div>
+                <div class="employee-document-note">
+                  <h3>Supporting documents</h3>
+                  <p>
+                    This form records file names only. Keep the receipt and certificate available
+                    for review; files are not uploaded here.
+                  </p>
+                </div>
+                <div class="field">
+                  <label for="claims-receipt">
+                    Receipt file name
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="receipt"
+                    id="claims-receipt"
+                    required
+                    data-validate-text
+                    th:value="${param.receipt != null ? param.receipt[0] : ''}"
+                    placeholder="course-receipt.pdf"
+                    aria-describedby="claims-receipt-error"
+                  />
+                  <p
+                    class="field-error"
+                    id="claims-receipt-error"
+                    data-field-error
+                    hidden
+                  ></p>
+                </div>
+                <div class="field">
+                  <label for="claims-certificate">
+                    Certificate file name
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="certificate"
+                    id="claims-certificate"
+                    required
+                    data-validate-text
+                    th:value="${param.certificate != null ? param.certificate[0] : ''}"
+                    placeholder="completion-certificate.pdf"
+                    aria-describedby="claims-certificate-error"
+                  />
+                  <p
+                    class="field-error"
+                    id="claims-certificate-error"
+                    data-field-error
+                    hidden
+                  ></p>
+                </div>
+              </section>
+              <div class="employee-submit">
+                <p class="hint">Your manager will review the amount and supporting references.</p>
+                <div class="actions">
+                  <a
+                    class="button secondary"
+                    th:href="@{/employee/claims}"
+                  >
+                    Cancel
+                  </a>
+                  <button
+                    type="submit"
+                    class="button primary"
+                    data-submit-label
+                  >
+                    Submit claim
+                  </button>
+                </div>
+                <p
+                  class="submission-status"
+                  data-submission-status
+                  role="status"
+                  aria-live="polite"
+                ></p>
+              </div>
+            </form>
+            <aside
+              class="employee-context"
+              aria-labelledby="claim-summary-heading"
+            >
+              <h2 id="claim-summary-heading">Your course</h2>
+              <p
+                class="employee-context-title"
+                th:text="${app.courseTitle}"
+              ></p>
+              <p
+                class="employee-context-provider"
+                th:text="${app.trainingProvider}"
+              ></p>
+              <dl class="employee-facts">
+                <div>
+                  <dt>Category</dt>
+                  <dd th:text="${app.category != null ? app.category.name : 'Not set'}"></dd>
+                </div>
+                <div>
+                  <dt>Status</dt>
+                  <dd>
+                    <span
+                      class="status-badge"
+                      th:text="${app.status}"
+                      th:attr="data-status=${app.status}"
+                    ></span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Recorded fee</dt>
+                  <dd
+                    th:text="${app.courseFee != null ? 'S$' + #numbers.formatDecimal(app.courseFee, 1, 'COMMA', 2, 'POINT') : 'Not set'}"
+                  ></dd>
+                </div>
+                <div>
+                  <dt>Your claim</dt>
+                  <dd
+                    data-claim-total
+                    th:text="${app.courseFee != null ? 'S$' + #numbers.formatDecimal(app.courseFee, 1, 'COMMA', 2, 'POINT') : 'Not set'}"
+                  ></dd>
+                </div>
+              </dl>
+              <p class="hint">
+                One claim per completed paid course. Claims are subject to manager approval.
+              </p>
+              <a
+                class="employee-context-link"
+                th:href="@{/employee/applications/{id}(id=${app.id})}"
+              >
+                View course application
+              </a>
+            </aside>
+          </div>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
+    </div>
+  </body>
+</html>

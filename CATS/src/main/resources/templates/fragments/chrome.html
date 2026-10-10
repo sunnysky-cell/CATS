@@ -1,0 +1,522 @@
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:fragment="head(title)">
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <meta
+      name="theme-color"
+      content="#f9f9f7"
+    />
+    <title th:text="${title + ' · CATS Academy'}">CATS Academy</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      th:href="@{/assets/cats-mark.svg}"
+    />
+    <link
+      rel="preload"
+      th:href="@{/assets/fonts/InterVariable.woff2(v='java1')}"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      th:href="@{/assets/fonts/SourceSerif4.ttf(v='java1')}"
+      as="font"
+      type="font/ttf"
+      crossorigin
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/study.css}"
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/controls.css}"
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/paper.css}"
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/employee.css}"
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/admin.css}"
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/insights.css}"
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/agent-access.css}"
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/agent-chat.css}"
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/calendar.css}"
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/dashboard.css}"
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/avatars.css}"
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/workspace-panels.css}"
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/workspace.css}"
+    />
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/readability.css}"
+    />
+    <script
+      defer
+      th:src="@{/assets/courses.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/sketches.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/course-art.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/icons.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/app.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/catalog.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/forms.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/controls.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/insights-data.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/insights.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/agent-access.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/agent-chat.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/avatars.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/dashboard.js}"
+    ></script>
+    <script
+      defer
+      th:src="@{/assets/workspace.js}"
+    ></script>
+  </head>
+  <body>
+    <!-- Navigation follows the authenticated Java role. It never switches preview personas. -->
+    <aside
+      class="sidebar"
+      id="main-sidebar"
+      th:fragment="sidebar(active)"
+    >
+      <a
+        class="wordmark"
+        th:href="@{/home}"
+        aria-label="CATS Academy home"
+      >
+        <img
+          th:src="@{/assets/cats-mark.svg}"
+          width="34"
+          height="34"
+          alt=""
+        />
+        <span class="sr-only">CATS Academy</span>
+      </a>
+      <div
+        class="sidebar-identity"
+        th:if="${session.loggedInUser != null}"
+        th:attr="data-cats-role=${session.loggedInUser.role.name()},data-cats-user-id=${session.loggedInUser.id}"
+      >
+        <button
+          type="button"
+          class="dock-account"
+          data-workspace-target="workspace-account-panel"
+          aria-controls="workspace-account-panel"
+          aria-expanded="false"
+          aria-label="Account"
+        >
+          <span
+            class="user-avatar"
+            th:attr="data-avatar-name=${session.loggedInUser.name}"
+            th:text="${#strings.isEmpty(session.loggedInUser.name) ? 'U' : #strings.toUpperCase(#strings.substring(session.loggedInUser.name, 0, 1))}"
+            aria-hidden="true"
+          >
+            U
+          </span>
+          <span>Account</span>
+        </button>
+      </div>
+      <nav
+        class="primary-nav"
+        aria-label="Workspace navigation"
+      >
+        <a
+          th:href="@{/home}"
+          data-tone="blue"
+          th:classappend="${active == 'overview'} ? 'active'"
+        >
+          <span
+            class="nav-icon"
+            data-icon="home"
+            aria-hidden="true"
+          ></span>
+          <span>Dashboard</span>
+        </a>
+        <th:block
+          th:if="${session.loggedInUser != null and session.loggedInUser.role.name() == 'EMPLOYEE'}"
+        >
+          <a
+            th:href="@{/home#course-catalog}"
+            data-tone="teal"
+            data-workspace-target="workspace-courses-panel"
+          >
+            <span
+              class="nav-icon"
+              data-icon="reader"
+              aria-hidden="true"
+            ></span>
+            <span>Courses</span>
+          </a>
+          <a
+            th:href="@{/employee/applications}"
+            data-tone="soft-blue"
+            th:classappend="${active == 'applications'} ? 'active'"
+          >
+            <span
+              class="nav-icon"
+              data-icon="fileText"
+              aria-hidden="true"
+            ></span>
+            <span>My applications</span>
+          </a>
+          <a
+            th:href="@{/employee/claims}"
+            data-tone="slate"
+            th:classappend="${active == 'claims'} ? 'active'"
+          >
+            <span
+              class="nav-icon"
+              data-icon="receipt"
+              aria-hidden="true"
+            ></span>
+            <span>Fee claims</span>
+          </a>
+        </th:block>
+        <th:block
+          th:if="${session.loggedInUser != null and session.loggedInUser.role.name() == 'MANAGER'}"
+        >
+          <a
+            th:href="@{/employee/applications}"
+            data-tone="blue"
+            th:classappend="${active == 'personal-training'} ? 'active'"
+          >
+            <span
+              class="nav-icon"
+              data-icon="reader"
+              aria-hidden="true"
+            ></span>
+            <span>Personal training</span>
+          </a>
+          <a
+            th:href="@{/manager/pending}"
+            data-tone="soft-blue"
+            data-workspace-target="workspace-courses-panel"
+            th:classappend="${active == 'approvals'} ? 'active'"
+          >
+            <span
+              class="nav-icon"
+              data-icon="fileText"
+              aria-hidden="true"
+            ></span>
+            <span>Applications</span>
+          </a>
+          <a
+            th:href="@{/manager/claims}"
+            data-tone="slate"
+            th:classappend="${active == 'claims'} ? 'active'"
+          >
+            <span
+              class="nav-icon"
+              data-icon="receipt"
+              aria-hidden="true"
+            ></span>
+            <span>Fee claims</span>
+          </a>
+          <a
+            th:href="@{/manager/history}"
+            data-tone="blue"
+            th:classappend="${active == 'history'} ? 'active'"
+          >
+            <span
+              class="nav-icon"
+              data-icon="barChart"
+              aria-hidden="true"
+            ></span>
+            <span>Learning insights</span>
+          </a>
+          <a
+            th:href="@{/manager/report}"
+            data-tone="indigo"
+            data-workspace-target="workspace-reports-panel"
+            th:classappend="${active == 'reports'} ? 'active'"
+          >
+            <span
+              class="nav-icon"
+              data-icon="archive"
+              aria-hidden="true"
+            ></span>
+            <span>Reports</span>
+          </a>
+        </th:block>
+        <th:block
+          th:if="${session.loggedInUser != null and session.loggedInUser.role.name() == 'ADMIN'}"
+        >
+          <a
+            th:href="@{/admin/home}"
+            data-tone="indigo"
+            th:classappend="${active == 'admin'} ? 'active'"
+          >
+            <span
+              class="nav-icon"
+              data-icon="gear"
+              aria-hidden="true"
+            ></span>
+            <span>Administration</span>
+          </a>
+          <a
+            th:href="@{/admin/users}"
+            data-tone="blue"
+            th:classappend="${active == 'users'} ? 'active'"
+          >
+            <span
+              class="nav-icon"
+              data-icon="person"
+              aria-hidden="true"
+            ></span>
+            <span>People &amp; access</span>
+          </a>
+          <a
+            th:href="@{/admin/categories}"
+            data-tone="teal"
+            th:classappend="${active == 'categories'} ? 'active'"
+          >
+            <span
+              class="nav-icon"
+              data-icon="reader"
+              aria-hidden="true"
+            ></span>
+            <span>Categories</span>
+          </a>
+          <a
+            th:href="@{/admin/holidays}"
+            data-tone="slate"
+            th:classappend="${active == 'holidays'} ? 'active'"
+          >
+            <span
+              class="nav-icon"
+              data-icon="calendar"
+              aria-hidden="true"
+            ></span>
+            <span>Public holidays</span>
+          </a>
+        </th:block>
+        <a
+          th:href="@{/training-calendar}"
+          data-tone="blue"
+          th:classappend="${active == 'calendar'} ? 'active'"
+        >
+          <span
+            class="nav-icon"
+            data-icon="calendar"
+            aria-hidden="true"
+          ></span>
+          <span>Training calendar</span>
+        </a>
+        <a
+          th:href="@{/agent-demo}"
+          data-tone="blue"
+          th:classappend="${active == 'agent'} ? 'active'"
+          data-agent-chat-open
+          aria-controls="agent-chat-panel"
+          aria-expanded="false"
+        >
+          <span
+            class="nav-icon"
+            data-icon="sparkle"
+            aria-hidden="true"
+          ></span>
+          <span>Agent demo</span>
+        </a>
+      </nav>
+      <div class="sidebar-bottom">
+        <button
+          type="button"
+          class="dock-help"
+          data-workspace-target="workspace-help-panel"
+          aria-controls="workspace-help-panel"
+          aria-expanded="false"
+        >
+          <span
+            class="nav-icon"
+            data-icon="help"
+            aria-hidden="true"
+          ></span>
+          <span>Help</span>
+        </button>
+        <noscript><a th:href="@{/logout}">Sign out</a></noscript>
+      </div>
+      <th:block th:replace="~{fragments/workspace-panels :: panels}"></th:block>
+      <section
+        id="agent-chat-panel"
+        class="agent-chat-panel"
+        data-agent-chat-panel
+        th:attr="data-current-role=${session.loggedInUser.role.name()}"
+        hidden
+        role="dialog"
+        aria-labelledby="agent-chat-title"
+        tabindex="-1"
+      >
+        <header class="agent-chat-header">
+          <div class="agent-chat-brand">
+            <span class="agent-chat-mark" aria-hidden="true">✦</span>
+            <div>
+              <p class="agent-chat-eyebrow">CATS Help Center</p>
+              <p class="agent-chat-agent-name" data-agent-name></p>
+            </div>
+          </div>
+          <button type="button" class="agent-chat-icon-button" data-agent-chat-close aria-label="Close assistant">×</button>
+        </header>
+        <div class="agent-chat-view agent-chat-home" data-agent-view="home" role="tabpanel" aria-labelledby="agent-tab-home">
+          <h2 id="agent-chat-title" class="agent-chat-welcome">Hello <span aria-hidden="true">👋</span><br />What can I help with?</h2>
+          <button type="button" class="agent-chat-recent" data-agent-open-messages>
+            <span class="agent-chat-card-label">RECENT MESSAGES</span>
+            <span class="agent-chat-recent-row"><span class="agent-chat-avatar" aria-hidden="true">✦</span><span><strong data-agent-recent-title>Start a conversation</strong><small data-agent-recent-preview>Ask your CATS assistant a question.</small></span><span class="agent-chat-card-arrow" aria-hidden="true">›</span></span>
+          </button>
+          <button type="button" class="agent-chat-link-card" data-agent-page-link="help"><span>How can this assistant help?</span><span aria-hidden="true">↗</span></button>
+          <button type="button" class="agent-chat-link-card agent-chat-send-card" data-agent-open-messages><strong>Send us a message</strong><span aria-hidden="true">➤</span></button>
+          <div class="agent-chat-home-note"><span class="agent-chat-status-dot" aria-hidden="true"></span><span data-agent-role-note>Demo assistant · Sample replies</span></div>
+        </div>
+        <div class="agent-chat-view agent-chat-thread" data-agent-view="messages" role="tabpanel" aria-labelledby="agent-tab-messages" hidden>
+          <div class="agent-chat-thread-heading"><button type="button" class="agent-chat-back" data-agent-page-link="home" aria-label="Back to home">‹</button><div><strong data-agent-thread-title></strong><small>Demo conversation</small></div></div>
+          <div class="agent-chat-messages" data-agent-messages role="log" aria-live="polite" aria-relevant="additions"></div>
+          <div class="agent-chat-suggestions" data-agent-suggestions aria-label="Suggested questions"></div>
+          <form class="agent-chat-compose" data-agent-chat-form>
+            <label class="visually-hidden" for="agent-chat-input">Message the CATS assistant</label>
+            <textarea id="agent-chat-input" rows="1" maxlength="500" placeholder="Send a message…"></textarea>
+            <div class="agent-chat-compose-footer"><span>Demo replies are simulated</span><button type="submit" aria-label="Send message" title="Send message">➤</button></div>
+          </form>
+          <p class="agent-chat-disclaimer">Sample conversation. No CATS request is submitted or changed.</p>
+        </div>
+        <div class="agent-chat-view agent-chat-help" data-agent-view="help" role="tabpanel" aria-labelledby="agent-tab-help" hidden>
+          <h2>How can we help?</h2>
+          <p>Choose a question to start a sample conversation with your role’s CATS assistant.</p>
+          <div class="agent-chat-help-list" data-agent-help-list></div>
+          <p class="agent-chat-help-note">This is a classroom demo. Replies are simulated and do not change application data.</p>
+        </div>
+        <nav class="agent-chat-bottom-nav" aria-label="Assistant navigation" role="tablist">
+          <button type="button" id="agent-tab-home" role="tab" data-agent-page="home" aria-selected="true"><span aria-hidden="true">◆</span><small>Home</small></button>
+          <button type="button" id="agent-tab-messages" role="tab" data-agent-page="messages" aria-selected="false"><span aria-hidden="true">▤</span><small>Messages</small></button>
+          <button type="button" id="agent-tab-help" role="tab" data-agent-page="help" aria-selected="false"><span aria-hidden="true">ⓘ</span><small>Help</small></button>
+        </nav>
+      </section>
+    </aside>
+    <header
+      class="topbar"
+      th:fragment="topbar(section)"
+    >
+      <div class="topbar-location">
+        <button
+          class="menu-toggle"
+          type="button"
+          aria-controls="main-sidebar"
+          aria-expanded="false"
+          aria-label="Open navigation"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            aria-hidden="true"
+          >
+            <path d="M4 8h16M4 16h16" />
+          </svg>
+        </button>
+        <nav
+          class="workspace-breadcrumbs"
+          aria-label="Breadcrumb"
+        >
+          <th:block th:if="${section != 'Overview' and section != 'Dashboard'}">
+            <a th:href="@{/home}">Dashboard</a>
+            <span
+              data-icon="chevronRight"
+              aria-hidden="true"
+            ></span>
+          </th:block>
+          <span
+            th:text="${section}"
+            aria-current="page"
+          >
+            Workspace
+          </span>
+        </nav>
+      </div>
+      <span class="topbar-note">A little room to grow.</span>
+    </header>
+    <footer
+      class="page-footer"
+      th:fragment="footer"
+    >
+      <span>CATS Academy</span>
+      <span>Course Application &amp; Training System</span>
+    </footer>
+  </body>
+</html>

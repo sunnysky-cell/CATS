@@ -306,9 +306,7 @@ public class AdminController {
 
 // Course Category
     @GetMapping("/categories")
-    public String categories(
-            HttpSession session,
-            Model model) {
+    public String categories(HttpSession session, Model model) {
 
         if (requireAdmin(session) == null) {
             return "redirect:/admin/login";

@@ -1,0 +1,367 @@
+/* Administration: the service renders records; this file only arranges their presentation. */
+
+/* The overview is a directory, with counts kept beside the links they describe. */
+.admin-directory {
+  border-top: 1px solid var(--line);
+}
+.admin-directory-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 27px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  text-decoration: none;
+}
+.admin-directory-entry h2 {
+  margin: 0;
+  font: 400 25px/1.25 var(--serif);
+}
+.admin-directory-entry p {
+  max-width: 58ch;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.admin-directory-entry:hover h2 {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.admin-directory-meta {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.admin-directory-meta > span:last-child {
+  margin-left: 12px;
+}
+
+/* People and editable rules share the same quiet record table. */
+.admin-record-primary {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+}
+.admin-record-secondary {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.admin-record-number,
+.admin-allowances-table {
+  font-variant-numeric: tabular-nums;
+}
+.admin-row-actions {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.admin-row-actions form,
+.admin-categories-table form,
+.admin-holidays-table form {
+  margin: 0;
+}
+.admin-row-actions .button,
+.admin-categories-table .button,
+.admin-holidays-table .button {
+  min-height: 34px;
+  padding: 6px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.admin-record-note {
+  margin-top: 16px;
+}
+.admin-categories-table input[type='text'] {
+  min-width: 130px;
+  width: 100%;
+  padding: 8px 9px;
+  font-size: 13px;
+}
+.admin-categories-table input[name='description'] {
+  min-width: 180px;
+}
+.admin-checkbox-cell {
+  text-align: center;
+}
+.admin-checkbox-cell input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ink);
+}
+.admin-year-nav,
+.admin-year-nav form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.admin-year-nav {
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.admin-year-nav form {
+  margin: 0;
+}
+.admin-year-nav label {
+  color: var(--muted);
+  font-size: 12px;
+}
+.admin-year-nav input {
+  width: 100px;
+}
+.admin-year-nav .actions {
+  margin: 0;
+}
+
+/* Profile, policy and annual allowance forms use flat sections with explicit labels. */
+.admin-back-link {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: none;
+}
+.admin-back-link:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.admin-edit-section {
+  padding-top: 25px;
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 28px;
+}
+.admin-profile {
+  max-width: 860px;
+}
+.admin-section-heading {
+  margin-bottom: 24px;
+}
+.admin-section-heading h2 {
+  margin: 0 0 7px;
+  font: 400 25px/1.25 var(--serif);
+}
+.admin-section-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.admin-fieldset {
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+.admin-fieldset + .admin-fieldset {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.admin-fieldset legend {
+  padding: 0;
+  margin-bottom: 22px;
+  color: var(--ink);
+  font: 400 24px/1.25 var(--serif);
+}
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 21px 24px;
+}
+.admin-full-width {
+  grid-column: 1 / -1;
+}
+.admin-form-grid .help {
+  margin: 6px 0 0;
+}
+.admin-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--ink);
+  font-size: 13px;
+  cursor: pointer;
+}
+.admin-checkbox input {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin: 2px 0 0;
+  accent-color: var(--ink);
+}
+.admin-form-actions {
+  margin-top: 24px;
+}
+.admin-role-field {
+  max-width: 340px;
+}
+.admin-entitlement-grid {
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+.admin-form-subheading {
+  margin: 26px 0 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* On narrow workspaces, editable category rows retain the same associated POST forms. */
+@media (max-width: 1180px) {
+  .admin-categories-table,
+  .admin-categories-table tbody {
+    display: block;
+    min-width: 0;
+  }
+  .admin-categories-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .admin-categories-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .admin-categories-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .admin-categories-table td {
+    display: block;
+    padding: 0;
+    border: 0;
+    text-align: left;
+  }
+  .admin-categories-table td::before {
+    display: block;
+    margin-bottom: 7px;
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .admin-categories-table .admin-checkbox-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .admin-categories-table .admin-checkbox-cell::before {
+    margin: 0;
+  }
+  .admin-categories-table td:nth-last-child(-n + 2)::before {
+    display: none;
+  }
+  .admin-categories-table input[type='text'] {
+    min-width: 0;
+  }
+  .admin-categories-table .empty {
+    grid-column: 1 / -1;
+  }
+  .admin-categories-table .empty::before {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-directory-entry {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+    padding: 23px 0;
+  }
+  .admin-directory-entry h2,
+  .admin-section-heading h2 {
+    font-size: 23px;
+  }
+  .admin-form-grid,
+  .admin-entitlement-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .admin-full-width {
+    grid-column: auto;
+  }
+  .admin-year-nav {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .admin-year-nav .actions {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .admin-users-table,
+  .admin-users-table tbody {
+    display: block;
+    min-width: 0;
+  }
+  .admin-users-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .admin-users-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .admin-users-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .admin-users-table td {
+    display: block;
+    padding: 0;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+  .admin-users-table td::before {
+    display: block;
+    content: attr(data-label);
+    margin-bottom: 5px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .admin-users-table td:first-child,
+  .admin-users-table td:nth-child(4) {
+    grid-column: 1 / -1;
+  }
+  .admin-users-table td:first-child::before,
+  .admin-users-table td:last-child::before {
+    display: none;
+  }
+  .admin-users-table .empty {
+    grid-column: 1 / -1;
+  }
+  .admin-users-table .empty::before {
+    display: none;
+  }
+  .admin-row-actions {
+    align-items: flex-start;
+  }
+  .admin-row-actions .button {
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 440px) {
+  .admin-categories-table tbody tr {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .admin-categories-table td:nth-child(-n + 2) {
+    grid-column: 1 / -1;
+  }
+}

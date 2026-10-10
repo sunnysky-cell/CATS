@@ -1,80 +1,514 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CATS - Subordinate Course History</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f6f8; color: #222; }
-        header { background-color: #1f3a5f; color: white; padding: 18px 30px; }
-        header h1 { margin: 0; font-size: 24px; }
-        main { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 10px; flex-wrap: wrap; }
-        .button { display: inline-block; padding: 9px 14px; border: none; border-radius: 5px;
-                  text-decoration: none; cursor: pointer; font-size: 14px; }
-        .primary { background-color: #1f3a5f; color: white; }
-        .secondary { background-color: #68737d; color: white; }
-        .success { background-color: #e6f4ea; color: #1e6b32; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
-        .error { background-color: #ffe5e5; color: #a00000; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
-        .table-wrapper { overflow-x: auto; background-color: white; border-radius: 8px;
-                         box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: middle; }
-        th { background-color: #e9eef3; }
-        tr:hover { background-color: #f8fafc; }
-        .empty { text-align: center; color: #777; }
-    </style>
-</head>
-<body>
-<header>
-    <h1>Subordinate Course History</h1>
-</header>
-<main>
-    <div class="toolbar">
-        <a class="button secondary" th:href="@{/home}">&larr; Home</a>
-        <a class="button primary" th:href="@{/manager/pending}">Applications for Approval</a>
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Learning insights')}"></head>
+  <body>
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside th:replace="~{fragments/chrome :: sidebar('history')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Learning insights')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header insights-heading">
+          <div>
+            <h1>Learning insights</h1>
+            <p>Assigned employees only. Explore their course requests and current decisions.</p>
+          </div>
+          <div class="actions">
+            <button
+              type="button"
+              class="button secondary"
+              data-agent-open
+            >
+              <span
+                class="insight-action-icon"
+                data-icon="sparkle"
+                aria-hidden="true"
+              ></span>
+              Agent access
+            </button>
+            <a
+              class="button text"
+              th:href="@{/manager/pending}"
+            >
+              <span
+                class="insight-action-icon"
+                data-icon="fileText"
+                aria-hidden="true"
+              ></span>
+              Review requests
+            </a>
+          </div>
+        </header>
+        <div class="page-body">
+          <p
+            class="success"
+            th:if="${success}"
+            th:text="${success}"
+            role="status"
+          ></p>
+          <p
+            class="error"
+            th:if="${error}"
+            th:text="${error}"
+            role="alert"
+          ></p>
+          <!-- This explicit manifest is also the complete, readable no-JavaScript table.
+               Only scalar fields from this manager's Java-scoped applications are exposed. -->
+          <section
+            id="cats-manager-data"
+            class="learning-insights"
+            data-schema-version="1"
+            data-scope="assigned-students"
+            th:attr="data-role=${session.loggedInUser != null ? session.loggedInUser.role : ''},data-manager-id=${manager.id}"
+            aria-label="Assigned employee learning insights"
+          >
+            <div
+              class="insights-intro"
+              data-insight-enhancement
+              hidden
+            >
+              <p
+                class="insight-totals"
+                data-insight-summary
+                role="status"
+                aria-live="polite"
+              ></p>
+              <p
+                class="insight-snapshot"
+                data-insight-snapshot
+              ></p>
+            </div>
+            <form
+              class="insight-filters"
+              data-insight-filters
+              data-insight-enhancement
+              hidden
+              role="search"
+              aria-label="Filter course requests"
+            >
+              <div class="field insight-search">
+                <label for="insight-search">Search requests</label>
+                <input
+                  id="insight-search"
+                  name="search"
+                  type="search"
+                  placeholder="Course, employee, provider or ID"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="field">
+                <label for="insight-status">Status</label>
+                <select
+                  id="insight-status"
+                  name="status"
+                >
+                  <option value="">All statuses</option>
+                  <option value="PENDING">Pending review</option>
+                  <option value="APPLIED">Applied</option>
+                  <option value="UPDATED">Updated</option>
+                  <option value="APPROVED">Approved</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="REJECTED">Rejected</option>
+                  <option value="CANCELLED">Cancelled</option>
+                  <option value="DELETED">Deleted</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="insight-category">Category</label>
+                <select
+                  id="insight-category"
+                  name="category"
+                >
+                  <option value="">All categories</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="insight-student">Employee</label>
+                <select
+                  id="insight-student"
+                  name="applicantId"
+                >
+                  <option value="">All employees</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="insight-date-basis">Date basis</label>
+                <select
+                  id="insight-date-basis"
+                  name="dateField"
+                >
+                  <option value="created">Request created</option>
+                  <option value="start">Course start</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="insight-from">From</label>
+                <input
+                  id="insight-from"
+                  name="from"
+                  type="date"
+                />
+              </div>
+              <div class="field">
+                <label for="insight-to">To</label>
+                <input
+                  id="insight-to"
+                  name="to"
+                  type="date"
+                />
+              </div>
+              <button
+                type="reset"
+                class="button text insight-reset"
+              >
+                <span
+                  class="insight-action-icon"
+                  data-icon="reload"
+                  aria-hidden="true"
+                ></span>
+                Reset filters
+              </button>
+              <p
+                class="field-error insight-filter-error"
+                data-insight-filter-error
+                role="alert"
+                hidden
+              ></p>
+            </form>
+            <div
+              class="insight-selections"
+              data-insight-selections
+              data-insight-enhancement
+              hidden
+              aria-label="Chart selections"
+            ></div>
+            <div
+              class="insight-figures"
+              data-insight-enhancement
+              hidden
+            >
+              <section
+                class="insight-demand"
+                aria-labelledby="insight-demand-title"
+              >
+                <div class="insight-section-heading">
+                  <h2 id="insight-demand-title">
+                    <span
+                      class="insight-section-icon"
+                      data-icon="barChart"
+                      aria-hidden="true"
+                    ></span>
+                    Course demand
+                  </h2>
+                  <p>Requests per course group</p>
+                </div>
+                <div data-insight-demand></div>
+                <p class="insight-note">
+                  Top eight groups in this selection. A group shares a title, provider and category;
+                  it is not a scheduled class.
+                </p>
+              </section>
+              <section
+                class="insight-trend"
+                aria-labelledby="insight-trend-title"
+              >
+                <div class="insight-section-heading">
+                  <h2 id="insight-trend-title">
+                    <span
+                      class="insight-section-icon"
+                      data-icon="calendar"
+                      aria-hidden="true"
+                    ></span>
+                    <span data-insight-trend-label>Requests by month</span>
+                  </h2>
+                  <p data-insight-trend-caption>Grouped by creation date</p>
+                </div>
+                <div data-insight-trend></div>
+                <p
+                  class="insight-note"
+                  data-insight-trend-note
+                ></p>
+              </section>
+              <section
+                class="insight-statuses"
+                aria-labelledby="insight-status-title"
+              >
+                <div class="insight-section-heading">
+                  <h2 id="insight-status-title">
+                    <span
+                      class="insight-section-icon"
+                      data-icon="fileText"
+                      aria-hidden="true"
+                    ></span>
+                    Current decisions
+                  </h2>
+                  <p>Click a status to focus the selection</p>
+                </div>
+                <div
+                  class="insight-status-list"
+                  data-insight-statuses
+                ></div>
+                <p class="insight-note">
+                  Pending includes Applied and Updated. All states describe this page snapshot, not
+                  historical approval events or attendance.
+                </p>
+              </section>
+            </div>
+            <section
+              class="section insight-records"
+              aria-labelledby="history-title"
+            >
+              <div class="section-heading">
+                <div>
+                  <h2 id="history-title">
+                    <span
+                      class="insight-section-icon"
+                      data-icon="archive"
+                      aria-hidden="true"
+                    ></span>
+                    Request register
+                  </h2>
+                  <p data-insight-fallback>
+                    All requests returned by Java for your assigned employees. Open a record to
+                    review its details.
+                  </p>
+                  <p
+                    data-insight-record-count
+                    data-insight-enhancement
+                    hidden
+                  ></p>
+                </div>
+                <button
+                  type="button"
+                  class="button secondary"
+                  data-insight-export
+                  data-insight-enhancement
+                  hidden
+                >
+                  <span
+                    class="insight-action-icon"
+                    data-icon="download"
+                    aria-hidden="true"
+                  ></span>
+                  Export selection
+                </button>
+              </div>
+              <div class="table-wrapper">
+                <table class="insight-table">
+                  <caption class="sr-only">
+                    Assigned employee requests, current status and reported course fees
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">
+                        <button
+                          type="button"
+                          data-insight-sort="title"
+                        >
+                          Course
+                        </button>
+                      </th>
+                      <th scope="col">
+                        <button
+                          type="button"
+                          data-insight-sort="learner"
+                        >
+                          Employee
+                        </button>
+                      </th>
+                      <th scope="col">
+                        <button
+                          type="button"
+                          data-insight-sort="start"
+                        >
+                          Training dates
+                        </button>
+                      </th>
+                      <th scope="col">
+                        <button
+                          type="button"
+                          data-insight-sort="created"
+                        >
+                          Requested
+                        </button>
+                      </th>
+                      <th scope="col">
+                        <button
+                          type="button"
+                          data-insight-sort="status"
+                        >
+                          Status
+                        </button>
+                      </th>
+                      <th
+                        scope="col"
+                        class="numeric"
+                      >
+                        <button
+                          type="button"
+                          data-insight-sort="fee"
+                        >
+                          Course fee
+                        </button>
+                      </th>
+                      <th
+                        scope="col"
+                        class="numeric"
+                      >
+                        <button
+                          type="button"
+                          data-insight-sort="days"
+                        >
+                          Days
+                        </button>
+                      </th>
+                      <th scope="col"><span class="sr-only">Action</span></th>
+                    </tr>
+                  </thead>
+                  <tbody data-insight-records>
+                    <tr
+                      th:each="a : ${applications}"
+                      data-insight-record
+                      th:attr="
+                        data-id=${a.id},
+                        data-title=${a.courseTitle != null ? a.courseTitle : ''},
+                        data-provider=${a.trainingProvider != null ? a.trainingProvider : ''},
+                        data-category=${a.category != null ? a.category.name : ''},
+                        data-applicant-id=${a.applicant != null ? a.applicant.id : ''},
+                        data-learner=${a.applicant != null ? a.applicant.name : ''},
+                        data-start=${a.startDate != null ? a.startDate.toString() : ''},
+                        data-end=${a.endDate != null ? a.endDate.toString() : ''},
+                        data-created=${a.createdAt != null ? a.createdAt.toString() : ''},
+                        data-status=${a.status != null ? a.status.name() : 'UNKNOWN'},
+                        data-fee=${a.courseFee != null ? a.courseFee.toPlainString() : ''},
+                        data-days=${a.trainingDays != null ? a.trainingDays.toPlainString() : ''}
+                      "
+                    >
+                      <td data-label="Course">
+                        <strong th:text="${a.courseTitle}"></strong>
+                        <small th:text="${a.trainingProvider}"></small>
+                        <small>
+                          <span
+                            th:text="${a.category != null ? a.category.name : 'Unspecified category'}"
+                          ></span>
+                          · #
+                          <span th:text="${a.id}"></span>
+                        </small>
+                      </td>
+                      <td
+                        data-label="Employee"
+                        th:text="${a.applicant != null ? a.applicant.name : 'Employee unavailable'}"
+                      ></td>
+                      <td data-label="Training dates">
+                        <span
+                          th:text="${a.startDate != null ? a.startDate : 'Not recorded'}"
+                        ></span>
+                        <small>
+                          to
+                          <span th:text="${a.endDate != null ? a.endDate : 'Not recorded'}"></span>
+                        </small>
+                      </td>
+                      <td
+                        data-label="Requested"
+                        th:text="${a.createdAt != null ? #temporals.format(a.createdAt, 'yyyy-MM-dd HH:mm') : 'Not recorded'}"
+                      ></td>
+                      <td data-label="Status">
+                        <span
+                          class="status-badge"
+                          th:text="${a.status != null ? a.status : 'UNKNOWN'}"
+                          th:attr="data-status=${a.status}"
+                        ></span>
+                      </td>
+                      <td
+                        data-label="Course fee"
+                        class="numeric"
+                        th:text="${a.courseFee != null ? a.courseFee.toPlainString() : 'Not recorded'}"
+                      ></td>
+                      <td
+                        data-label="Days"
+                        class="numeric"
+                        th:text="${a.trainingDays != null ? a.trainingDays.toPlainString() : 'Not recorded'}"
+                      ></td>
+                      <td data-label="Action">
+                        <a
+                          class="button text"
+                          th:href="@{/manager/applications/{id}(id=${a.id})}"
+                        >
+                          View
+                        </a>
+                      </td>
+                    </tr>
+                    <tr
+                      data-insight-empty
+                      th:if="${#lists.isEmpty(applications)}"
+                    >
+                      <td
+                        colspan="8"
+                        class="empty"
+                      >
+                        No course requests are available for your assigned employees.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div
+                class="insight-pagination"
+                data-insight-enhancement
+                hidden
+              >
+                <div class="field">
+                  <label for="insight-page-size">Rows per page</label>
+                  <select id="insight-page-size">
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                  </select>
+                </div>
+                <nav aria-label="Request pages">
+                  <button
+                    type="button"
+                    class="button secondary"
+                    data-insight-previous
+                  >
+                    Previous
+                  </button>
+                  <span
+                    data-insight-page-label
+                    role="status"
+                  ></span>
+                  <button
+                    type="button"
+                    class="button secondary"
+                    data-insight-next
+                  >
+                    Next
+                  </button>
+                </nav>
+              </div>
+              <p
+                class="insight-note"
+                data-insight-enhancement
+                hidden
+              >
+                All assigned records are loaded by Java on this page. Filtering and pagination run
+                in your browser; export includes every matching request, across all pages.
+              </p>
+            </section>
+          </section>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
     </div>
-
-    <div class="success" th:if="${success}" th:text="${success}"></div>
-    <div class="error" th:if="${error}" th:text="${error}"></div>
-
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Employee</th>
-                    <th>Course</th>
-                    <th>Category</th>
-                    <th>Provider</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="a : ${applications}">
-                    <td th:text="${a.id}"></td>
-                    <td th:text="${a.applicant != null ? a.applicant.name : '-'}"></td>
-                    <td th:text="${a.courseTitle}"></td>
-                    <td th:text="${a.category != null ? a.category.name : '-'}"></td>
-                    <td th:text="${a.trainingProvider}"></td>
-                    <td th:text="${a.startDate}"></td>
-                    <td th:text="${a.endDate}"></td>
-                    <td th:text="${a.status}"></td>
-                    <td>
-                        <a class="button primary"
-                           th:href="@{/manager/applications/{id}(id=${a.id})}">View</a>
-                    </td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(applications)}">
-                    <td colspan="9" class="empty">No subordinate course applications found.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</main>
-</body>
+  </body>
 </html>

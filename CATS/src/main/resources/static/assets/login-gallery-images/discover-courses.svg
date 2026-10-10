@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="960"
+  viewBox="0 0 960 960" role="img" aria-labelledby="title description">
+  <title id="title">Discover Courses</title>
+  <desc id="description">Original CATS course artwork, shown on a circular color field. Illustrative artwork.</desc>
+  <!-- A blue, green or lilac circle replaces the previous rectangular poster. -->
+  <circle cx="480" cy="480" r="480" fill="#dce9f5" />
+  <g transform="translate(0 -180)">
+<!-- Quiet blue frame gives the catalog a physical, printed presence. -->
+  
+  
+  <path
+    d="M111 432C233 407 348 411 480 447C612 411 727 407 849 432V890C727 865 612 869 480 905C348 869 233 865 111 890Z"
+    fill="#f9f9f7"
+    stroke="#345b7f"
+    stroke-width="5"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M480 447V905M125 905C251 881 364 888 480 919C596 888 709 881 835 905"
+    fill="none"
+    stroke="#345b7f"
+    stroke-width="4"
+  />
+  <path
+    d="M465 452V881M495 452V881"
+    fill="none"
+    stroke="#dce4e8"
+    stroke-width="2"
+  />
+
+  <!-- Left page: three distinct course subject illustrations. -->
+  <g
+    id="knowledge-diagram"
+    fill="#f9f9f7"
+    stroke="#345b7f"
+    stroke-width="4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path
+      d="M194 538H235M214 516V561M235 538L280 510M235 538L280 566"
+      fill="none"
+    />
+    <circle cx="178" cy="538" r="17" fill="#eef4f9" />
+    <circle cx="294" cy="503" r="17" fill="#eef4f9" />
+    <circle cx="294" cy="575" r="17" fill="#eef4f9" />
+    <circle cx="234" cy="538" r="10" fill="#345b7f" />
+  </g>
+  <g
+    id="people-diagram"
+    fill="#f9f9f7"
+    stroke="#345b7f"
+    stroke-width="4"
+    stroke-linecap="round"
+  >
+    <circle cx="200" cy="678" r="20" fill="#eef4f9" />
+    <circle cx="277" cy="678" r="20" fill="#eef4f9" />
+    <path
+      d="M166 733V721C166 699 234 699 234 721V733M243 733V721C243 699 311 699 311 721V733"
+      fill="none"
+    />
+    <path d="M226 654H250M240 644L250 654L240 664" fill="none" />
+  </g>
+  <g
+    id="practice-diagram"
+    fill="#f9f9f7"
+    stroke="#345b7f"
+    stroke-width="4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <rect x="174" y="785" width="112" height="65" rx="5" fill="#eef4f9" />
+    <path
+      d="M191 804H234M191 818H215M250 807L259 815L250 823M224 837H269"
+      fill="none"
+    />
+    <path d="M197 860H266" fill="none" />
+  </g>
+
+  <!-- Right page: reading hierarchy, rather than invented course records. -->
+  <g
+    id="catalog-topics"
+    fill="#345b7f"
+    font-family="Arial, Helvetica, sans-serif"
+  >
+    <text x="538" y="504" font-size="24" letter-spacing="2" fill="#617889">
+      CATALOG INDEX
+    </text>
+    <text x="538" y="567" font-size="36">Knowledge</text>
+    <path
+      d="M538 592H784M538 611H724"
+      fill="none"
+      stroke="#c8d3da"
+      stroke-width="3"
+    />
+    <text x="538" y="696" font-size="36">People</text>
+    <path
+      d="M538 721H784M538 740H745"
+      fill="none"
+      stroke="#c8d3da"
+      stroke-width="3"
+    />
+    <text x="538" y="825" font-size="36">Practice</text>
+    <path
+      d="M538 850H784M538 869H699"
+      fill="none"
+      stroke="#c8d3da"
+      stroke-width="3"
+    />
+  </g>
+
+  
+  </g>
+</svg>

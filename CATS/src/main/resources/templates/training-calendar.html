@@ -1,87 +1,297 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Training Calendar - CATS</title>
-		<style>
-			body{font-family: Arial, sans-serif; margin: 2rem; color: #243247;}
-			main{max-width: 1100px; margin: auto;}
-			nav, form{display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin:1rem 0;}
-			select, button{padding: .5rem; font:inherit;}
-			a {color: #1856a1;}.table-container{overflow-x:auto;}
-			table{border-collapse: collapse; width: 100%; margin-top: 1rem;}
-			caption{text-align: left; padding: .5rem 0;}
-			th,td{border: 1px solid #d1d9e3; padding: .75rem;text-align: left;}
-			th{background:#edf3fa;}.empty{padding: 1rem; background: #f3f6fa;}
-		</style>
-	</head>
-	<body>
-	<main>
-		<h1>Training Calendar</h1>
-		<p>Approved courses for all employees.</p>
-		
-		<nav aria-label="Main navigation">
-			<a th:href="@{/home}">Home</a>
-			<a th:href="@{/logout}">Logout</a>
-		</nav>
-		
-		<form method="get" th:action="@{/training-calendar}">
-			<label for="year">Year</label>
-			<select id="year" name="year">
-				<option th:each="y : ${years}" th:value="${y}"
-				th:text="${y}" th:selected="${y == year}"></option>
-						
-			</select>
-			
-			<label for="month">Month</label>
-			<select id="month" name="month">
-				<option th:each="m : ${#numbers.sequence(1,12)}" th:value="${m}" th:text="${m}" th:selected="${m == month}"></option>
-			</select>
-			<button type="submit">View Month</button>
-		</form>
-		
-		<nav aria-label="Month navigation">
-			<a th:if="${previousMonth != null}"
-			th:href="@{/training-calendar(year=${previousMonth.year}, month=${previousMonth.monthValue})}">
-			Previous Month
-			</a>
-			<a th:href="@{/training-calendar}">Current Month</a>
-			<a th:if="${nextMonth !=null}"
-			th:href="@{/training-calendar(year=${nextMonth.year}, month=${nextMonth.monthValue})}">
-			Next Month
-			</a>
-		</nav>
-		
-		<h2 th:text="${monthLabel}">October 2026</h2>
-		<p class="empty" th:if="${#lists.isEmpty(rows)}">No approved courses for this month.</p>
-		
-		<div class="table-container" th:unless="${#lists.isEmpty(rows)}">
-			<table>
-				<caption th:text="|${#lists.size(rows)} approved course application(s)|"></caption>	
-				<thead>
-					<tr>
-						<th scope="col">Employee</th>
-						<th scope="col">Course</th>
-						<th scope="col">Category</th>
-						<th scope="col">Training Provider</th>
-						<th scope="col">Start Date</th>
-						<th scope="col">End Date</th>
-					</tr>
-					</thead>
-					<tbody>
-						<tr th:each="row:${rows}">
-						<td th:text="${row.employeeName}"></td>
-						<td th:text="${row.courseTitle}"></td>
-						<td th:text="${row.categoryName}"></td>
-						<td th:text="${row.trainingProvider}"></td>
-						<td th:text="${row.startDate}"></td>
-						<td th:text="${row.endDate}"></td>
-					</tr>
-					</tbody>
-				</table>
-			</div>
-		</main>
-		</body>
-		</html>			
-						
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Training calendar')}"></head>
+  <body>
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/calendar-workspace.css}"
+    />
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside th:replace="~{fragments/chrome :: sidebar('calendar')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Training calendar')}"></header>
+      <main
+        id="main-content"
+        class="page-content training-calendar"
+      >
+        <header class="page-header">
+          <div>
+            <h1>Training calendar</h1>
+            <p>See approved training and plan your own events, one day at a time.</p>
+          </div>
+        </header>
+        <div class="page-body">
+          <!-- These scalar rows come from the original Java month query. -->
+          <div
+            id="cats-calendar-approved-data"
+            data-schema-version="1"
+            data-scope="approved-organization"
+            th:attr="data-year=${year},data-month=${month},data-role=${session.loggedInUser.role.name()},data-user-id=${session.loggedInUser.id}"
+            hidden
+          >
+            <span
+              th:each="row : ${rows}"
+              data-calendar-course
+              th:attr="data-title=${row.courseTitle != null ? row.courseTitle : ''},data-provider=${row.trainingProvider != null ? row.trainingProvider : ''},data-employee=${row.employeeName != null ? row.employeeName : ''},data-category=${row.categoryName != null ? row.categoryName : ''},data-start=${row.startDate != null ? row.startDate.toString() : ''},data-end=${row.endDate != null ? row.endDate.toString() : ''}"
+            ></span>
+          </div>
+          <section
+            id="cats-calendar-month"
+            data-calendar-workspace
+            data-schema-version="1"
+            data-scope="approved-organization"
+            th:attr="data-year=${year},data-month=${month},data-role=${session.loggedInUser.role.name()},data-user-id=${session.loggedInUser.id}"
+            aria-label="Monthly calendar and agenda"
+          ></section>
+          <section
+            class="calendar-tools"
+            data-calendar-fallback
+            aria-labelledby="calendar-tools-title"
+          >
+            <div class="calendar-tools-heading">
+              <span
+                class="calendar-tool-icon"
+                data-icon="calendar"
+                aria-hidden="true"
+              ></span>
+              <div>
+                <h2 id="calendar-tools-title">Find a month</h2>
+                <p>Choose a period to see approved training across the organization.</p>
+              </div>
+            </div>
+            <form
+              method="get"
+              th:action="@{/training-calendar}"
+              class="calendar-period-form"
+            >
+              <div class="field">
+                <label for="year">Year</label>
+                <select
+                  id="year"
+                  name="year"
+                >
+                  <option
+                    th:each="y : ${years}"
+                    th:value="${y}"
+                    th:text="${y}"
+                    th:selected="${y == year}"
+                  ></option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="month">Month</label>
+                <select
+                  id="month"
+                  name="month"
+                >
+                  <option
+                    value="1"
+                    th:selected="${month == 1}"
+                  >
+                    January
+                  </option>
+                  <option
+                    value="2"
+                    th:selected="${month == 2}"
+                  >
+                    February
+                  </option>
+                  <option
+                    value="3"
+                    th:selected="${month == 3}"
+                  >
+                    March
+                  </option>
+                  <option
+                    value="4"
+                    th:selected="${month == 4}"
+                  >
+                    April
+                  </option>
+                  <option
+                    value="5"
+                    th:selected="${month == 5}"
+                  >
+                    May
+                  </option>
+                  <option
+                    value="6"
+                    th:selected="${month == 6}"
+                  >
+                    June
+                  </option>
+                  <option
+                    value="7"
+                    th:selected="${month == 7}"
+                  >
+                    July
+                  </option>
+                  <option
+                    value="8"
+                    th:selected="${month == 8}"
+                  >
+                    August
+                  </option>
+                  <option
+                    value="9"
+                    th:selected="${month == 9}"
+                  >
+                    September
+                  </option>
+                  <option
+                    value="10"
+                    th:selected="${month == 10}"
+                  >
+                    October
+                  </option>
+                  <option
+                    value="11"
+                    th:selected="${month == 11}"
+                  >
+                    November
+                  </option>
+                  <option
+                    value="12"
+                    th:selected="${month == 12}"
+                  >
+                    December
+                  </option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                class="button calendar-go"
+              >
+                <span
+                  data-icon="calendar"
+                  aria-hidden="true"
+                ></span>
+                View month
+              </button>
+            </form>
+          </section>
+          <div
+            class="calendar-month-heading"
+            data-calendar-fallback
+          >
+            <h2
+              class="calendar-month-title"
+              th:text="${monthLabel}"
+            >
+              October 2026
+            </h2>
+            <nav
+              aria-label="Month navigation"
+              class="calendar-month-navigation"
+            >
+              <a
+                class="button secondary"
+                th:if="${previousMonth != null}"
+                th:href="@{/training-calendar(year=${previousMonth.year}, month=${previousMonth.monthValue})}"
+              >
+                <span
+                  data-icon="arrowLeft"
+                  aria-hidden="true"
+                ></span>
+                Previous
+              </a>
+              <a
+                class="button secondary"
+                th:href="@{/training-calendar}"
+              >
+                <span
+                  data-icon="reload"
+                  aria-hidden="true"
+                ></span>
+                Current month
+              </a>
+              <a
+                class="button secondary"
+                th:if="${nextMonth != null}"
+                th:href="@{/training-calendar(year=${nextMonth.year}, month=${nextMonth.monthValue})}"
+              >
+                Next
+                <span
+                  data-icon="arrowRight"
+                  aria-hidden="true"
+                ></span>
+              </a>
+            </nav>
+          </div>
+          <div
+            class="calendar-empty"
+            data-calendar-fallback
+            th:if="${#lists.isEmpty(rows)}"
+            role="status"
+          >
+            <span
+              class="calendar-empty-icon"
+              data-icon="calendar"
+              aria-hidden="true"
+            ></span>
+            <div>
+              <h3>No approved courses this month</h3>
+              <p>
+                There are no approved training records for this period. Choose another month to
+                explore the calendar.
+              </p>
+            </div>
+          </div>
+          <div
+            class="table-wrapper calendar-records"
+            data-calendar-fallback
+            th:unless="${#lists.isEmpty(rows)}"
+          >
+            <table>
+              <caption th:text="|${#lists.size(rows)} approved course application(s)|"></caption>
+              <thead>
+                <tr>
+                  <th scope="col">Employee</th>
+                  <th scope="col">Course</th>
+                  <th scope="col">Provider</th>
+                  <th scope="col">Dates</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="row : ${rows}">
+                  <td
+                    data-label="Employee"
+                    th:text="${row.employeeName}"
+                  ></td>
+                  <td data-label="Course">
+                    <strong th:text="${row.courseTitle}"></strong>
+                    <small th:text="${row.categoryName}"></small>
+                  </td>
+                  <td
+                    data-label="Provider"
+                    th:text="${row.trainingProvider}"
+                  ></td>
+                  <td data-label="Dates">
+                    <span th:text="${row.startDate}"></span>
+                    <small>
+                      to
+                      <span th:text="${row.endDate}"></span>
+                    </small>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
+    </div>
+    <script
+      type="module"
+      th:src="@{/assets/calendar-workspace.js}"
+    ></script>
+  </body>
+</html>

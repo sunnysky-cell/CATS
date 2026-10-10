@@ -1,0 +1,38 @@
+/* A modest global type scale for high-density desktop and laptop displays. */
+body {
+  font-size: 16px;
+}
+
+body :is(
+  p,
+  li,
+  td,
+  th,
+  label,
+  input,
+  select,
+  textarea,
+  button,
+  a,
+  small,
+  dt,
+  dd,
+  .topbar,
+  .small,
+  .muted,
+  .helper,
+  .field-hint,
+  .hint,
+  .eyebrow,
+  .workspace-kicker,
+  .page-index,
+  .workspace-panel-caption
+) {
+  font-size: max(13px, 0.9em) !important;
+}
+
+@media (max-width: 600px) {
+  body {
+    font-size: 16px;
+  }
+}

@@ -1,0 +1,601 @@
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <body>
+    <th:block
+      th:fragment="panels"
+      th:if="${session.loggedInUser != null}"
+      th:with="accountUser=${session.loggedInUser}, accountRole=${session.loggedInUser.role.name()}"
+    >
+      <section
+        id="workspace-account-panel"
+        class="workspace-panel"
+        hidden
+        role="dialog"
+        aria-labelledby="workspace-account-title"
+        tabindex="-1"
+      >
+        <header class="workspace-panel-header">
+          <h2 id="workspace-account-title">Account</h2>
+          <button
+            type="button"
+            class="workspace-panel-close"
+            data-workspace-close
+            aria-label="Close account panel"
+          >
+            <span
+              data-icon="close"
+              aria-hidden="true"
+            ></span>
+          </button>
+        </header>
+        <div class="workspace-panel-body">
+          <div class="workspace-profile-hero">
+            <span
+              class="user-avatar user-avatar-large"
+              th:attr="data-avatar-name=${accountUser.name}"
+              aria-hidden="true"
+            ></span>
+            <div class="workspace-profile-heading">
+              <h3
+                class="workspace-profile-name"
+                th:text="${#strings.isEmpty(accountUser.name) ? 'Your profile' : accountUser.name}"
+              >
+                Your profile
+              </h3>
+              <p
+                class="workspace-profile-role"
+                th:switch="${accountRole}"
+              >
+                <span th:case="'MANAGER'">Manager</span>
+                <span th:case="'EMPLOYEE'">Employee</span>
+                <span th:case="'ADMIN'">Admin</span>
+                <span th:case="*">Account holder</span>
+              </p>
+            </div>
+          </div>
+          <!-- Read only the profile fields needed here; never expose the session object. -->
+          <dl class="workspace-profile">
+            <div>
+              <dt>Name</dt>
+              <dd
+                th:text="${#strings.isEmpty(accountUser.name) ? 'Not recorded' : accountUser.name}"
+              >
+                Your name
+              </dd>
+            </div>
+            <div>
+              <dt>Email</dt>
+              <dd
+                th:text="${#strings.isEmpty(accountUser.email) ? 'Not recorded' : accountUser.email}"
+              >
+                Your email
+              </dd>
+            </div>
+            <div>
+              <dt>Role</dt>
+              <dd th:switch="${accountRole}">
+                <span th:case="'MANAGER'">Manager</span>
+                <span th:case="'EMPLOYEE'">Employee</span>
+                <span th:case="'ADMIN'">Admin</span>
+                <span th:case="*">Account holder</span>
+              </dd>
+            </div>
+            <div>
+              <dt>Designation</dt>
+              <dd
+                th:text="${#strings.isEmpty(accountUser.designation) ? 'Not recorded' : accountUser.designation}"
+              >
+                Not recorded
+              </dd>
+            </div>
+            <div>
+              <dt>Reports to</dt>
+              <dd
+                th:text="${accountUser.manager != null and !#strings.isEmpty(accountUser.manager.name) ? accountUser.manager.name : 'Not assigned'}"
+              >
+                Not assigned
+              </dd>
+            </div>
+          </dl>
+          <section
+            class="workspace-panel-section"
+            th:if="${accountRole == 'MANAGER'}"
+            aria-labelledby="workspace-personal-title"
+          >
+            <h3 id="workspace-personal-title">Your own training</h3>
+            <nav
+              class="workspace-panel-links"
+              aria-label="Personal training shortcuts"
+            >
+              <a th:href="@{/employee/applications/new}">
+                <span
+                  class="workspace-link-icon"
+                  data-tone="blue"
+                  data-icon="plus"
+                  aria-hidden="true"
+                ></span>
+                <span>
+                  <strong>Apply for a course</strong>
+                  <small>Submit your own training request.</small>
+                </span>
+                <span
+                  data-icon="arrowRight"
+                  aria-hidden="true"
+                ></span>
+              </a>
+              <a th:href="@{/employee/applications}">
+                <span
+                  class="workspace-link-icon"
+                  data-tone="blue"
+                  data-icon="reader"
+                  aria-hidden="true"
+                ></span>
+                <span>
+                  <strong>My applications</strong>
+                  <small>Your current-year course history.</small>
+                </span>
+                <span
+                  data-icon="arrowRight"
+                  aria-hidden="true"
+                ></span>
+              </a>
+              <a th:href="@{/employee/claims}">
+                <span
+                  class="workspace-link-icon"
+                  data-tone="blue"
+                  data-icon="receipt"
+                  aria-hidden="true"
+                ></span>
+                <span>
+                  <strong>My fee claims</strong>
+                  <small>Your own reimbursement records.</small>
+                </span>
+                <span
+                  data-icon="arrowRight"
+                  aria-hidden="true"
+                ></span>
+              </a>
+            </nav>
+          </section>
+          <section
+            class="workspace-panel-section"
+            aria-labelledby="workspace-display-title"
+          >
+            <h3 id="workspace-display-title">Display preferences</h3>
+            <div class="workspace-preferences">
+              <button
+                type="button"
+                data-display-preference="contrast"
+                aria-pressed="false"
+              >
+                <span>Higher contrast</span>
+                <span
+                  class="workspace-preference-check"
+                  data-icon="check"
+                  aria-hidden="true"
+                ></span>
+              </button>
+              <button
+                type="button"
+                data-display-preference="font"
+                aria-pressed="false"
+              >
+                <span>Sans serif headings</span>
+                <span
+                  class="workspace-preference-check"
+                  data-icon="check"
+                  aria-hidden="true"
+                ></span>
+              </button>
+            </div>
+            <p class="workspace-panel-caption">This browser only.</p>
+          </section>
+          <div class="workspace-panel-footer">
+            <a
+              class="workspace-signout"
+              th:href="@{/logout}"
+            >
+              <span>Sign out</span>
+              <span
+                data-icon="arrowRight"
+                aria-hidden="true"
+              ></span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="workspace-courses-panel"
+        class="workspace-panel"
+        hidden
+        role="dialog"
+        aria-labelledby="workspace-courses-title"
+        tabindex="-1"
+      >
+        <header class="workspace-panel-header">
+          <h2
+            id="workspace-courses-title"
+            th:text="${accountRole == 'MANAGER' ? 'Applications' : 'Courses'}"
+          >
+            Courses
+          </h2>
+          <button
+            type="button"
+            class="workspace-panel-close"
+            data-workspace-close
+            aria-label="Close courses panel"
+          >
+            <span
+              data-icon="close"
+              aria-hidden="true"
+            ></span>
+          </button>
+        </header>
+        <div class="workspace-panel-body">
+          <th:block th:if="${accountRole == 'EMPLOYEE'}">
+            <p class="workspace-panel-intro">
+              Explore a course, then keep track of your application.
+            </p>
+            <nav
+              class="workspace-panel-links"
+              aria-label="Course shortcuts"
+            >
+              <a th:href="@{/home#course-catalog}">
+                <span
+                  class="workspace-link-icon"
+                  data-tone="blue"
+                  data-icon="reader"
+                  aria-hidden="true"
+                ></span>
+                <span>
+                  <strong>Explore courses</strong>
+                  <small>Browse the example course collection.</small>
+                </span>
+                <span
+                  data-icon="arrowRight"
+                  aria-hidden="true"
+                ></span>
+              </a>
+              <a th:href="@{/employee/applications/new}">
+                <span
+                  class="workspace-link-icon"
+                  data-tone="blue"
+                  data-icon="plus"
+                  aria-hidden="true"
+                ></span>
+                <span>
+                  <strong>New application</strong>
+                  <small>Submit your course details for review.</small>
+                </span>
+                <span
+                  data-icon="arrowRight"
+                  aria-hidden="true"
+                ></span>
+              </a>
+              <a th:href="@{/employee/applications}">
+                <span
+                  class="workspace-link-icon"
+                  data-tone="blue"
+                  data-icon="fileText"
+                  aria-hidden="true"
+                ></span>
+                <span>
+                  <strong>My applications</strong>
+                  <small>Check decisions and course progress.</small>
+                </span>
+                <span
+                  data-icon="arrowRight"
+                  aria-hidden="true"
+                ></span>
+              </a>
+            </nav>
+          </th:block>
+          <th:block th:if="${accountRole == 'MANAGER'}">
+            <p class="workspace-panel-intro">
+              Review applications and follow the learning requests assigned to you.
+            </p>
+            <nav
+              class="workspace-panel-links"
+              aria-label="Application shortcuts"
+            >
+              <a th:href="@{/manager/pending}">
+                <span
+                  class="workspace-link-icon"
+                  data-tone="blue"
+                  data-icon="fileText"
+                  aria-hidden="true"
+                ></span>
+                <span>
+                  <strong>Awaiting review</strong>
+                  <small>Open a request before making a decision.</small>
+                </span>
+                <span
+                  data-icon="arrowRight"
+                  aria-hidden="true"
+                ></span>
+              </a>
+              <a th:href="@{/manager/history}">
+                <span
+                  class="workspace-link-icon"
+                  data-tone="blue"
+                  data-icon="barChart"
+                  aria-hidden="true"
+                ></span>
+                <span>
+                  <strong>Learning insights</strong>
+                  <small>Filter, analyse and export your assigned requests.</small>
+                </span>
+                <span
+                  data-icon="arrowRight"
+                  aria-hidden="true"
+                ></span>
+              </a>
+              <a th:href="@{/manager/claims}">
+                <span
+                  class="workspace-link-icon"
+                  data-tone="blue"
+                  data-icon="fileText"
+                  aria-hidden="true"
+                ></span>
+                <span>
+                  <strong>Fee claims</strong>
+                  <small>Review the submitted claim details.</small>
+                </span>
+                <span
+                  data-icon="arrowRight"
+                  aria-hidden="true"
+                ></span>
+              </a>
+            </nav>
+          </th:block>
+          <th:block th:if="${accountRole == 'ADMIN'}">
+            <p class="workspace-panel-intro">
+              Maintain the categories used by course applications.
+            </p>
+            <nav
+              class="workspace-panel-links"
+              aria-label="Course administration shortcuts"
+            >
+              <a th:href="@{/admin/categories}">
+                <span
+                  class="workspace-link-icon"
+                  data-tone="blue"
+                  data-icon="reader"
+                  aria-hidden="true"
+                ></span>
+                <span>
+                  <strong>Course categories</strong>
+                  <small>Add, edit or activate a category.</small>
+                </span>
+                <span
+                  data-icon="arrowRight"
+                  aria-hidden="true"
+                ></span>
+              </a>
+              <a th:href="@{/training-calendar}">
+                <span
+                  class="workspace-link-icon"
+                  data-tone="blue"
+                  data-icon="calendar"
+                  aria-hidden="true"
+                ></span>
+                <span>
+                  <strong>Training calendar</strong>
+                  <small>View approved courses by month.</small>
+                </span>
+                <span
+                  data-icon="arrowRight"
+                  aria-hidden="true"
+                ></span>
+              </a>
+            </nav>
+          </th:block>
+        </div>
+      </section>
+
+      <section
+        id="workspace-reports-panel"
+        class="workspace-panel"
+        hidden
+        role="dialog"
+        aria-labelledby="workspace-reports-title"
+        tabindex="-1"
+        th:if="${accountRole == 'MANAGER' or accountRole == 'ADMIN'}"
+      >
+        <header class="workspace-panel-header">
+          <h2 id="workspace-reports-title">Reports</h2>
+          <button
+            type="button"
+            class="workspace-panel-close"
+            data-workspace-close
+            aria-label="Close reports panel"
+          >
+            <span
+              data-icon="close"
+              aria-hidden="true"
+            ></span>
+          </button>
+        </header>
+        <div class="workspace-panel-body">
+          <p class="workspace-panel-intro">Organization-wide training and budget records.</p>
+          <nav
+            class="workspace-panel-links"
+            aria-label="Report shortcuts"
+          >
+            <a th:href="@{/manager/report}">
+              <span
+                class="workspace-link-icon"
+                data-tone="blue"
+                data-icon="archive"
+                aria-hidden="true"
+              ></span>
+              <span>
+                <strong>Report overview</strong>
+                <small>Choose a training or budget report.</small>
+              </span>
+              <span
+                data-icon="arrowRight"
+                aria-hidden="true"
+              ></span>
+            </a>
+            <a th:href="@{/manager/report/attendance}">
+              <span
+                class="workspace-link-icon"
+                data-tone="blue"
+                data-icon="calendar"
+                aria-hidden="true"
+              ></span>
+              <span>
+                <strong>Training attendance</strong>
+                <small>Filter by course dates and export CSV.</small>
+              </span>
+              <span
+                data-icon="arrowRight"
+                aria-hidden="true"
+              ></span>
+            </a>
+            <a th:href="@{/manager/report/budget}">
+              <span
+                class="workspace-link-icon"
+                data-tone="blue"
+                data-icon="barChart"
+                aria-hidden="true"
+              ></span>
+              <span>
+                <strong>Annual budget</strong>
+                <small>Review annual usage and export CSV.</small>
+              </span>
+              <span
+                data-icon="arrowRight"
+                aria-hidden="true"
+              ></span>
+            </a>
+          </nav>
+          <p
+            class="workspace-panel-caption"
+            th:if="${accountRole == 'MANAGER'}"
+          >
+            For requests assigned to you, use Learning insights.
+          </p>
+        </div>
+      </section>
+
+      <section
+        id="workspace-help-panel"
+        class="workspace-panel"
+        hidden
+        role="dialog"
+        aria-labelledby="workspace-help-title"
+        tabindex="-1"
+      >
+        <header class="workspace-panel-header">
+          <h2 id="workspace-help-title">Workspace guide</h2>
+          <button
+            type="button"
+            class="workspace-panel-close"
+            data-workspace-close
+            aria-label="Close help panel"
+          >
+            <span
+              data-icon="close"
+              aria-hidden="true"
+            ></span>
+          </button>
+        </header>
+        <div class="workspace-panel-body">
+          <p class="workspace-panel-intro">A few pointers for your next step.</p>
+          <div
+            class="workspace-guidance"
+            th:if="${accountRole == 'EMPLOYEE'}"
+          >
+            <section>
+              <h3>Apply for a course</h3>
+              <p>
+                Enter the course dates, duration and fee. Check the details before submitting for
+                review.
+              </p>
+              <a th:href="@{/employee/applications/new}">Start an application</a>
+            </section>
+            <section>
+              <h3>Follow your progress</h3>
+              <p>
+                Open an application to read its decision and see the actions available at its
+                current stage.
+              </p>
+              <a th:href="@{/employee/applications}">View my applications</a>
+            </section>
+            <section>
+              <h3>Submit a fee claim</h3>
+              <p>
+                For an eligible completed course, open the application and enter the claim details.
+              </p>
+              <a th:href="@{/employee/claims}">View fee claims</a>
+            </section>
+          </div>
+          <div
+            class="workspace-guidance"
+            th:if="${accountRole == 'MANAGER'}"
+          >
+            <section>
+              <h3>Review an application</h3>
+              <p>
+                Open the full request, check the course details, and confirm your approval or
+                rejection.
+              </p>
+              <a th:href="@{/manager/pending}">View awaiting review</a>
+            </section>
+            <section>
+              <h3>Review fee claims</h3>
+              <p>
+                Check the claim amount and recorded supporting details before confirming a decision.
+              </p>
+              <a th:href="@{/manager/claims}">View fee claims</a>
+            </section>
+            <section>
+              <h3>Understand your requests</h3>
+              <p>
+                Use the same filters across charts, request details and CSV exports. Agent access
+                supports queries and analysis; decisions stay with you.
+              </p>
+              <a th:href="@{/manager/history}">Open Learning insights</a>
+            </section>
+          </div>
+          <div
+            class="workspace-guidance"
+            th:if="${accountRole == 'ADMIN'}"
+          >
+            <section>
+              <h3>Manage people and access</h3>
+              <p>
+                Maintain account details, roles, reporting relationships and annual entitlements.
+              </p>
+              <a th:href="@{/admin/users}">View people and access</a>
+            </section>
+            <section>
+              <h3>Maintain course categories</h3>
+              <p>Edit category details and activation status used in new applications.</p>
+              <a th:href="@{/admin/categories}">View categories</a>
+            </section>
+            <section>
+              <h3>Keep public holidays current</h3>
+              <p>Review the dates used when calculating course working days.</p>
+              <a th:href="@{/admin/holidays}">View public holidays</a>
+            </section>
+          </div>
+          <section class="workspace-panel-section">
+            <h3>Find a course date</h3>
+            <p>The training calendar lists approved courses for the month you choose.</p>
+            <a th:href="@{/training-calendar}">Open training calendar</a>
+          </section>
+          <p class="workspace-panel-caption">
+            Use Escape to close this panel and return to the navigation.
+          </p>
+        </div>
+      </section>
+    </th:block>
+  </body>
+</html>

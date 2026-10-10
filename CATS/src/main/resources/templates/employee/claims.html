@@ -1,0 +1,178 @@
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('My fee claims')}"></head>
+  <body class="employee-workspace">
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside
+      th:replace="~{fragments/chrome :: sidebar(${session.loggedInUser.role.name() == 'MANAGER' ? 'personal-training' : 'claims'})}"
+    ></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('My fee claims')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <h1>Fee claims</h1>
+            <p>Your reimbursement requests and manager decisions.</p>
+          </div>
+          <a
+            class="button secondary"
+            th:href="@{/employee/applications}"
+          >
+            My applications
+          </a>
+        </header>
+        <div
+          class="page-body"
+          data-record-view="claims"
+        >
+          <p
+            class="success"
+            th:if="${success}"
+            th:text="${success}"
+            role="status"
+          ></p>
+          <p
+            class="error"
+            th:if="${error}"
+            th:text="${error}"
+            role="alert"
+          ></p>
+          <div th:unless="${#lists.isEmpty(claims)}">
+            <div class="record-controls employee-record-controls">
+              <div class="field">
+                <label for="claim-search">Search claims</label>
+                <input
+                  type="search"
+                  id="claim-search"
+                  data-record-search
+                  placeholder="Course, reference or comment"
+                />
+              </div>
+              <div class="field">
+                <label for="claim-status">Status</label>
+                <select
+                  id="claim-status"
+                  data-record-status
+                >
+                  <option value="">All statuses</option>
+                  <option value="SUBMITTED">Awaiting decision</option>
+                  <option value="APPROVED">Approved</option>
+                  <option value="REJECTED">Rejected</option>
+                </select>
+              </div>
+            </div>
+            <p
+              class="record-results"
+              data-record-results
+              role="status"
+              aria-live="polite"
+              th:text="${#lists.size(claims)} + ' claims'"
+            ></p>
+            <div class="table-wrapper">
+              <table class="employee-record-table employee-claim-table">
+                <caption class="sr-only">Your course fee reimbursement claims</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Reference</th>
+                    <th scope="col">Course</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Submitted</th>
+                    <th scope="col">Manager comment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    th:each="c : ${claims}"
+                    data-record-row
+                    th:attr="data-record-status=${c.status}"
+                  >
+                    <td
+                      class="record-reference"
+                      data-label="Reference"
+                    >
+                      #
+                      <span th:text="${c.id}"></span>
+                    </td>
+                    <td class="employee-record-course">
+                      <a
+                        class="record-title record-link"
+                        th:if="${c.application != null}"
+                        th:href="@{/employee/applications/{id}(id=${c.application.id})}"
+                        th:text="${c.application.courseTitle}"
+                      ></a>
+                      <span th:unless="${c.application != null}">Application unavailable</span>
+                    </td>
+                    <td
+                      class="record-amount"
+                      data-label="Amount"
+                      th:text="${c.claimAmount != null ? 'S$' + #numbers.formatDecimal(c.claimAmount, 1, 'COMMA', 2, 'POINT') : 'Not set'}"
+                    ></td>
+                    <td class="employee-record-status">
+                      <span
+                        class="status-badge"
+                        th:text="${c.status}"
+                        th:attr="data-status=${c.status}"
+                      ></span>
+                    </td>
+                    <td
+                      data-label="Submitted"
+                      th:text="${c.submittedAt != null ? #temporals.format(c.submittedAt, 'yyyy-MM-dd HH:mm') : 'Not set'}"
+                    ></td>
+                    <td
+                      class="employee-record-comment"
+                      data-label="Manager comment"
+                      th:text="${c.managerComment != null ? c.managerComment : 'No comment yet'}"
+                    ></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div
+              class="employee-empty"
+              data-record-empty
+              hidden
+            >
+              <h2>No matching claims</h2>
+              <p>Try another search or status.</p>
+              <button
+                type="button"
+                class="button secondary"
+                data-record-reset
+              >
+                Clear filters
+              </button>
+            </div>
+          </div>
+          <section
+            class="employee-empty"
+            th:if="${#lists.isEmpty(claims)}"
+          >
+            <h2>No fee claims yet</h2>
+            <p>
+              Complete an approved paid course, then open its application to request reimbursement.
+            </p>
+            <a
+              class="button primary"
+              th:href="@{/employee/applications}"
+            >
+              View my applications
+            </a>
+          </section>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
+    </div>
+  </body>
+</html>

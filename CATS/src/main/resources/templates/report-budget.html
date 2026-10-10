@@ -1,82 +1,196 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
-<head>
-<meta charset="UTF-8">
-<title>Budget Utilisation Report - CATS</title>
-</head>
-
-<body>
-
-<h2>Budget Utilisation Report</h2>
-
-<hr/>
-
-<h3>Filter Criteria</h3>
-
-<form method="post" th:action="@{/manager/report/budget}">
-
-  <table border="1">
-    <tr>
-      <td>Year</td>
-      <td>
-        <select name="year">
-          <option th:each="y : ${#numbers.sequence(2024, 2030)}"
-                  th:value="${y}"
-                  th:text="${y}"
-                  th:selected="${y == year}"></option>
-        </select>
-      </td>
-    </tr>
-  </table>
-
-  <br/>
-
-  <button type="submit">Generate Report</button>
-
-</form>
-
-<hr/>
-
-<h3>Report Results</h3>
-
-<div th:if="${rows == null || rows.isEmpty()}">
-  <p>No records found. Please adjust your filter criteria.</p>
-</div>
-
-<table border="1" th:if="${rows != null && !rows.isEmpty()}">
-  <thead>
-    <tr>
-      <th>Employee Name</th>
-      <th>Designation</th>
-      <th>Entitled Days</th>
-      <th>Days Used</th>
-      <th>Annual Budget</th>
-      <th>Approved Course Fees</th>
-      <th>Claimed Amounts</th>
-      <th>Remaining Budget</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr th:each="r : ${rows}">
-      <td th:text="${r['employeeName']}"></td>
-      <td th:text="${r['designation']}"></td>
-      <td th:text="${r['entitledDays']}"></td>
-      <td th:text="${r['daysUsed']}"></td>
-      <td th:text="${r['annualBudget']}"></td>
-      <td th:text="${r['approvedCourseFees']}"></td>
-      <td th:text="${r['claimedAmounts']}"></td>
-      <td th:text="${r['remainingBudget']}"></td>
-    </tr>
-  </tbody>
-</table>
-
-<hr/>
-
-<p>
-  <a th:href="@{/manager/report}">Back to Report Center</a> |
-  <a th:href="@{/logout}">Logout</a>
-</p>
-
-</body>
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Budget utilisation')}"></head>
+  <body>
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside th:replace="~{fragments/chrome :: sidebar('reports')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Budget utilisation')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <h1>Budget utilisation</h1>
+            <p>Annual entitlements, course costs, claims, and remaining budgets.</p>
+          </div>
+          <a
+            class="button text"
+            th:href="@{/manager/report}"
+          >
+            All reports
+          </a>
+        </header>
+        <div class="page-body">
+          <section
+            class="section"
+            aria-labelledby="budget-filters-title"
+          >
+            <h2 id="budget-filters-title">Reporting year</h2>
+            <form
+              method="post"
+              th:action="@{/manager/report/budget}"
+            >
+              <div class="form-grid">
+                <div class="field">
+                  <label for="reports-year">Year</label>
+                  <select
+                    name="year"
+                    id="reports-year"
+                  >
+                    <option
+                      th:each="y : ${#numbers.sequence(2024, 2030)}"
+                      th:value="${y}"
+                      th:text="${y}"
+                      th:selected="${y == (year != null ? year : #dates.year(#dates.createNow()))}"
+                    ></option>
+                  </select>
+                </div>
+              </div>
+              <div class="actions">
+                <button
+                  class="button primary"
+                  type="submit"
+                >
+                  Generate report
+                </button>
+              </div>
+            </form>
+          </section>
+          <section
+            class="section"
+            aria-labelledby="budget-results-title"
+          >
+            <div class="section-heading">
+              <h2 id="budget-results-title">Budget records</h2>
+              <a
+                class="button secondary"
+                th:if="${rows != null &amp;&amp; !rows.isEmpty()}"
+                th:href="@{/manager/report/budget/export(year=${year})}"
+              >
+                Export CSV
+              </a>
+            </div>
+            <p
+              class="empty"
+              th:if="${rows != null &amp;&amp; rows.isEmpty()}"
+            >
+              No records found. Choose another reporting year.
+            </p>
+            <p
+              class="muted"
+              th:if="${rows == null}"
+            >
+              Choose a year, then generate your report.
+            </p>
+            <div
+              class="table-wrapper"
+              th:if="${rows != null &amp;&amp; !rows.isEmpty()}"
+            >
+              <table data-searchable="true">
+                <caption class="sr-only">Annual training budget utilisation</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Employee</th>
+                    <th scope="col">Designation</th>
+                    <th
+                      scope="col"
+                      class="numeric"
+                    >
+                      Entitled days
+                    </th>
+                    <th
+                      scope="col"
+                      class="numeric"
+                    >
+                      Days used
+                    </th>
+                    <th
+                      scope="col"
+                      class="numeric"
+                    >
+                      Annual budget
+                    </th>
+                    <th
+                      scope="col"
+                      class="numeric"
+                    >
+                      Approved course fees
+                    </th>
+                    <th
+                      scope="col"
+                      class="numeric"
+                    >
+                      Claimed amounts
+                    </th>
+                    <th
+                      scope="col"
+                      class="numeric"
+                    >
+                      Remaining budget
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="r : ${rows}">
+                    <td
+                      data-label="Employee"
+                      th:text="${r['employeeName']}"
+                    ></td>
+                    <td
+                      data-label="Designation"
+                      th:text="${r['designation']}"
+                    ></td>
+                    <td
+                      data-label="Entitled days"
+                      class="numeric"
+                      th:text="${r['entitledDays']}"
+                    ></td>
+                    <td
+                      data-label="Days used"
+                      class="numeric"
+                      th:text="${r['daysUsed']}"
+                    ></td>
+                    <td
+                      data-label="Annual budget"
+                      class="numeric"
+                      th:text="${r['annualBudget']}"
+                    ></td>
+                    <td
+                      data-label="Approved course fees"
+                      class="numeric"
+                      th:text="${r['approvedCourseFees']}"
+                    ></td>
+                    <td
+                      data-label="Claimed amounts"
+                      class="numeric"
+                      th:text="${r['claimedAmounts']}"
+                    ></td>
+                    <td
+                      data-label="Remaining budget"
+                      class="numeric"
+                      th:text="${r['remainingBudget']}"
+                    ></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="muted">
+              The application calculates these values from its training and allowance records.
+            </p>
+          </section>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
+    </div>
+  </body>
 </html>

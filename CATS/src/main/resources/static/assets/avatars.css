@@ -1,0 +1,53 @@
+/* A restrained identity mark, shared by the dock, profile and request workspace. */
+.user-avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #bbcedd;
+  border-radius: 50%;
+  background: #e6eff7;
+  color: #315b82;
+  font: 500 13px/1 var(--sans);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+.user-avatar[data-avatar-tone='1'] {
+  background: #e6eef0;
+  border-color: #c1d0d6;
+  color: #3d5e70;
+}
+.user-avatar[data-avatar-tone='2'] {
+  background: #e9edf5;
+  border-color: #c5cede;
+  color: #4b5877;
+}
+.user-avatar[data-avatar-tone='3'] {
+  background: #e8eaf4;
+  border-color: #c7cbdf;
+  color: #535d80;
+}
+.user-avatar-large {
+  width: 72px;
+  height: 72px;
+  font-size: 24px;
+}
+.dock-account .user-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 11px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.dock-account:hover .user-avatar,
+.dock-account[aria-expanded='true'] .user-avatar {
+  border-color: #6b91b3;
+  box-shadow: 0 0 0 3px rgb(49 91 130 / 8%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dock-account .user-avatar {
+    transition: none;
+  }
+}

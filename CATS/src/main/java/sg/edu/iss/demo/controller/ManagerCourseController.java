@@ -4,12 +4,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import sg.edu.iss.demo.service.CourseApplicationService;
+import sg.edu.iss.demo.service.CourseFeeClaimService;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import sg.edu.iss.demo.repo.CourseApplicationRepository;
 
 import org.springframework.data.domain.Pageable;
 import sg.edu.iss.demo.model.ApplicationStatus;
+import sg.edu.iss.demo.model.CourseFeeClaim;
 
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,13 +40,16 @@ public class ManagerCourseController {
 
     private final CourseApplicationService courseApplicationService;
     private final CourseApplicationRepository courseApplicationRepository;
+    private final CourseFeeClaimService courseFeeClaimService;
 
     public ManagerCourseController(
             CourseApplicationService courseApplicationService,
-            CourseApplicationRepository courseApplicationRepository) {
+            CourseApplicationRepository courseApplicationRepository,
+            CourseFeeClaimService courseFeeClaimService) {
 
         this.courseApplicationService = courseApplicationService;
         this.courseApplicationRepository = courseApplicationRepository;
+        this.courseFeeClaimService = courseFeeClaimService;
     }
  // ==================== Manager Pending Applications ====================
 
@@ -68,6 +75,28 @@ public class ManagerCourseController {
 
         model.addAttribute("applications", applications);
         model.addAttribute("manager", manager);
+
+        LinkedHashMap<String, List<CourseApplication>> grouped = new LinkedHashMap<>();
+
+        for (CourseApplication a : applications) {
+
+            String name = "No employee name";
+
+            if (a.getApplicant() != null && a.getApplicant().getName() != null) {
+                name = a.getApplicant().getName();
+            }
+
+            List<CourseApplication> one = grouped.get(name);
+
+            if (one == null) {
+                one = new ArrayList<>();
+                grouped.put(name, one);
+            }
+
+            one.add(a);
+        }
+
+        model.addAttribute("grouped", grouped);
 
         return "manager/pending";
     }
@@ -112,6 +141,19 @@ public class ManagerCourseController {
         // template resolve against the wrong object (blank fields / 500 errors).
         model.addAttribute("app", application);
         model.addAttribute("manager", manager);
+
+        int usageYear = LocalDate.now().getYear();
+
+        if (application.getStartDate() != null) {
+            usageYear = application.getStartDate().getYear();
+        }
+
+        if (application.getApplicant() != null) {
+            model.addAttribute("usageSummary",
+                    courseApplicationService.Summary(
+                            application.getApplicant().getId(), usageYear));
+            model.addAttribute("usageYear", usageYear);
+        }
 
         return "manager/detail";
     }
@@ -205,6 +247,7 @@ public class ManagerCourseController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(value = "excludeApplicant", required = false) Long excludeApplicant,
             HttpSession session,
             Model model) {
 
@@ -223,8 +266,15 @@ public class ManagerCourseController {
                     HttpStatus.BAD_REQUEST, "End date cannot be earlier than start date");
         }
 
+        Long excludeId = -1L;
+
+        if (excludeApplicant != null) {
+            excludeId = excludeApplicant;
+        }
+
         List<CourseApplication> applications =
-                courseApplicationService.findApprovedOverlapping(startDate, endDate);
+                courseApplicationService.findApprovedOverlapping(
+                        manager.getId(), excludeId, startDate, endDate);
 
         model.addAttribute("applications", applications);
         model.addAttribute("startDate", startDate);
@@ -260,6 +310,109 @@ public class ManagerCourseController {
 
         return "manager/history";
     }
-    
-    
+
+    @GetMapping("/claims")
+    public String pendingClaims(HttpSession session, Model model) {
+
+        User manager = (User) session.getAttribute("loggedInUser");
+
+        if (manager == null) {
+            return "redirect:/login";
+        }
+
+        if (manager.getRole() != Role.MANAGER) {
+            return "redirect:/home";
+        }
+
+        List<CourseFeeClaim> claims =
+                courseFeeClaimService.findClaimForManager(manager.getId());
+
+        model.addAttribute("claims", claims);
+        model.addAttribute("manager", manager);
+
+        return "manager/claims";
+    }
+
+    @GetMapping("/claims/{id}")
+    public String claimDetail(@PathVariable Long id, HttpSession session, Model model) {
+
+        User manager = (User) session.getAttribute("loggedInUser");
+
+        if (manager == null) {
+            return "redirect:/login";
+        }
+
+        if (manager.getRole() != Role.MANAGER) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        CourseFeeClaim claim = courseFeeClaimService.findById(id);
+
+        if (claim == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        model.addAttribute("claim", claim);
+        model.addAttribute("manager", manager);
+
+        return "manager/claim-detail";
+    }
+
+    @PostMapping("/claims/{id}/approve")
+    public String approveClaim(
+            @PathVariable Long id,
+            @RequestParam("comment") String comment,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        User manager = (User) session.getAttribute("loggedInUser");
+
+        if (manager == null) {
+            return "redirect:/login";
+        }
+
+        if (manager.getRole() != Role.MANAGER) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        try {
+            courseFeeClaimService.approve(id, comment, manager.getId());
+            redirectAttributes.addFlashAttribute("success", "Fee claim approved.");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/manager/claims/" + id;
+        }
+
+        return "redirect:/manager/claims";
+    }
+
+    @PostMapping("/claims/{id}/reject")
+    public String rejectClaim(
+            @PathVariable Long id,
+            @RequestParam("comment") String comment,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        User manager = (User) session.getAttribute("loggedInUser");
+
+        if (manager == null) {
+            return "redirect:/login";
+        }
+
+        if (manager.getRole() != Role.MANAGER) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        try {
+            courseFeeClaimService.reject(id, comment, manager.getId());
+            redirectAttributes.addFlashAttribute("success", "Fee claim rejected.");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/manager/claims/" + id;
+        }
+
+        return "redirect:/manager/claims";
+    }
+
+
 }

@@ -43,6 +43,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				// Public entry points (two separate URLs per CA instructions)
 				.requestMatchers("/", "/login", "/admin/login").permitAll()
+				.requestMatchers("/assets/**").permitAll()
 				// Container error dispatch (403/500 pages) must stay reachable,
 				// otherwise a denied request is re-dispatched to /error, denied
 				// again as anonymous and the real status is replaced by a

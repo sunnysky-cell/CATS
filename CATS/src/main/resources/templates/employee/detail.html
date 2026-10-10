@@ -1,93 +1,316 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CATS - Application Detail</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f6f8; color: #222; }
-        header { background-color: #1f3a5f; color: white; padding: 18px 30px; }
-        header h1 { margin: 0; font-size: 24px; }
-        main { max-width: 800px; margin: 30px auto; padding: 0 20px; }
-        .button { display: inline-block; padding: 9px 14px; border: none; border-radius: 5px;
-                  text-decoration: none; cursor: pointer; font-size: 14px; }
-        .primary { background-color: #1f3a5f; color: white; }
-        .secondary { background-color: #68737d; color: white; }
-        .danger { background-color: #b42318; color: white; }
-        .success { background-color: #e6f4ea; color: #1e6b32; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
-        .error { background-color: #ffe5e5; color: #a00000; padding: 12px; border-radius: 5px; margin-bottom: 20px; }
-        .card { background-color: white; border-radius: 8px; padding: 24px;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 20px; }
-        .row { margin-bottom: 12px; }
-        .row label { font-weight: bold; display: inline-block; min-width: 160px; color: #555; }
-        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
-        .actions { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
-        textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-height: 70px; }
-        form.inline { display: inline; }
-    </style>
-</head>
-<body>
-<header>
-    <h1>Application #<span th:text="${app.id}"></span></h1>
-</header>
-<main>
-    <a class="button secondary" th:href="@{/employee/applications}">&larr; My Applications</a>
-
-    <div class="success" th:if="${success}" th:text="${success}"></div>
-    <div class="error" th:if="${error}" th:text="${error}"></div>
-
-    <div class="card">
-        <div class="row"><label>Status:</label>
-            <span class="status-badge" th:text="${app.status}"></span>
-        </div>
-        <div class="row"><label>Course Title:</label><span th:text="${app.courseTitle}"></span></div>
-        <div class="row"><label>Category:</label><span th:text="${app.category != null ? app.category.name : '-'}"></span></div>
-        <div class="row"><label>Provider:</label><span th:text="${app.trainingProvider}"></span></div>
-        <div class="row"><label>Start Date:</label><span th:text="${app.startDate}"></span></div>
-        <div class="row"><label>End Date:</label><span th:text="${app.endDate}"></span></div>
-        <div class="row"><label>Training Days:</label><span th:text="${app.trainingDays}"></span></div>
-        <div class="row"><label>Course Fee:</label><span th:text="${app.courseFee}"></span></div>
-        <div class="row"><label>Justification:</label><span th:text="${app.justification}"></span></div>
-        <div class="row" th:if="${app.workDissemination != null}">
-            <label>Dissemination:</label><span th:text="${app.workDissemination}"></span>
-        </div>
-        <div class="row" th:if="${app.managerComment != null}">
-            <label>Manager Comment:</label><span th:text="${app.managerComment}"></span>
-        </div>
-        <div class="row" th:if="${app.decisionDate != null}">
-            <label>Decided At:</label><span th:text="${app.decisionDate}"></span>
-        </div>
-        <div class="row" th:if="${app.experienceComment != null}">
-            <label>Your Feedback:</label><span th:text="${app.experienceComment}"></span>
-        </div>
-    </div>
-
-    <!-- Edit: only allowed while still in APPLIED / UPDATED -->
-    <div class="actions" th:if="${app.status.name() == 'APPLIED' or app.status.name() == 'UPDATED'}">
-        <a class="button primary" th:href="@{/employee/applications/{id}/edit(id=${app.id})}">Edit</a>
-    </div>
-
-    <!-- Cancel / Complete: only allowed while APPROVED -->
-    <div class="card" th:if="${app.status.name() == 'APPROVED'}">
-        <h3>Finish up</h3>
-
-        <form method="post" class="inline"
-              th:action="@{/employee/applications/{id}/cancel(id=${app.id})}"
-              th:attr="onclick='return confirm(\'Cancel this approved course?\')'">
-            <button type="submit" class="button danger">Cancel Course</button>
-        </form>
-
-        <h3 style="margin-top:20px;">Mark as Completed</h3>
-        <form method="post"
-              th:action="@{/employee/applications/{id}/complete(id=${app.id})}">
-            <div class="row">
-                <label>Experience / Feedback:</label>
-                <textarea name="experienceComment" placeholder="Share your learning experience..."></textarea>
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Application details')}"></head>
+  <body class="employee-workspace">
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside
+      th:replace="~{fragments/chrome :: sidebar(${session.loggedInUser.role.name() == 'MANAGER' ? 'personal-training' : 'applications'})}"
+    ></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Application details')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <a
+              class="employee-back"
+              th:href="@{/employee/applications}"
+            >
+              Back to my applications
+            </a>
+            <h1 th:text="${app.courseTitle}">Application details</h1>
+            <p>
+              Application #
+              <span th:text="${app.id}"></span>
+              ·
+              <span th:text="${app.trainingProvider}"></span>
+            </p>
+          </div>
+          <span
+            class="status-badge"
+            th:text="${app.status}"
+            th:attr="data-status=${app.status}"
+          ></span>
+        </header>
+        <div class="page-body">
+          <p
+            class="success"
+            th:if="${success}"
+            th:text="${success}"
+            role="status"
+          ></p>
+          <p
+            class="error"
+            th:if="${error}"
+            th:text="${error}"
+            role="alert"
+            tabindex="-1"
+            data-server-errors
+          ></p>
+          <div class="employee-layout">
+            <div class="employee-document">
+              <section
+                class="employee-section"
+                aria-labelledby="course-overview-heading"
+              >
+                <h2 id="course-overview-heading">Course overview</h2>
+                <dl class="employee-detail-facts">
+                  <div>
+                    <dt>Category</dt>
+                    <dd th:text="${app.category != null ? app.category.name : 'Not set'}"></dd>
+                  </div>
+                  <div>
+                    <dt>Training provider</dt>
+                    <dd th:text="${app.trainingProvider}"></dd>
+                  </div>
+                  <div>
+                    <dt>Start date</dt>
+                    <dd th:text="${app.startDate}"></dd>
+                  </div>
+                  <div>
+                    <dt>End date</dt>
+                    <dd th:text="${app.endDate}"></dd>
+                  </div>
+                  <div>
+                    <dt>Training days</dt>
+                    <dd th:text="${app.trainingDays != null ? app.trainingDays : 'Not set'}"></dd>
+                  </div>
+                  <div>
+                    <dt>Course fee</dt>
+                    <dd
+                      th:text="${app.courseFee != null ? 'S$' + #numbers.formatDecimal(app.courseFee, 1, 'COMMA', 2, 'POINT') : 'No fee recorded'}"
+                    ></dd>
+                  </div>
+                </dl>
+              </section>
+              <section
+                class="employee-section"
+                aria-labelledby="learning-objectives-heading"
+              >
+                <h2 id="learning-objectives-heading">Learning objectives</h2>
+                <div class="employee-prose">
+                  <h3>Why this course</h3>
+                  <p th:text="${app.justification}"></p>
+                </div>
+                <div
+                  class="employee-prose"
+                  th:if="${app.workDissemination != null and !#strings.isEmpty(app.workDissemination)}"
+                >
+                  <h3>Sharing the learning</h3>
+                  <p th:text="${app.workDissemination}"></p>
+                </div>
+              </section>
+              <section
+                class="employee-section"
+                th:if="${app.managerComment != null or app.decisionDate != null}"
+              >
+                <h2>Manager decision</h2>
+                <p
+                  class="hint"
+                  th:if="${app.decisionDate != null}"
+                  th:text="${#temporals.format(app.decisionDate, 'yyyy-MM-dd HH:mm')}"
+                ></p>
+                <p
+                  class="employee-comment"
+                  th:if="${app.managerComment != null}"
+                  th:text="${app.managerComment}"
+                ></p>
+              </section>
+              <section
+                class="employee-section"
+                th:if="${app.experienceComment != null}"
+              >
+                <h2>Your learning feedback</h2>
+                <p
+                  class="employee-comment"
+                  th:text="${app.experienceComment}"
+                ></p>
+              </section>
+              <!-- Completion remains a server action and uses the original optional field. -->
+              <section
+                class="employee-section"
+                th:if="${app.status.name() == 'APPROVED'}"
+              >
+                <h2>Complete your course</h2>
+                <p class="hint">Record your experience after the training is finished.</p>
+                <form
+                  method="post"
+                  th:action="@{/employee/applications/{id}/complete(id=${app.id})}"
+                  data-processing-form
+                >
+                  <div class="field">
+                    <label for="experienceComment">
+                      Learning experience
+                      <span class="employee-unit">Optional</span>
+                    </label>
+                    <textarea
+                      id="experienceComment"
+                      name="experienceComment"
+                      rows="5"
+                      placeholder="What did you learn, and how will you apply it?"
+                    ></textarea>
+                  </div>
+                  <button
+                    type="submit"
+                    class="button primary"
+                    data-submit-label
+                  >
+                    Mark as completed
+                  </button>
+                  <p
+                    class="submission-status"
+                    data-submission-status
+                    role="status"
+                    aria-live="polite"
+                  ></p>
+                </form>
+              </section>
             </div>
-            <button type="submit" class="button success">Mark Completed</button>
-        </form>
+            <aside
+              class="employee-context"
+              aria-labelledby="next-steps-heading"
+            >
+              <h2 id="next-steps-heading">Next steps</h2>
+              <p
+                class="employee-next-step"
+                th:if="${app.status.name() == 'APPLIED' or app.status.name() == 'UPDATED'}"
+              >
+                Your manager is reviewing this request. You can still update the details.
+              </p>
+              <p
+                class="employee-next-step"
+                th:if="${app.status.name() == 'APPROVED'}"
+              >
+                Your course is approved. After training, record your experience and mark it as
+                completed.
+              </p>
+              <p
+                class="employee-next-step"
+                th:if="${app.status.name() == 'COMPLETED'}"
+              >
+                Your course is completed. Eligible paid courses can proceed to a fee claim.
+              </p>
+              <p
+                class="employee-next-step"
+                th:if="${app.status.name() == 'REJECTED'}"
+              >
+                Your request was declined. Read the manager comment for the reason.
+              </p>
+              <p
+                class="employee-next-step"
+                th:if="${app.status.name() == 'CANCELLED'}"
+              >
+                This course has been cancelled.
+              </p>
+              <p
+                class="employee-next-step"
+                th:if="${app.status.name() == 'DELETED'}"
+              >
+                This application has been deleted.
+              </p>
+              <dl class="employee-facts">
+                <div>
+                  <dt>Status</dt>
+                  <dd>
+                    <span
+                      class="status-badge"
+                      th:text="${app.status}"
+                      th:attr="data-status=${app.status}"
+                    ></span>
+                  </dd>
+                </div>
+                <div th:if="${app.createdAt != null}">
+                  <dt>Created</dt>
+                  <dd th:text="${#temporals.format(app.createdAt, 'yyyy-MM-dd')}"></dd>
+                </div>
+                <div th:if="${app.applicant != null and app.applicant.manager != null}">
+                  <dt>Reviewed by</dt>
+                  <dd th:text="${app.applicant.manager.name}"></dd>
+                </div>
+              </dl>
+              <!-- Only expose actions for the persisted application status. -->
+              <div
+                class="employee-action-group"
+                th:if="${app.status.name() == 'APPLIED' or app.status.name() == 'UPDATED'}"
+              >
+                <a
+                  class="button primary"
+                  th:href="@{/employee/applications/{id}/edit(id=${app.id})}"
+                >
+                  Edit application
+                </a>
+                <form
+                  method="post"
+                  th:action="@{/employee/applications/{id}/delete(id=${app.id})}"
+                  data-processing-form
+                  data-confirm="Delete this application? This cannot be undone."
+                >
+                  <button
+                    type="submit"
+                    class="button secondary"
+                    data-submit-label
+                  >
+                    Delete application
+                  </button>
+                </form>
+              </div>
+              <div
+                class="employee-action-group"
+                th:if="${app.status.name() == 'APPROVED'}"
+              >
+                <form
+                  method="post"
+                  th:action="@{/employee/applications/{id}/cancel(id=${app.id})}"
+                  data-processing-form
+                  data-confirm="Cancel this approved course?"
+                >
+                  <button
+                    type="submit"
+                    class="button secondary"
+                    data-submit-label
+                  >
+                    Cancel course
+                  </button>
+                </form>
+              </div>
+              <div
+                class="employee-action-group"
+                th:if="${app.status.name() == 'COMPLETED' and app.category != null and app.category.feeRequired}"
+              >
+                <a
+                  class="button primary"
+                  th:href="@{/employee/claim/{id}(id=${app.id})}"
+                >
+                  Request reimbursement
+                </a>
+                <a
+                  class="employee-context-link"
+                  th:href="@{/employee/claims}"
+                >
+                  View my fee claims
+                </a>
+              </div>
+              <a
+                class="employee-context-link"
+                th:href="@{/training-calendar}"
+              >
+                Open training calendar
+              </a>
+            </aside>
+          </div>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
     </div>
-</main>
-</body>
+  </body>
 </html>

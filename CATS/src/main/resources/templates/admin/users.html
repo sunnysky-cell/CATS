@@ -1,289 +1,142 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
-<head>
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>CATS - Manage Users</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #f4f6f8;
-            color: #222;
-        }
-
-        header {
-            background-color: #1f3a5f;
-            color: white;
-            padding: 18px 30px;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        main {
-            max-width: 1250px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        .toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .button {
-            display: inline-block;
-            padding: 9px 14px;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .primary {
-            background-color: #1f3a5f;
-            color: white;
-        }
-
-        .secondary {
-            background-color: #68737d;
-            color: white;
-        }
-
-        .danger {
-            background-color: #b42318;
-            color: white;
-        }
-
-        .success {
-            background-color: #287a3c;
-            color: white;
-        }
-
-        .error {
-            background-color: #ffe5e5;
-            color: #a00000;
-            padding: 12px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-            vertical-align: middle;
-        }
-
-        th {
-            background-color: #e9eef3;
-        }
-
-        tr:hover {
-            background-color: #f8fafc;
-        }
-
-        .status-active {
-            color: #287a3c;
-            font-weight: bold;
-        }
-
-        .status-disabled {
-            color: #b42318;
-            font-weight: bold;
-        }
-
-        .actions {
-            display: flex;
-            gap: 7px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .actions form {
-            margin: 0;
-        }
-
-        .empty {
-            text-align: center;
-            color: #777;
-        }
-    </style>
-</head>
-
-<body>
-
-<header>
-    <h1>
-        Manage Users
-    </h1>
-</header>
-
-
-<main>
-
-    <div class="toolbar">
-
-        <a class="button secondary"
-           th:href="@{/admin/home}">
-            ← Admin Home
-        </a>
-
-        <a class="button primary"
-           th:href="@{/admin/users/new}">
-            + New User
-        </a>
-
-    </div>
-
-
-    <!-- Controller business error -->
-    <div class="error"
-         th:if="${error}"
-         th:text="${error}">
-    </div>
-
-
-    <div class="table-wrapper">
-
-        <table>
-
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Name</th>
-                <th>Role</th>
-                <th>Designation</th>
-                <th>Manager</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-
-
-            <tbody>
-
-            <tr th:each="u : ${users}">
-
-                <td th:text="${u.id}">
-                </td>
-
-                <td th:text="${u.username}">
-                </td>
-
-                <td th:text="${u.name}">
-                </td>
-
-                <td th:text="${u.role}">
-                </td>
-
-                <td th:text="${u.designation}">
-                </td>
-
-                <td th:text="${u.manager != null
-                              ? u.manager.name
-                              : '-'}">
-                </td>
-
-                <td>
-
-                    <span class="status-active"
-                          th:if="${u.enabled}">
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Users &amp; allowances')}"></head>
+  <body class="admin-page">
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside th:replace="~{fragments/chrome :: sidebar('users')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Users &amp; allowances')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <h1>Users &amp; allowances</h1>
+            <p>Manage people, reporting lines and annual training entitlements.</p>
+          </div>
+          <a
+            class="button primary"
+            th:href="@{/admin/users/new}"
+          >
+            Add user
+          </a>
+        </header>
+        <div class="page-body">
+          <div
+            class="error"
+            th:if="${error}"
+            th:text="${error}"
+            role="alert"
+          ></div>
+          <section
+            class="section admin-records"
+            aria-label="User records"
+          >
+            <div class="table-wrapper">
+              <table
+                class="table admin-users-table"
+                data-searchable="true"
+              >
+                <caption class="sr-only">User accounts and reporting lines</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Person</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Designation</th>
+                    <th scope="col">Reporting manager</th>
+                    <th scope="col">Access</th>
+                    <th scope="col"><span class="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="u : ${users}">
+                    <td data-label="Person">
+                      <span
+                        class="admin-record-primary"
+                        th:text="${u.name}"
+                      ></span>
+                      <span class="admin-record-secondary">
+                        <span th:text="${u.username}"></span>
+                        · ID
+                        <span th:text="${u.id}"></span>
+                      </span>
+                    </td>
+                    <td
+                      data-label="Role"
+                      th:text="${u.role.name() == 'ADMIN' ? 'Admin' : #strings.capitalize(#strings.toLowerCase(u.role.name()))}"
+                    ></td>
+                    <td
+                      data-label="Designation"
+                      th:text="${u.designation}"
+                    ></td>
+                    <td
+                      data-label="Reporting manager"
+                      th:text="${u.manager != null ? u.manager.name : 'No reporting manager'}"
+                    ></td>
+                    <td data-label="Access">
+                      <span
+                        class="status status-active"
+                        th:if="${u.enabled}"
+                      >
                         Enabled
-                    </span>
-
-                    <span class="status-disabled"
-                          th:unless="${u.enabled}">
+                      </span>
+                      <span
+                        class="status status-disabled"
+                        th:unless="${u.enabled}"
+                      >
                         Disabled
-                    </span>
-
-                </td>
-
-
-                <td>
-
-                    <div class="actions">
-
-                        <!-- EDIT -->
-                        <a class="button primary"
-                           th:href="@{/admin/users/{id}/edit(id=${u.id})}">
-                            Edit
+                      </span>
+                    </td>
+                    <td data-label="Actions">
+                      <div class="actions admin-row-actions">
+                        <a
+                          class="button text"
+                          th:href="@{/admin/users/{id}/edit(id=${u.id})}"
+                        >
+                          Edit
                         </a>
-
-
-                        <!-- ENABLE / DISABLE -->
-                        <form method="post"
-                              th:action="@{/admin/users/{id}/toggle(id=${u.id})}">
-
-                            <button type="submit"
-                                    class="button"
-                                    th:classappend="${u.enabled}
-                                        ? ' danger'
-                                        : ' success'"
-                                    th:text="${u.enabled}
-                                        ? 'Disable'
-                                        : 'Enable'"
-                                    th:attr="onclick=${u.enabled}
-                                        ? 'return confirm(\'Disable this user?\')'
-                                        : 'return confirm(\'Enable this user?\')'">
-                            </button>
-
+                        <form
+                          method="post"
+                          th:action="@{/admin/users/{id}/toggle(id=${u.id})}"
+                          th:attr="data-confirm=${u.enabled ? 'Disable this user?' : 'Enable this user?'}"
+                        >
+                          <button
+                            type="submit"
+                            class="button text"
+                            th:classappend="${u.enabled} ? ' danger' : ' success'"
+                            th:text="${u.enabled} ? 'Disable' : 'Enable'"
+                          ></button>
                         </form>
-
-                    </div>
-
-                </td>
-
-            </tr>
-
-
-            <tr th:if="${#lists.isEmpty(users)}">
-
-                <td colspan="8"
-                    class="empty">
-
-                    No users found.
-
-                </td>
-
-            </tr>
-
-            </tbody>
-
-        </table>
-
+                      </div>
+                    </td>
+                  </tr>
+                  <tr th:if="${#lists.isEmpty(users)}">
+                    <td
+                      colspan="6"
+                      class="empty"
+                    >
+                      No users found.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="help admin-record-note">
+              Open Edit to manage a profile, role and allowances for each year.
+            </p>
+          </section>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
     </div>
-
-</main>
-
-</body>
+  </body>
 </html>

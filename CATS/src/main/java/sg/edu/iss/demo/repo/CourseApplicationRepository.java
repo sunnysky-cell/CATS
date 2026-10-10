@@ -47,10 +47,15 @@ public interface CourseApplicationRepository extends JpaRepository<CourseApplica
 	@Query("""
 			SELECT ca FROM CourseApplication ca
 			WHERE ca.status = sg.edu.iss.demo.model.ApplicationStatus.APPROVED
+			  AND ca.applicant.manager.id = :managerId
+			  AND ca.applicant.id <> :excludeApplicantId
 			  AND ca.startDate <= :endDate
 			  AND ca.endDate   >= :startDate
+			ORDER BY ca.startDate ASC, ca.applicant.name ASC
 			""")
-	List<CourseApplication> findApprovedOverlapping(@Param("startDate") LocalDate startDate,
+	List<CourseApplication> findApprovedOverlapping(@Param("managerId") Long managerId,
+			@Param("excludeApplicantId") Long excludeApplicantId,
+			@Param("startDate") LocalDate startDate,
 			@Param("endDate") LocalDate endDate);
 
 	@Query("""

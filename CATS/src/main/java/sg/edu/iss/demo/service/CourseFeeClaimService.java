@@ -186,31 +186,32 @@ public class CourseFeeClaimService {
 		
 		claim.setDecisionDate(LocalDateTime.now());
 		
+		courseFeeClaimRepo.save(claim);
+		
 		notifService.notifyUser(claim.getClaimant(), "Your fee claim has been REJECTED");
 		
 	}
 	
-	public void checkManager(CourseFeeClaim claim, Long managerId ) {
-		
+	private void checkManager(CourseFeeClaim claim, Long managerId) {
+
 		User claimant = claim.getClaimant();
-		
-		if(claimant.getManager() != null || !claimant.getManager().equals(managerId)) {
-			
+
+		if (claimant.getManager() == null || !claimant.getManager().getId().equals(managerId)) {
+
 			throw new IllegalStateException("You are not the manager of this claimant");
-			
+
 		}
-		
-		
+
 	}
-	
-	public void checkComment(String comment) {
-		
-		if(comment != null || comment.trim().isEmpty()) {
-			
+
+	private void checkComment(String comment) {
+
+		if (comment == null || comment.trim().isEmpty()) {
+
 			throw new IllegalArgumentException("Comment is mandatory for approve/reject");
-			
+
 		}
-		
+
 	}
 
 	

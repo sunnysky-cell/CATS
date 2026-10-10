@@ -25,7 +25,7 @@ public final class CalendarCourseView {
 	public String getEmployeeName() {
 		return employeeName;
 	}
-	public String getCourseTtitle() {
+	public String getCourseTitle() {
 		return courseTitle;
 	}
 	public String getCategoryName() {

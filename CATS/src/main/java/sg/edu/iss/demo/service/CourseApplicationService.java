@@ -73,9 +73,9 @@ public class CourseApplicationService {
 		
 	}
 
-	public List<CourseApplication> findApprovedOverlapping(LocalDate start, LocalDate end){
+	public List<CourseApplication> findApprovedOverlapping(Long managerId, Long excludeApplicantId, LocalDate start, LocalDate end){
 		
-		return CourseAppRepo.findApprovedOverlapping(start, end);
+		return CourseAppRepo.findApprovedOverlapping(managerId, excludeApplicantId, start, end);
 		
 	}
 
@@ -88,6 +88,18 @@ public class CourseApplicationService {
 		LocalDate end = form.getEndDate();
 		
 		CourseCategory c = form.getCategory();
+		
+		if(c == null || c.getId() == null) {
+			
+			error.add("Please choose a course category");
+			
+		}
+		
+		if(start != null && !start.isAfter(LocalDate.now())) {
+			
+			error.add("Course must start on a future date (today or past dates are not allowed)");
+			
+		}
 		
 		// 规则1：结束日期不能早于开始日期
 		if(start != null && end != null && end.isBefore(start)) {
@@ -115,6 +127,28 @@ public class CourseApplicationService {
 			
 			// 规则4：天数由系统算，不让用户填（复用队友的 TrainingDayCalculator）
 			BigDecimal days = dayCalculator.calculateTrainingDays(start, end);
+			
+			if(form.isHalfDay()) {
+				
+				if(c == null || !c.isAllowHalfDay()) {
+					
+					error.add("Half-day sessions are only allowed for Internal Training");
+					
+				}
+				
+				else if(days.compareTo(new BigDecimal("1")) != 0) {
+					
+					error.add("Half-day sessions are only allowed for a single-day course");
+					
+				}
+				
+				else {
+					
+					days = new BigDecimal("0.5");
+					
+				}
+				
+			}
 			
 			form.setTrainingDays(days);
 			
@@ -173,7 +207,6 @@ public class CourseApplicationService {
 					
 				}
 				
-				// 免费分类：费用强制归零
 				else if(c != null ) {
 					
 					form.setCourseFee(BigDecimal.ZERO);
@@ -202,7 +235,6 @@ public class CourseApplicationService {
 			
 			else {
 				
-				// 编辑：排除自己这条
 				overlap = CourseAppRepo.existsOverlappingApplicationExcluding(nowUser.getId(), start, end, activeStatuses, exId);
 				
 			}
@@ -279,6 +311,8 @@ public class CourseApplicationService {
 		
 		db.setTrainingDays(form.getTrainingDays());
 		
+		db.setHalfDay(form.isHalfDay());
+		
 		db.setJustification(form.getJustification());
 		
 		db.setWorkDissemination(form.getWorkDissemination());
@@ -299,7 +333,7 @@ public class CourseApplicationService {
 		
 		checkOwner(db, userId);
 		
-		if(db.getStatus() != ApplicationStatus.APPROVED && db.getStatus() != ApplicationStatus.UPDATED) {
+		if(db.getStatus() != ApplicationStatus.APPLIED && db.getStatus() != ApplicationStatus.UPDATED) {
 			
 			throw new IllegalStateException("Only APPLIED/UPDATED applications can be deleted, current: " + db.getStatus());
 			
@@ -343,6 +377,12 @@ public class CourseApplicationService {
 		if(db.getStatus() != ApplicationStatus.APPROVED) {
 			
 			throw new IllegalStateException("Only APPROVED applications can be marked completed, current: " + db.getStatus());
+			
+		}
+		
+		if(db.getEndDate() != null && db.getEndDate().isAfter(LocalDate.now())) {
+			
+			throw new IllegalStateException("You can only mark the course completed after it has ended (end date " + db.getEndDate() + ")");
 			
 		}
 		

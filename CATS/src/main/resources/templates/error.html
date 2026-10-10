@@ -1,17 +1,71 @@
-<!DOCTYPE html>
-
-<html xmlns:th="http://www.thymeleaf.org">
-	
-<head><meta charset="UTF-8"><title>Error</title></head>
-
-<body>
-	
-<h2>Something went wrong</h2>
-
-<p style="color:red" th:text="${error}"></p>
-
-<p><a href="javascript:history.back()">Go back</a></p>
-
-</body>
-
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <head th:replace="~{fragments/chrome :: head('Something went wrong')}"></head>
+  <body class="">
+    <a
+      class="skip-link"
+      href="#main-content"
+    >
+      Skip to content
+    </a>
+    <aside th:replace="~{fragments/chrome :: sidebar('error')}"></aside>
+    <div class="app-frame">
+      <header th:replace="~{fragments/chrome :: topbar('Something went wrong')}"></header>
+      <main
+        id="main-content"
+        class="page-content"
+      >
+        <header class="page-header">
+          <div>
+            <span class="eyebrow">Keep moving</span>
+            <h1>Something went wrong</h1>
+            <p></p>
+          </div>
+          <span class="page-index">CATS / ERROR</span>
+        </header>
+        <div class="page-body">
+          <section class="error-panel">
+            <div
+              class="error-code"
+              aria-hidden="true"
+            >
+              ↗
+            </div>
+            <span class="eyebrow">LET’S GET YOU BACK ON TRACK</span>
+            <h2 style="font-size: 34px; margin-top: 16px">A small interruption.</h2>
+            <p
+              class="error"
+              th:if="${error}"
+              th:text="${error}"
+              role="alert"
+            >
+              Something went wrong.
+            </p>
+            <p>
+              We couldn’t complete that request. Return to your workspace and try again, or contact
+              your administrator if it keeps happening.
+            </p>
+            <div class="actions">
+              <a
+                class="button"
+                th:href="@{/home}"
+              >
+                Back to overview ↗
+              </a>
+              <a
+                class="button secondary"
+                th:href="@{/logout}"
+              >
+                Sign in again
+              </a>
+            </div>
+          </section>
+        </div>
+        <footer th:replace="~{fragments/chrome :: footer}"></footer>
+      </main>
+    </div>
+  </body>
 </html>
