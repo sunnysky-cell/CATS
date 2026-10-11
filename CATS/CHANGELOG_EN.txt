@@ -1,0 +1,237 @@
+# Changelog
+(English version of CHANGELOG.txt)
+
+## 2026-10-11 - Fix application form validation and approval notification; add frontend source and third-party licenses
+
+### Bug fixes
+
+- The employee application form had no server-side field validation. The project did not use `@Valid`, and `validate()` did not check the title or the justification. A blank title failed at save with `ConstraintViolationException`, and the page showed only "Unexpected error". The create and edit POST methods in `EmployeeCourseController` now use `@Valid @ModelAttribute` with `BindingResult`, and the form shows field errors together with the business errors from `validate()`. `employee/form.html` has `th:errors` on the title, training provider, start and end dates, fee and justification.
+- Employees got no notification when a manager approved their application. `reject()` called `notifyUser`; `approve()` did not. `approve()` now notifies the applicant at the end, as the CA requires for both approval and rejection.
+- The repository had only the built JS for the three React pages (course, calendar and agent workspace), with no source. We copied the source from the handoff folder `ui/components-source` into `frontend-source/`. During the merge someone had edited 22 labels in the built `agent-workspace.js` and `course-workspace.js` ("student" to "employee", "teacher" to "manager") without changing the source. We made the same edits in the source. `vite.config.ts`, `tools/verify-build.mjs` and `tests/agent-data.test.ts` now point to `src/main/resources/static/assets`, and we regenerated the three `.js.map` files. See `frontend-source/README.txt` for details.
+- Third-party license notices were missing. The previous entry said the handoff's license file was in the repository; it was not. We added `THIRD-PARTY-LICENSES.txt`, which lists the source and license of the login page gallery (Codrops, three.js), the components and libraries in the React pages (shadcn/ui, motion-primitives, React, Radix UI and others), and the icons and fonts.
+
+### Tests
+
+- Added `EmployeeApplicationValidationTests`: create with a blank title, clear the title while editing, and a normal submission.
+- Added `CourseApplicationRepositoryTests` (`@DataJpaTest`) for the queries behind approved courses in the same period, date overlap, yearly allowance, the pending list and the training calendar.
+- `mvn test`: 41 pass, 1 skipped by design. `npm test` in `frontend-source`: 21 pass. A rebuild produces the same three JS files as the ones in the repository.
+
+## 2026-10-11 - Merge the teammate's redesigned frontend, close six mandatory CA gaps, fix seven frontend defects
+
+### 1. Frontend merge (from the handoff package CATS-Academy-Handoff-20261010)
+
+- A teammate rebuilt the whole frontend from this repository's source. We merged it as delivered, with no changes to its design or page structure.
+- We merged from `ui/templates` and `ui/static` in the package, not from `runtime/CATS-1.0.0.jar`. The templates inside that JAR are an older build.
+- All 26 files in `templates/` now come from the teammate's version; each one matches the source by md5. New files: `templates/fragments/chrome.html` (four shared fragments: head, sidebar, topbar and footer, which 22 pages include through `th:replace`) and `templates/agent-demo.html`.
+- `static/` grew from 4 files to 65 (16.54 MB): `app.css`, `admin.css`, `workspace.css`, `agent-workspace.css`, `calendar-workspace.css`, `course-workspace.css`, the matching JS, the Inter and SourceSerif4 fonts, and SVG graphics. Each file matches the source byte for byte.
+- Third-party licenses: the package contains `THIRD-PARTY-LICENSES.txt` and the font OFL notices, covering Tailwind, shadcn/ui, Codrops, Three.js and others. We added them to the repository to meet their distribution terms.
+- Checks after the merge: none of the 38 `/assets/*` files the templates reference is missing; no fragment reference is broken; `clean compile` and `mvn test` pass; 13 pages across the three roles (employee, manager, admin) return HTTP 200 with no error page.
+
+### 2. Backend changes needed for the frontend merge
+
+- `SecurityConfig`: added `.requestMatchers("/assets/**").permitAll()` to `authorizeHttpRequests`. The login page loads `/assets/*.svg` before anyone signs in. Without this rule `anyRequest().authenticated()` blocks those requests with 403, and the login page loses all its styles and graphics. The frontend merge needed no other backend change.
+- `workspace.css` line 99: the `margin-right` of `.app-frame` changed from `max(32px, calc((100vw - 1420px) / 2))` to `clamp(32px, calc((100vw - 1420px) / 6), 180px)`. The old formula grew at half speed: each extra 2px of viewport gave the content 1px. On a 2552px screen that left 566px of empty space on the right (72% content fill). The new value keeps the fill between 87% and 90%. Across 7 viewports × 24 pages (168 checks) we found 0 horizontal overflows. 6 narrow widths (375/600/760/900/1024/1180) × 4 pages also showed 0 overflows, and the drawer sidebar on narrow screens works as before.
+- Added the `sg.edu.iss.demo.calendar` package with 9 classes, copied as-is from the handoff's `backend-extensions/src` (md5 match): `AgentDemoController`, `CalendarEventController`, `CalendarEventInput`, `PersonalCalendarEvent`, `PersonalCalendarEventRepository`, `PersonalCalendarService`, `CalendarApiSecurity`, `CalendarApiErrors`, `CalendarApiException`. This package serves the sidebar link `/agent-demo` and the `/api/calendar/session` and `/api/calendar/events` calls from `calendar-workspace.js`. Without it the sidebar has a dead link and the calendar page gets no data.
+  - `CalendarApiSecurity` uses `@Order(0)` and `securityMatcher("/api/calendar/**")`. It covers only the calendar API and leaves the existing security chain alone. Anonymous calls to the calendar API get 401.
+  - `PersonalCalendarEvent` is a new entity; `ddl-auto=update` creates the `personal_calendar_event` table. The handoff README notes that nobody has tested this schema change in production, so review the new table and index before going live.
+
+### 3. Six mandatory CA gaps closed
+
+We checked the Mandatory Features on pages 6 and 7 of `SA63 CA Instructions.pdf` one by one and closed these gaps:
+
+1. **The course must start on a future date** (CA p6: `the course must start on a future date`). `CourseApplicationService.validate()` now rejects a start date of today or earlier and saves nothing. A test submission with `startDate=2026-01-05` was blocked with a message, and the database stayed unchanged.
+2. **Half-day granularity for Internal Training** (CA p6: `Half-day sessions are allowed for Internal Training only`; p3: `the granularity is half a day`). `CourseApplication` has a new `boolean halfDay` field (column `half_day bit(1)`). When the box is ticked, `validate()` requires a category with `allowHalfDay` and a single-day course, then counts the course as `0.5` days. `update()` copies the field too. `employee/form.html` has a new checkbox and hint at the end of Course details. Four test cases: internal + half day + one day → saves `training_days=0.5` and `half_day=1`; internal + no half day + one day → `1.0` / `0`; external + half day → rejected; internal + half day + two days → rejected. After approval the CSV report shows `0.5` under `Days Used`, so half days count toward the yearly allowance.
+3. **Mark as completed only after the course ends** (CA p6: `Once an approved course has ended, the Employee marks it as attended`). `markCompleted()` now checks the end date after the status check. Completing an APPROVED application that ends in the future (2026-10-23) leaves it APPROVED and tells the employee to wait until the course ends.
+4. **Pending list grouped by subordinate name** (CA p7: `This page shows applications grouped by subordinate name`). `ManagerCourseController.pendingApplications()` groups applications in a `LinkedHashMap` (keeping order) and puts it in the model. `manager/pending.html` renders it with two nested `<th:block>` loops; group heading rows use `colspan`, which works with the table search in the teammate's `app.js` (it skips rows with colspan). The group headings render, each employee's rows sit under the right group, and no raw tags leak onto the page.
+5. **Approval detail shows the subordinate's days and budget used this year** (CA p7: `the system shows the subordinate's training days and budget used so far this year`). `ManagerCourseController.applicationDetail()` calls `CourseApplicationService.Summary()`, which existed but had no caller. It uses the year of the course start date, the same rule as the allowance check in `validate()`. `manager/detail.html` shows the result after Course fee. A manager opening the detail page sees `Days: 10.0 / 10.0    Budget used: 1533.00 / 2000.00`.
+6. **Approved courses in the same period limited to "other direct subordinates"** (CA p7: `lists other subordinates' approved courses during the same course period`). The old `findApprovedOverlapping` query had no ownership filter: it returned courses from the whole organisation, including the applicant's own. The JPQL now adds `ca.applicant.manager.id = :managerId` and `ca.applicant.id <> :excludeApplicantId`, plus ordering. The service and controller signatures follow. `/manager/approved-overlapping` takes a new optional parameter `excludeApplicant` and falls back to `-1` when it is missing, because `<> null` in JPQL is never true. The link in `manager/detail.html` passes the current applicant's id. Excluding emp1 shows only emp2's courses in that period, and the page does not contain emp1's name. Without the parameter the page still returns 200. With an unrelated id the results stay within the manager's own subordinates.
+
+### 4. Frontend defects fixed (seven)
+
+1. `dto/CalendarCourseView.java`: the method name `getCourseTtitle()` had a typo and did not match `${row.courseTitle}` in `training-calendar.html`. Any month with data threw `Exception evaluating SpringEL expression: "row.courseTitle"` and returned 500. Renamed to `getCourseTitle()`. October 2026, which has real data, went from 500 to 200 and shows the course names; empty months also return 200.
+2. `GlobalExceptionHandler.java`: the handlers did not set a response status. Missing resources and access violations returned 200, and system errors and the `/error` fallback returned 999. We added `setStatus` and three new handlers for `ResponseStatusException`, `MissingServletRequestParameterException` and `NoResourceFoundException`, so 403, 404 and 500 each return the right code.
+3. `templates/error.html`: the only way out was `javascript:history.back()`, a dead end when there is no history or the previous page no longer works. The page now offers two exits: `Back to Home` (`/home`) and `Logout` (`/logout`).
+4. Blank form submissions exposed internal exceptions. Submitting the application without a category made Spring bind an empty `CourseCategory` with a null id. That object is not null, so it passed every null check until `save` threw `org.hibernate.TransientPropertyValueException` and showed the class name to the user. `validate()` now checks the category first. In `EmployeeCourseController.submitClaim()`, `claimAmount` is `@RequestParam(required = false)`; a blank amount goes to the existing amount check in `CourseFeeClaimService`, which returns a readable message instead of `Required request parameter ... converted to null`.
+5. Timestamps showed the raw `LocalDateTime` format. Six places now use `#temporals.format(..., 'yyyy-MM-dd HH:mm')`: `employee/claims.html`, `manager/claims.html`, `manager/claim-detail.html` (two places), `employee/detail.html` and `manager/detail.html`. The teammate's version kept all six through the frontend merge.
+6. The course fee claim feature had no entry point (CA p8 optional feature Course Fee Claim Management). `CourseFeeClaimService` was dead code with no caller; we wired it up. `EmployeeCourseController` gained the `/employee/claims`, `/employee/claim/{id}` and `/employee/applications/{id}/complete` endpoints. `ManagerCourseController` gained `/manager/claims`, `/manager/claims/{id}` and the approve/reject endpoints. Four new templates: `employee/claims.html`, `employee/claim-form.html`, `manager/claims.html`, `manager/claim-detail.html`. The home page and sidebar show claim links by role. The claim button appears only for `COMPLETED` applications in fee-paying categories, matching the CA's "once the course is completed". A second claim for the same application gets `This application already has a claim` from the service layer, and the number of claims stays the same.
+7. Some pages had no Logout link. We added it to `employee/claim-form.html`, `employee/history.html`, `manager/history.html`, `manager/claim-detail.html` and `manager/pending.html`. Since the merge, the sidebar in `fragments/chrome.html` provides Logout to all 22 pages, so nobody needs to maintain it page by page.
+
+### 5. Other
+
+- The 4 changed lines in `AdminController.java` come from IDE formatting (method signatures joined onto one line), with no logic change.
+- We removed old inline comments from the Java source, so the new code in this commit has no `//` comments.
+- The Delete feature in `EmployeeCourseController` could not be reached, and the template had its display condition reversed. Fixed: `employee/detail.html` shows Delete for APPLIED and UPDATED applications.
+- Known issue, not handled: at phone width (375px), 10 sidebar links have a size of 0x0 and cannot be tapped, `/logout` among them. The cause: `.topbar .menu-toggle { display: none }` in `workspace.css` has higher specificity than `.menu-toggle { display: grid }` inside the media query in `paper.css`, and `app.js` does not bind the `nav-open` state. The problem existed before the frontend merge and was outside the scope of this change.
+- The `training_entitlement` table has an old empty column `year` (all NULL); the entity maps `entitlement_year`. `ddl-auto=update` adds columns but never drops them. No effect on features.
+- The `admin` account (designation = Administrative) has no row in `training_entitlement`, so its allowance shows as NULL and the CSV report shows 0. The CA defines allowances for employees only, not for admin, so we left it unchanged pending confirmation.
+
+### 6. Verification
+
+- `mvn -o clean test`: 30 tests pass, 1 skipped by design (`CalendarEventTests.browserMyEventsWorkflow` is an optional browser check; it skips through `Assumptions` when `-Dcats.calendar.browserScript` is not set). Test classes: the existing `CatsApplicationTests`, `ManagerFlowViewTests` and `SecurityIntegrationTests`, plus `CalendarEventTests`, `CourseApplicationDateBindingTests` and `DashboardAllowanceTests`.
+- End-to-end HTTP checks on a separate instance (port 8081): sign-in for all three roles, 13 page renders, 403 on unauthorised access, the calendar API contract (`schemaVersion` / `csrf.header` / year and month echo), CSV export content and figures, the full claim flow and the full approval flow.
+- Courses across weekends (7 cases): a two-week course (one weekend inside) goes through in one application and counts as 10.0 days; a week and a half counts as 8.0; three weeks (15 working days) exceeds the 10-day allowance and gets blocked; a Saturday start date and a Sunday end date both get blocked; two separate one-week applications do not conflict. The working-day check looks only at the start and end dates, and `calculateTrainingDays()` skips the weekend days in between. The day preview in the frontend `forms.js` is labelled "before holidays" to show it is an estimate, consistent with the backend.
+- Responsive change: 7 viewports × 24 pages = 168 measurements, 0 horizontal overflows.
+- We removed all test data from the local development database and kept the 3 existing SPT application records (id 1 CANCELLED, id 12 COMPLETED with its approved claim, id 13 APPROVED). Course category states changed during testing are restored.
+- Pre-commit checks: `application.properties` keeps its `skip-worktree` flag and stayed out of the staging area. On the remote, that file contains only `spring.application.name=CATS` and no database credentials. A scan of all files in the commit found no passwords, keys, tokens or local absolute paths (largest file 2.84 MB, far below GitHub's 100 MB limit).
+
+### AI use declaration
+
+We built this change with help from Hermes Agent (Nous Research). AI took part in bug finding and root-cause analysis, checking the CA requirements one by one, code changes and refactoring, writing and running automated verification scripts, and writing documentation. A team member reviewed every change before we committed it. Business rules follow the original text of `SA63 CA Instructions.pdf`. Every verification result above comes from real compilation, unit test and end-to-end HTTP runs; none is guessed or made up.
+
+
+## 2026-10-09 - Fix HTTP 500 in the manager approval flow (missing templates + Thymeleaf variable shadowing)
+
+### Symptoms
+
+- After a manager signed in, `/manager/pending`, `/manager/applications/{id}`, `/manager/approved-overlapping` and `/manager/history` all returned HTTP 500.
+- The employee detail page `/employee/applications/{id}` also returned 500 in some cases, or rendered blank fields.
+
+### Root cause
+
+1. **Missing templates**: `ManagerCourseController` (commit 519ef7d, marked untested) returns four view names such as `manager/pending`, but nobody had ever committed a `templates/manager/` folder. Result: `TemplateInputException: Error resolving template [manager/pending]`.
+2. **Thymeleaf reserved variable shadowing**: both controllers stored the course application with `model.addAttribute("application", ...)`. `application` is a built-in variable of the Thymeleaf web context (it points to the ServletContext attribute map `WebEngineContext$ApplicationAttributeMap`), so it hid the model attribute of the same name. Every `${application.*}` in the templates read the ServletContext attribute map, so all fields rendered empty, and `${application.status.name()}` in `employee/detail.html` threw an NPE → 500. A probe test confirmed it: `${application}` printed `ApplicationAttributeMap@59412c`, not a CourseApplication.
+
+### Fix
+
+- Added four manager templates: `templates/manager/pending.html` (pending list), `manager/detail.html` (approval detail + approve/reject form), `manager/approved-overlapping.html` (approved courses in the same period) and `manager/history.html` (subordinate application history). They follow the style of the existing employee and admin pages.
+- `ManagerCourseController` / `EmployeeCourseController`: renamed the model key from `application` to `app` (one line each, with a comment explaining why), and changed `manager/detail.html` and `employee/detail.html` to use `${app.*}`. Apart from this rename we did not touch any of the teammate's business logic.
+
+### Verification
+
+- New regression test `ManagerFlowViewTests` (6 cases): the four manager pages render, the pending list contains a new application, the detail page renders real field values, and approving with a comment saves the APPROVED status. All pass.
+- Full `mvn test`: 22/22 pass (15 security + 6 manager flow + 1 context).
+- End-to-end curl run against a real server: emp1 signs in → submits an application → manager signs in → sees it in the pending list → detail page shows all fields → approves with CSRF → status becomes APPROVED → emp1's detail page shows APPROVED and the Cancel/Complete actions.
+
+### Notes for the team
+
+- Do not use `application`, `session` or `param` as model attribute names in Thymeleaf templates (reserved names shadow them).
+- Every template with a POST form must use `th:action`, not `action=`. Otherwise Spring Security does not insert the CSRF token and the submit gets 403.
+
+## 2026-10-08 - Core course application service and claim service
+
+### New features
+
+- Added `CourseApplicationService` for validating, submitting and moving course applications through their states (core of the mandatory features).
+- Added `CourseFeeClaimService` for submitting course fee claims and manager approval of them (optional feature).
+- Application validation returns all errors at once, so the form shows them together and employees do not have to fix and resubmit one error at a time.
+
+### Backend
+
+- `CourseApplicationService.validate(...)` checks 8 errors: end date before start date, start date not a working day, end date not a working day, no allowance set for the year, training days over the yearly allowance, no fee for a fee-paying category, fee over the remaining budget, and overlap with the employee's other Applied/Updated/Approved applications. It also does 2 things on its own: counts training days from working days, and sets the fee to zero for free categories.
+- State methods: `submit` / `update` / `delete` / `cancel` / `markCompleted` / `approve` / `reject`, guarded by `checkOwner`, `checkManager` and `checkComment`.
+- The `excludeId` parameter of `validate(...)` lets one method serve both create and edit: create passes `null`, edit passes the record's own id, so a record never overlaps with itself or counts its own days twice.
+- `CourseFeeClaimService.submitClaim(...)` checks 9 things: the application exists, it belongs to the claimant, the category is not free, the course is COMPLETED, the application has no claim yet, the amount is over 0, the amount does not exceed the course fee, the receipt file name is present, and the certificate file name is present.
+- Claim `approve(...)` / `reject(...)` require a manager comment (the CA says "manager must again give an appropriate reason").
+- The `claimant` always comes from the application record, never from the form, so nobody can submit a claim for someone else.
+- Added `findApprovedOverlapping(...)` to `CourseApplicationRepository`, so the manager's approval page can show other people's approved courses in the same period (decision support required by the CA).
+- Added `existsOverlappingApplicationExcluding(...)` to `CourseApplicationRepository` for the overlap check when editing, excluding the record itself.
+
+### Refactoring and integration
+
+- Reused the teammates' existing components and removed duplicate code from this module; `CourseApplicationService` is 117 lines shorter.
+- Training days and working-day checks now call `TrainingDayCalculator`; removed the duplicate `CT(...)` and `isWorkingDay(...)` from this class.
+- Used days and used budget now come from `EntitlementService.calculateUsedDays(...)` / `calculateUsedBudget(...)`; removed the duplicate loops and `findActiveApplications(...)` from this class.
+- The usage summary `Summary(...)` now delegates to `EntitlementService.usageSummary(...)`; removed the duplicate implementation.
+- Resolved the `CourseApplicationRepository` merge conflict: kept every query from both sides, with each `@Query` matched to its method signature. `findActiveByUserAndYear(...)` uses the teammate's version (`int year`), shared by `EntitlementService` and this service.
+
+### Bug fixes
+
+- The allowance and budget checks sat inside the summing loop: if the employee had no other applications the checks never ran, and with several applications the same error appeared several times. They now run once after the loop.
+- The end-date working-day check tested `start != null` and then checked `end`, which threw a NullPointerException when `end` was empty. Fixed.
+- That check's error message said "Start date"; it now says "End date".
+- `checkManager(...)` checked for null in the wrong order. It now checks `applicant` and `manager` for null before comparing ids.
+
+### Business rules
+
+- The system counts training days from working days; users do not enter them.
+- Start and end dates must both be working days (no weekends or public holidays).
+- Yearly training days and budget count toward the year of the course start date.
+- Free categories always get a course fee of zero.
+- Only APPLIED / UPDATED applications can be edited or decided; only APPROVED applications can be cancelled or marked completed.
+- Employees can submit a claim only when the course is COMPLETED and the category charges a fee.
+
+### Verification
+
+- `mvn -o clean compile` passes for the full build (including the Admin, Training Calendar and Reporting modules merged in this change).
+
+## 2026-10-08 - Admin module and repository integration
+
+### New features
+
+- Finished the Admin Dashboard.
+- User management: add users, edit profiles, assign managers, change roles, enable and disable users.
+- Yearly Training Entitlement management: add or update training days and budget for a user and year.
+- Course Category management: add, edit, enable and disable course categories.
+- Public Holiday management: view by year, add and delete public holidays.
+
+### Backend
+
+- Added `UserService` for users, roles, the manager hierarchy, enabled status and Training Entitlement.
+- Added `AdminCatalogService` for Course Category and Public Holiday.
+- Added `AdminController` for the Admin Dashboard, user management, training entitlement, course category and public holiday pages.
+- Added `findActiveByUserAndYear(...)` to `CourseApplicationRepository` for `EntitlementService`.
+- Added `findByApplicantIdAndYear(...)` to `CourseApplicationRepository` for `ReportingService`.
+- Fixed parameter binding in the Training Calendar repository query so `status`, `monthStart` and `monthEnd` map to the right parameters.
+
+### Frontend
+
+- Added `templates/admin/home.html`.
+- Added `templates/admin/users.html`.
+- Added `templates/admin/user-form.html`.
+- Added `templates/admin/categories.html`.
+- Added `templates/admin/holidays.html`.
+- All admin pages show error messages, validate forms and ask for confirmation.
+
+### Business rules
+
+- Creating a user also creates the Training Entitlement for the current year.
+- Administrative users get 5 training days by default; Professional users get 10.
+- Saving a Training Entitlement for the same user and year updates the existing row instead of adding a duplicate.
+- Admins enable and disable users instead of deleting them, so history stays.
+- A course category cannot allow half-day training and charge a fee at the same time.
+- Only one Public Holiday per date.
+- Non-admin users who open an Admin route go to the Admin login page.
+
+## 2026-10-06 - Training Calendar
+
+### New features
+
+- Monthly Training Calendar.
+- Any signed-in user can see approved courses for all employees.
+- Shows the current month by default.
+- Year and month drop-downs switch the month.
+- Previous, current and next month links.
+- Handles courses that cross months and years.
+- Shows employee name, course title, category, training provider, start date and end date.
+- Shows an empty-result message when there are no courses.
+
+### Backend
+
+- Added a training calendar query to `CourseApplicationRepository`.
+- The query returns only `APPROVED` course applications.
+- The query uses date-range overlap, so courses that cross months still appear.
+- Added the `CalendarCourseView` page data object.
+- Added `TrainingCalendarService` for month validation, date range calculation and data conversion.
+- Added `TrainingCalendarController` for the login check, request parameters and page routing.
+- Added error handling for invalid years, invalid months and non-numeric parameters.
+
+### Frontend
+
+- Added the `training-calendar.html` page.
+- Added the month selection form and month navigation links.
+- Added the Training Calendar menu entry.
+- Added a shared `home.html` page for navigation after login.
+
+### Login flow
+
+- After login users land on the shared Home page.
+- The Home page links to the Training Calendar.
+- Kept the existing login, admin login and logout.
+
+
+### Business rules
+
+- The training calendar shows only `APPROVED` courses.
+- A course appears in a month if its dates overlap that month.
+- All signed-in users see the same results; the calendar does not filter by employee, manager or role.
+- The training calendar only reads data. It does not change course applications, approval states or training allowances.
