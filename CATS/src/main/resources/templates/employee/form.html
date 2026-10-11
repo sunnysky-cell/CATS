@@ -108,6 +108,7 @@
                       data-field-error
                       hidden
                     ></p>
+                    <p class="field-error" th:if="${#fields.hasErrors('courseTitle')}" th:errors="*{courseTitle}"></p>
                   </div>
                   <div class="field">
                     <label for="category.id">
@@ -156,6 +157,7 @@
                       data-field-error
                       hidden
                     ></p>
+                    <p class="field-error" th:if="${#fields.hasErrors('trainingProvider')}" th:errors="*{trainingProvider}"></p>
                   </div>
                   <div class="field">
                     <label for="startDate">
@@ -175,6 +177,7 @@
                       data-field-error
                       hidden
                     ></p>
+                    <p class="field-error" th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}"></p>
                   </div>
                   <div class="field">
                     <label for="endDate">
@@ -194,6 +197,7 @@
                       data-field-error
                       hidden
                     ></p>
+                    <p class="field-error" th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}"></p>
                   </div>
                   <p
                     class="hint employee-field-wide"
@@ -236,6 +240,7 @@
                       data-field-error
                       hidden
                     ></p>
+                    <p class="field-error" th:if="${#fields.hasErrors('courseFee')}" th:errors="*{courseFee}"></p>
                   </div>
                   <div class="field employee-field-wide">
                     <label for="halfDay">
@@ -297,6 +302,7 @@
                     data-field-error
                     hidden
                   ></p>
+                  <p class="field-error" th:if="${#fields.hasErrors('justification')}" th:errors="*{justification}"></p>
                 </div>
                 <div class="field">
                   <label for="workDissemination">

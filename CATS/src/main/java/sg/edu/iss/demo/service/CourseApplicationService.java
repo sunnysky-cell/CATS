@@ -421,6 +421,9 @@ public class CourseApplicationService {
 		db.setDecisionDate(LocalDateTime.now());
 		
 		CourseAppRepo.save(db);
+		
+		notificationService.notifyUser(db.getApplicant(), "Your course application has been APPROVED");
+		
 	}
 
 	@Transactional

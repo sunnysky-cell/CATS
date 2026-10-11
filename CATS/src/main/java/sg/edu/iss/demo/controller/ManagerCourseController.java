@@ -51,24 +51,20 @@ public class ManagerCourseController {
         this.courseApplicationRepository = courseApplicationRepository;
         this.courseFeeClaimService = courseFeeClaimService;
     }
- // ==================== Manager Pending Applications ====================
 
     @GetMapping("/pending")
     public String pendingApplications(HttpSession session, Model model) {
 
         User manager = (User) session.getAttribute("loggedInUser");
 
-        // Check whether user is logged in
         if (manager == null) {
             return "redirect:/login";
         }
 
-        // Only managers can access this page
         if (manager.getRole() != Role.MANAGER) {
             return "redirect:/home";
         }
 
-        // Get applications awaiting manager approval
         List<CourseApplication> applications =
                 courseApplicationService.findPendingForManager(
                         manager.getId());
@@ -101,8 +97,6 @@ public class ManagerCourseController {
         return "manager/pending";
     }
     
- // ==================== Manager Application Detail ====================
-
     @GetMapping("/applications/{id}")
     public String applicationDetail(
             @PathVariable Long id,
@@ -126,7 +120,6 @@ public class ManagerCourseController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
-        // Manager can only view applications from their own employees
         if (application.getApplicant() == null
                 || application.getApplicant().getManager() == null
                 || !application.getApplicant().getManager().getId()
@@ -135,10 +128,7 @@ public class ManagerCourseController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
-        // NOTE: model key must NOT be "application" — that name is shadowed by
-        // Thymeleaf's built-in 'application' variable (ServletContext attribute
-        // map), which made every ${application.*} expression in the detail
-        // template resolve against the wrong object (blank fields / 500 errors).
+        // "application" is a Thymeleaf built-in variable, so the model key is "app"
         model.addAttribute("app", application);
         model.addAttribute("manager", manager);
 
@@ -157,7 +147,6 @@ public class ManagerCourseController {
 
         return "manager/detail";
     }
- // ==================== Manager Approve Application ====================
 
     @PostMapping("/applications/{id}/approve")
     public String approveApplication(
@@ -168,17 +157,14 @@ public class ManagerCourseController {
 
         User manager = (User) session.getAttribute("loggedInUser");
 
-        // Check login
         if (manager == null) {
             return "redirect:/login";
         }
 
-        // Only managers can approve applications
         if (manager.getRole() != Role.MANAGER) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
-        // Check whether the comment is empty
         if (comment == null || comment.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute(
                     "error", "Manager comment is required.");
@@ -186,7 +172,6 @@ public class ManagerCourseController {
             return "redirect:/manager/applications/" + id;
         }
 
-        // Call CourseApplicationService to approve
         courseApplicationService.approve(
                 id,
                 manager.getId(),
@@ -199,8 +184,6 @@ public class ManagerCourseController {
     }
 
     
- // ==================== Manager Reject Application ====================
-
     @PostMapping("/applications/{id}/reject")
     public String rejectApplication(
             @PathVariable Long id,
@@ -210,17 +193,14 @@ public class ManagerCourseController {
 
         User manager = (User) session.getAttribute("loggedInUser");
 
-        // Check login
         if (manager == null) {
             return "redirect:/login";
         }
 
-        // Only managers can reject applications
         if (manager.getRole() != Role.MANAGER) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
-        // Manager comment is mandatory
         if (comment == null || comment.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute(
                     "error", "Manager comment is required.");
@@ -228,7 +208,6 @@ public class ManagerCourseController {
             return "redirect:/manager/applications/" + id;
         }
 
-        // Call CourseApplicationService to reject
         courseApplicationService.reject(
                 id,
                 manager.getId(),
@@ -239,7 +218,6 @@ public class ManagerCourseController {
 
         return "redirect:/manager/pending";
     }
- // ==================== Approved Overlapping Courses ====================
 
     @GetMapping("/approved-overlapping")
     public String approvedOverlappingCourses(
@@ -284,7 +262,6 @@ public class ManagerCourseController {
         return "manager/approved-overlapping";
    
    }
- // ==================== Subordinate Application History ====================
 
     @GetMapping("/history")
     public String subordinateHistory(HttpSession session, Model model) {

@@ -1,0 +1,513 @@
+.cats-course-workspace .calendar-workspace {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+.cats-course-workspace .cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 8px 0 24px;
+}
+.cats-course-workspace .cal-header h2 {
+  font-family: var(--serif, Georgia, serif);
+  font-size: clamp(25px, 3vw, 34px);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+.cats-course-workspace .cal-eyebrow {
+  margin-bottom: 7px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.cats-course-workspace .cal-header-actions,
+.cats-course-workspace .cal-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cats-course-workspace .cal-header-actions {
+  gap: 18px;
+}
+.cats-course-workspace .cal-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.cats-course-workspace .cal-search {
+  position: relative;
+  width: 240px;
+  margin-left: auto;
+}
+.cats-course-workspace .cal-search > svg {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  color: var(--muted-foreground);
+}
+.cats-course-workspace .cal-search input {
+  padding-left: 36px;
+}
+.cats-course-workspace .cal-scope-note {
+  max-width: 270px;
+  line-height: 1.5;
+}
+.cats-course-workspace .cal-summary {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 16px 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.cats-course-workspace .cal-summary-divider {
+  padding: 0 5px;
+}
+.cats-course-workspace .cal-refreshing {
+  margin-left: auto;
+  color: var(--primary);
+}
+.cats-course-workspace .cal-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 285px;
+  gap: 24px;
+  align-items: start;
+}
+.cats-course-workspace .cal-layout.is-refreshing {
+  opacity: 0.65;
+}
+.cats-course-workspace .cal-month-grid {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--card);
+}
+.cats-course-workspace .cal-weekday-row,
+.cats-course-workspace .cal-week-row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.cats-course-workspace .cal-weekday-row {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+}
+.cats-course-workspace .cal-weekday-row span {
+  padding: 11px 0;
+}
+.cats-course-workspace .cal-grid-cell {
+  min-width: 0;
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+.cats-course-workspace .cal-grid-cell:last-child {
+  border-right: 0;
+}
+.cats-course-workspace .cal-day {
+  display: flex;
+  width: 100%;
+  min-height: 116px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 9px;
+  padding: 10px 6px;
+  background: transparent;
+  color: var(--foreground);
+  text-align: left;
+  border-radius: 0;
+  transition: background 0.14s;
+}
+.cats-course-workspace .cal-day:hover {
+  background: #edf3f8;
+}
+.cats-course-workspace .cal-day.is-selected {
+  background: #f4efdb;
+}
+.cats-course-workspace .cal-day.is-today .cal-day-number {
+  outline: 1px solid var(--primary);
+  outline-offset: 2px;
+  color: var(--primary);
+}
+.cats-course-workspace .cal-day:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -3px;
+}
+.cats-course-workspace .cal-day-number {
+  display: inline-flex;
+  width: 23px;
+  height: 23px;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-end;
+  border-radius: 50%;
+  font-size: 12px;
+}
+.cats-course-workspace .cal-day-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+.cats-course-workspace .cal-day-chip {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 4px;
+  border-radius: 3px;
+  font-size: 9px;
+  line-height: 1.15;
+}
+.cats-course-workspace .cal-day-chip > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.cats-course-workspace .cal-color-training,
+.cats-course-workspace .cal-color-blue {
+  background: #e4edf7;
+  color: #345b7f;
+}
+.cats-course-workspace .cal-color-teal {
+  background: #e4eef0;
+  color: #3c646e;
+}
+.cats-course-workspace .cal-color-indigo {
+  background: #e8eaf4;
+  color: #515e85;
+}
+.cats-course-workspace .cal-more {
+  padding: 1px 3px;
+  font-size: 9px;
+  color: var(--muted-foreground);
+}
+.cats-course-workspace .cal-outside-day {
+  display: flex;
+  min-height: 116px;
+  padding: 14px 11px;
+  justify-content: flex-end;
+  color: #afb5b8;
+  background: #f4f5f3;
+  font-size: 12px;
+}
+.cats-course-workspace .cal-mobile-count {
+  display: none;
+}
+.cats-course-workspace .cal-agenda {
+  min-width: 0;
+}
+.cats-course-workspace .cal-agenda header {
+  padding: 2px 0 18px;
+  border-bottom: 1px solid var(--border);
+}
+.cats-course-workspace .cal-agenda h3 {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.4;
+  font-family: var(--serif, Georgia, serif);
+}
+.cats-course-workspace .cal-agenda-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+}
+.cats-course-workspace .cal-agenda-course,
+.cats-course-workspace .cal-agenda-event {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border-radius: 7px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.cats-course-workspace .cal-agenda-course {
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+.cats-course-workspace .cal-item-type {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--primary);
+  margin-bottom: 11px;
+}
+.cats-course-workspace .cal-agenda h4,
+.cats-course-workspace .cal-agenda-event strong {
+  display: block;
+  font-size: 16px;
+  font-family: var(--serif, Georgia, serif);
+  font-weight: 500;
+  line-height: 1.35;
+}
+.cats-course-workspace .cal-agenda-course > p {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  padding: 5px 0 12px;
+}
+.cats-course-workspace .cal-agenda-course dl {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.cats-course-workspace .cal-agenda-course dl > div {
+  margin-top: 7px;
+}
+.cats-course-workspace .cal-agenda-course dt {
+  color: var(--muted-foreground);
+}
+.cats-course-workspace .cal-agenda-course dd {
+  margin: 1px 0 0;
+}
+.cats-course-workspace .cal-agenda-event {
+  border: 1px solid transparent;
+}
+.cats-course-workspace .cal-agenda-event:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.cats-course-workspace .cal-agenda-event:hover,
+.cats-course-workspace .cal-agenda-event:focus-visible {
+  border-color: var(--primary);
+}
+.cats-course-workspace .cal-edit-icon {
+  margin-left: auto;
+}
+.cats-course-workspace .cal-event-time {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+}
+.cats-course-workspace .cal-event-details {
+  display: block;
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.cats-course-workspace .cal-agenda-empty {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.cats-course-workspace .cal-agenda-empty > svg {
+  color: var(--primary);
+}
+.cats-course-workspace .cal-agenda-empty span {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.cats-course-workspace .cal-footer-note {
+  padding-top: 18px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.cats-course-workspace .cal-editor {
+  max-width: 500px;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+.cats-course-workspace .cal-event-form,
+.cats-course-workspace .cal-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+.cats-course-workspace .cal-form-fields {
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+}
+.cats-course-workspace .cal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+}
+.cats-course-workspace .cal-field > label {
+  font-weight: 500;
+}
+.cats-course-workspace .cal-field label span {
+  color: var(--muted-foreground);
+  font-weight: 400;
+}
+.cats-course-workspace .cal-time-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+.cats-course-workspace .cal-time-fields > div {
+  min-width: 0;
+}
+.cats-course-workspace .cal-all-day {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+}
+.cats-course-workspace .cal-textarea {
+  width: 100%;
+  border: 1px solid var(--input);
+  border-radius: 6px;
+  padding: 10px;
+  line-height: 1.5;
+  resize: vertical;
+  background: transparent;
+}
+.cats-course-workspace .cal-textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.cats-course-workspace .cal-editor-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 5px;
+}
+.cats-course-workspace .cal-delete-button {
+  margin-right: auto;
+  color: var(--destructive);
+}
+.cats-course-workspace .cal-form-error {
+  padding: 10px 12px;
+  background: #f6e8e7;
+  color: #853d3d;
+  border-radius: 5px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.cats-course-workspace .cal-load-error {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 16px;
+  margin: 16px 0;
+  background: #e9eff5;
+  border: 1px solid #cddae6;
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.cats-course-workspace .cal-load-error > div {
+  flex: 1;
+  min-width: 180px;
+}
+.cats-course-workspace .cal-load-error strong {
+  display: block;
+  margin-bottom: 5px;
+}
+.cats-course-workspace .cal-loading {
+  padding-top: 22px;
+}
+.cats-course-workspace .cal-loading-title {
+  width: 220px;
+  height: 15px;
+  margin-bottom: 20px;
+}
+.cats-course-workspace .cal-loading-grid {
+  height: 550px;
+  border-radius: 8px;
+}
+@media (max-width: 1050px) {
+  .cats-course-workspace .cal-layout {
+    grid-template-columns: 1fr;
+  }
+  .cats-course-workspace .cal-agenda-items {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cats-course-workspace .cal-agenda-empty {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 700px) {
+  .cats-course-workspace .cal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 17px;
+  }
+  .cats-course-workspace .cal-header-actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .cats-course-workspace .cal-controls {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .cats-course-workspace .cal-search {
+    margin-left: 0;
+    width: calc(100% - 48px);
+  }
+  .cats-course-workspace .cal-day {
+    min-height: 73px;
+    gap: 8px;
+    padding: 8px 3px;
+  }
+  .cats-course-workspace .cal-day-number {
+    align-self: center;
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+  .cats-course-workspace .cal-outside-day {
+    min-height: 73px;
+    padding: 10px 0;
+    justify-content: center;
+    font-size: 11px;
+  }
+  .cats-course-workspace .cal-day-chips {
+    display: none;
+  }
+  .cats-course-workspace .cal-mobile-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 10px;
+    color: var(--primary);
+  }
+  .cats-course-workspace .cal-date-dot {
+    width: 4px;
+    height: 4px;
+    background: currentColor;
+    border-radius: 50%;
+  }
+  .cats-course-workspace .cal-agenda-items {
+    display: flex;
+  }
+  .cats-course-workspace .cal-time-fields {
+    grid-template-columns: 1fr;
+  }
+  .cats-course-workspace .cal-editor-actions {
+    flex-wrap: wrap;
+  }
+  .cats-course-workspace .cal-delete-button {
+    margin-right: 0;
+  }
+  .cats-course-workspace .cal-editor {
+    width: calc(100vw - 24px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cats-course-workspace .cal-day {
+    transition: none;
+  }
+}

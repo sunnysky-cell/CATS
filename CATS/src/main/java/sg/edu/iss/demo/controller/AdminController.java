@@ -125,8 +125,6 @@ public class AdminController {
         userService.create(user,managerId);
         }catch (IllegalArgumentException e) {
 
-            // ADMIN MODULE:
-            // Business/input errors return to the original form.
             model.addAttribute(
                     "error",
                     e.getMessage());

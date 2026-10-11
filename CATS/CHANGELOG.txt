@@ -1,4 +1,19 @@
 # 更新日志
+## 2026-10-11 - 修复申请表单校验与批准通知，补齐前端源码和第三方许可
+
+### 缺陷修复
+
+- 员工申请表单缺少服务端字段校验。项目里没有用 `@Valid`，`validate()` 也不检查标题和理由，空标题提交后在保存时抛 `ConstraintViolationException`，页面只显示 "Unexpected error"。`EmployeeCourseController` 的新建和编辑两个 POST 方法改为 `@Valid @ModelAttribute` 加 `BindingResult`，字段错误和 `validate()` 的业务错误一起回到表单。`employee/form.html` 给标题、培训机构、起止日期、费用和理由加了 `th:errors`。
+- 经理批准申请后员工收不到通知。`reject()` 调用了 `notifyUser`，`approve()` 没有。现在 `approve()` 末尾也通知申请人，符合 CA 对批准和驳回都要通知员工的要求。
+- 三个 React 页面（course、calendar、agent workspace）在仓库里只有打包后的 JS，没有源码。我们从交接包 `ui/components-source` 复制源码到 `frontend-source/`。合并时有人直接在打包后的 `agent-workspace.js` 和 `course-workspace.js` 里改了 22 处界面文字（student 改 employee，teacher 改 manager），源码没跟着改，现在源码也改了。`vite.config.ts`、`tools/verify-build.mjs` 和 `tests/agent-data.test.ts` 的路径改为指向 `src/main/resources/static/assets`，三个 `.js.map` 重新生成。细节见 `frontend-source/README.txt`。
+- 第三方许可声明缺失。上一条日志说交接包的许可证文件已纳入仓库，实际没有。新增 `THIRD-PARTY-LICENSES.txt`，列出登录页画廊（Codrops、three.js）、React 页面用到的组件和库（shadcn/ui、motion-primitives、React、Radix UI 等），以及图标和字体的来源与许可证。
+
+### 测试
+
+- 新增 `EmployeeApplicationValidationTests`，覆盖空标题新建、编辑时清空标题和正常提交。
+- 新增 `CourseApplicationRepositoryTests`（`@DataJpaTest`），测试同期已批准课程、日期重叠、年度额度、待审批列表和培训日历的查询。
+- `mvn test` 41 个通过，1 个按设计跳过。`frontend-source` 下 `npm test` 21 个通过，重新构建出的三个 JS 与仓库里的文件一致。
+
 ## 2026-10-11 - 合并队友重做的前端、补齐 CA 六项必做核心缺口、修复七项前端缺陷
 
 ### 一、前端整体合并（来自队友交接包 CATS-Academy-Handoff-20261010）

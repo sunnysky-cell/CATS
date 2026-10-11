@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import sg.edu.iss.demo.model.CourseApplication;
 import sg.edu.iss.demo.model.CourseCategory;
 import sg.edu.iss.demo.model.CourseFeeClaim;
@@ -25,22 +27,6 @@ import sg.edu.iss.demo.repo.CourseCategoryRepository;
 import sg.edu.iss.demo.service.CourseApplicationService;
 import sg.edu.iss.demo.service.CourseFeeClaimService;
 
-/**
- * Employee-facing course application controller.
- *
- * Business method names match the UML diagram: showApplicationForm /
- * submitApplication / viewPersonalHistory / viewApplication / updateApplication
- * / cancelApplication / completeApplication
- *
- * Spring MVC requires @GetMapping/@PostMapping annotations, HttpSession (to
- * read the logged-in user, because the project uses manual session login
- * instead of Spring Security), Model (to expose data to Thymeleaf)
- * and @PathVariable /
- * 
- * @ModelAttribute / @RequestParam to bind web parameters. These are container
- *                 injection parameters and do not change the business
- *                 signature.
- */
 @Controller
 @RequestMapping("/employee")
 public class EmployeeCourseController {
@@ -75,15 +61,15 @@ public class EmployeeCourseController {
 	}
 
 	@PostMapping("/applications")
-	public String submitApplication(@ModelAttribute("form") CourseApplication form, HttpSession session, Model model,
-			RedirectAttributes redirectAttributes) {
+	public String submitApplication(@Valid @ModelAttribute("form") CourseApplication form, BindingResult result,
+			HttpSession session, Model model, RedirectAttributes redirectAttributes) {
 
 		User user = requireEmployee(session);
 
 		resolveCategory(form);
 
 		List<String> errors = courseApplicationService.validate(form, user, null);
-		if (!errors.isEmpty()) {
+		if (result.hasErrors() || !errors.isEmpty()) {
 			model.addAttribute("errors", errors);
 			model.addAttribute("categories", courseCategoryRepository.findByActiveTrue());
 			model.addAttribute("isNew", true);
@@ -122,8 +108,7 @@ public class EmployeeCourseController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
 
-		// NOTE: model key must NOT be "application" — Thymeleaf's built-in
-		// 'application' variable shadows it, breaking the detail template.
+		// "application" is a Thymeleaf built-in variable, so the model key is "app"
 		model.addAttribute("app", application);
 
 		return "employee/detail";
@@ -153,8 +138,8 @@ public class EmployeeCourseController {
 	}
 
 	@PostMapping("/applications/{id}")
-	public String updateApplication(@PathVariable Long id, @ModelAttribute("form") CourseApplication form,
-			HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+	public String updateApplication(@PathVariable Long id, @Valid @ModelAttribute("form") CourseApplication form,
+			BindingResult result, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
 
 		User user = requireEmployee(session);
 
@@ -163,7 +148,7 @@ public class EmployeeCourseController {
 		resolveCategory(form);
 
 		List<String> errors = courseApplicationService.validate(form, user, id);
-		if (!errors.isEmpty()) {
+		if (result.hasErrors() || !errors.isEmpty()) {
 			model.addAttribute("errors", errors);
 			model.addAttribute("categories", courseCategoryRepository.findByActiveTrue());
 			model.addAttribute("isNew", false);
@@ -291,11 +276,6 @@ public class EmployeeCourseController {
 		return user;
 	}
 
-	/**
-	 * Thymeleaf posts category.id as a number; Spring binds it onto an empty
-	 * CourseCategory shell. Replace that shell with the managed entity so JPA does
-	 * not try to persist a bogus new row.
-	 */
 	private void resolveCategory(CourseApplication form) {
 		if (form.getCategory() != null && form.getCategory().getId() != null) {
 			CourseCategory managed = courseCategoryRepository.findById(form.getCategory().getId()).orElse(null);

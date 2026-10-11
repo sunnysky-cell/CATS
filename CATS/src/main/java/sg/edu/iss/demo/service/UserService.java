@@ -34,7 +34,7 @@ public class UserService {
 	        this.passwordEncoder = passwordEncoder;
 	    }
 
-//USER MANAGEMENT - Returns all users for the Admin user-management page.
+// User Management
 
 	    public List<User> findAll() {
 	
@@ -43,10 +43,10 @@ public class UserService {
 
 	    public User findById(Long id) {
 	
-	        return userRepo.findById(id)
-	                .orElseThrow(() ->
-	                        new IllegalArgumentException(
-	                                "User not found: " + id));
+	        return userRepo.findById(id).orElseThrow(() ->
+	        
+	        new IllegalArgumentException( "User not found: " + id));
+	        
 	    }
 
 	    public List<User> findManagers() {
@@ -70,8 +70,6 @@ public class UserService {
 	            User user,
 	            Long managerId) {
 
-// Validate username
-
 	
 	        if (user.getUsername() == null
 	                || user.getUsername().isBlank()) {
@@ -92,7 +90,6 @@ public class UserService {
 	
 	        user.setUsername(username);
 
-// Validate and hash the password (BCrypt) before persisting
 	        String rawPassword = user.getPassword();
 
 	        if (rawPassword == null
@@ -111,10 +108,8 @@ public class UserService {
 	        user.setPassword(
 	                passwordEncoder.encode(rawPassword));
 
-// New users are active by default
 	        user.setEnabled(true);
 
-// Assign manager if Admin selected one
 	        if (managerId != null) {
 	
 	            User manager =
@@ -134,11 +129,9 @@ public class UserService {
 	
 	            user.setManager(manager);
 	        }
-// Save user first so that a database ID is generated
 	        User savedUser =
 	                userRepo.save(user);
 	        
-// Automatically create current-year entitlement
 	        createDefaultEntitlement(savedUser);
 
 	        return savedUser;
@@ -155,7 +148,6 @@ public class UserService {
 	        User user =
 	                findById(userId);
 
-// Validate profile data
 	        if (name == null
 	                || name.isBlank()) {
 	
@@ -181,7 +173,6 @@ public class UserService {
 	        user.setDesignation(
 	                designation.trim());
 
-// Update approval hierarchy
 	        if (managerId == null) {
 	
 	            user.setManager(null);
@@ -192,7 +183,6 @@ public class UserService {
 	                    findById(managerId);
 	
 	
-// User cannot manage themselves
 	            if (user.getId().equals(
 	                    manager.getId())) {
 	
@@ -255,7 +245,7 @@ public class UserService {
 	        userRepo.save(user);
 	    }
 
-// ADMIN MODULE - TRAINING ENTITLEMENT
+// Training Entitlement
 
 	    private void createDefaultEntitlement(
 	            User user) {
@@ -263,7 +253,6 @@ public class UserService {
 	        int currentYear =
 	                LocalDate.now().getYear();
 
-// Avoid duplicate user/year entitlement
 	        if (entitlementRepo
 	                .findByUserIdAndYear(
 	                        user.getId(),
@@ -292,7 +281,6 @@ public class UserService {
 	            BigDecimal entitledDays,
 	            BigDecimal annualBudget) {
 
-// Validation
 	        if (year == null) {
 	
 	            throw new IllegalArgumentException(
@@ -331,7 +319,6 @@ public class UserService {
 	        User user =
 	                findById(userId);
 
-// UPSERT
 	        TrainingEntitlement entitlement =
 	                entitlementRepo
 	                        .findByUserIdAndYear(
@@ -340,7 +327,6 @@ public class UserService {
 	                        .orElse(null);
 	
 	
-// No existing entitlement -> create one
 	        if (entitlement == null) {
 	
 	            entitlement =
@@ -351,7 +337,6 @@ public class UserService {
 	        }
 	
 	
-	        // Existing entitlement -> fields are simply updated
 	        entitlement.setEntitledDays(
 	                entitledDays);
 	
@@ -366,11 +351,6 @@ public class UserService {
 	    public List<TrainingEntitlement>
 	            findEntitlements(Long userId) {
 	
-	        /*
-	         * Confirm that the user exists first.
-	         * This avoids displaying entitlement records for an
-	         * invalid user ID.
-	         */
 	        findById(userId);
 	
 	        return entitlementRepo

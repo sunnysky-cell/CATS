@@ -102,7 +102,9 @@ public class LoginController {
 	}
 
 	private static BigDecimal remainingPercent(BigDecimal used, BigDecimal allocated) {
-		if (allocated.signum() <= 0) return BigDecimal.ZERO;
+		if (allocated.signum() <= 0) {
+			return BigDecimal.ZERO;
+		}
 		return allocated.subtract(used).multiply(BigDecimal.valueOf(100))
 				.divide(allocated, 2, RoundingMode.HALF_UP)
 				.max(BigDecimal.ZERO).min(BigDecimal.valueOf(100));

@@ -23,9 +23,7 @@ public class AdminCatalogService {
         this.holidayRepo = holidayRepo;
     }
 
-// =========================
 // Course Category
-// =========================
 
     public List<CourseCategory> findAllCategories() {
         return categoryRepo.findAll();
@@ -57,8 +55,6 @@ public class AdminCatalogService {
 
         String trimmedName = name.trim();
 
-        // ADMIN MODULE:
-        // Validate CA business rules for the category.
         validateCategoryRule(
                 feeRequired,
                 allowHalfDay);
@@ -109,8 +105,6 @@ public class AdminCatalogService {
 
         String trimmedName = name.trim();
 
-        // ADMIN MODULE:
-        // Reuse the same category business-rule validation.
         validateCategoryRule(
                 feeRequired,
                 allowHalfDay);
@@ -165,9 +159,7 @@ public class AdminCatalogService {
         }
     }
 
-// =========================
 // Public Holiday
-// =========================
 
     public List<PublicHoliday> findHolidaysOfYear(int year) {
 
@@ -178,13 +170,11 @@ public class AdminCatalogService {
 
     @Transactional
     public PublicHoliday createHoliday(LocalDate date,String description) {
-// Validate date
         if (date == null) {
             throw new IllegalArgumentException(
                     "Holiday date is required.");
         }
 
-// Validate description
         if (description == null
                 || description.isBlank()) {
 
@@ -192,7 +182,6 @@ public class AdminCatalogService {
                     "Holiday description is required.");
         }
 
-// Check duplicate holiday on the same date
         List<PublicHoliday> existing =
                 holidayRepo.findByHolidayDateBetween(
                         date.atStartOfDay(),
@@ -202,7 +191,6 @@ public class AdminCatalogService {
             throw new IllegalArgumentException(
                     "Public holiday already exists on " + date);
         }
-// Use the existing shared PublicHoliday model.
         PublicHoliday holiday =
                 new PublicHoliday(
 				    date.atStartOfDay(),

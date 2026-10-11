@@ -1,0 +1,103 @@
+/* Official Tailwind imports, deliberately omitting the document-wide Preflight. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "tw-animate-css";
+@custom-variant dark (&:where(.cats-course-workspace-dark, .cats-course-workspace-dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: 'Inter', Arial, sans-serif;
+  --font-serif: 'Source Serif', Georgia, serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+.cats-course-workspace {
+  --background: #f9f9f7;
+  --foreground: #262621;
+  --card: #fdfdfa;
+  --card-foreground: #262621;
+  --popover: #f9f9f7;
+  --popover-foreground: #262621;
+  --primary: #345b7f;
+  --primary-foreground: #ffffff;
+  --secondary: #e6edf1;
+  --secondary-foreground: #425d6e;
+  --muted: #f0f2f2;
+  --muted-foreground: #69727b;
+  --accent: #f4efdb;
+  --accent-foreground: #345b7f;
+  --destructive: #a13f3f;
+  --border: #d9dfdf;
+  --input: #c8d3da;
+  --ring: #345b7f;
+  --radius: 0.625rem;
+  color: var(--foreground);
+  font-family: 'Inter', Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* Only controls inside the island/portal get this small compatibility reset. */
+.cats-course-workspace *,
+.cats-course-workspace *::before,
+.cats-course-workspace *::after {
+  box-sizing: border-box;
+  border-color: var(--border);
+  border-style: solid;
+  border-width: 0;
+}
+
+.cats-course-workspace :is(button, input, textarea, select) {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  margin: 0;
+}
+
+.cats-course-workspace :is(button, [role="button"]) {
+  cursor: pointer;
+}
+
+.cats-course-workspace :is(button, input, textarea, select):disabled {
+  cursor: not-allowed;
+}
+
+.cats-course-workspace :is(h1, h2, h3, h4, p) {
+  margin: 0;
+}
+
+.cats-course-workspace svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.cats-course-workspace [data-sonner-toaster] {
+  --normal-bg: var(--popover);
+  --normal-text: var(--foreground);
+  --normal-border: var(--border);
+  font-family: inherit;
+}
+
+.cats-course-workspace [data-sonner-toast] {
+  border-radius: var(--radius);
+}

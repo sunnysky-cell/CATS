@@ -1,0 +1,262 @@
+{
+  "officialInstallation": {
+    "cli": "shadcn@4.21.4",
+    "result": "exit 0; 11 shadcn components + 3 Motion components installed",
+    "sourceLock": "provenance/installation-package-lock.json"
+  },
+  "observedUpstreamCommits": {
+    "shadcn-ui/ui": "c2a67849be260701852b0977ba15eb5f3a0ce2a4",
+    "ibelick/motion-primitives": "120f64f6ca60348e251f929e9c81f11ccbe45eda",
+    "emilkowalski/sonner": "8e4662b39255120b62138312058f5d77c0139a5e"
+  },
+  "note": "Observed repository branch commits do not establish the CDN registry generation commit. Registry bytes and hashes are preserved separately.",
+  "dependencies": {
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "lucide-react": "1.55.0",
+    "motion": "14.1.0",
+    "radix-ui": "1.7.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-use-measure": "2.1.7",
+    "sonner": "2.0.8",
+    "tailwind-merge": "3.7.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "5.1.4",
+    "postcss": "8.5.29",
+    "postcss-selector-parser": "7.1.6",
+    "tailwindcss": "4.3.3",
+    "tsx": "4.23.15",
+    "tw-animate-css": "1.4.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.7"
+  },
+  "overrides": {
+    "esbuild": "0.28.2"
+  },
+  "packageLockSha256": "f594894b1c16cd7a25dc4e870da20c93f799784fdee8947e05c55d07ff9a6d55",
+  "components": [
+    {
+      "name": "animated-background",
+      "source": "https://motion-primitives.com/c/animated-background.json",
+      "registryPath": "provenance/registry/animated-background.json",
+      "registrySha256": "c4f828b83a6180aa96e969823dce65a24da4ea6d07ac9f7658c3b4f361eb5ffc",
+      "files": [
+        {
+          "registryPath": "animated-background.tsx",
+          "sourcePath": "src/components/motion-primitives/animated-background.tsx",
+          "sha256": "705bc75c2d2fc5e4b07fe7e23ed3c0eca15ac8355692d211223539450ca9eee9",
+          "cliPath": "provenance/cli-installed/ui/animated-background.tsx",
+          "cliSha256": "fa592713c408eaf58b21976c20737d84239c42a0b7e47cf9e7843121b1c0852c"
+        }
+      ]
+    },
+    {
+      "name": "morphing-dialog",
+      "source": "https://motion-primitives.com/c/morphing-dialog.json",
+      "registryPath": "provenance/registry/morphing-dialog.json",
+      "registrySha256": "f59b635070c020114c68399f9d861e70ed72c29272d957c4f64b2bd3134b25fb",
+      "files": [
+        {
+          "registryPath": "morphing-dialog.tsx",
+          "sourcePath": "src/components/motion-primitives/morphing-dialog.tsx",
+          "sha256": "5e67cdc1e25fa6c91b83aa0165f2ea0a0690e55bd691518918314d27bda81393",
+          "cliPath": "provenance/cli-installed/ui/morphing-dialog.tsx",
+          "cliSha256": "3783289015c56be36cd74701468a4d2aa345b48676b7fa12964ace9558e4e33e"
+        },
+        {
+          "registryPath": "hooks/useClickOutside.tsx",
+          "sourcePath": "src/hooks/useClickOutside.tsx",
+          "sha256": "ec56b67354a0ad947ae33d06740074324fd0d0e5fed1fdd4df03a771f47f95ee",
+          "cliPath": "provenance/cli-installed/hooks/useClickOutside.tsx",
+          "cliSha256": "a239b751802f4a67e13d962bdf18118f7b24c7806a3f2ab3c41eca199d624445"
+        }
+      ]
+    },
+    {
+      "name": "button",
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/button.json",
+      "registryPath": "provenance/registry/shadcn-button.json",
+      "registrySha256": "4b8d7d848742727973c1b088af8d15f0b628272a1316f2d2fa344e73ddff9e9c",
+      "files": [
+        {
+          "registryPath": "registry/new-york-v4/ui/button.tsx",
+          "sourcePath": "src/components/ui/button.tsx",
+          "sha256": "92d60e20aa983e781614b99153cba224a3f59cea74c48fa018a8079284fa4ca9",
+          "cliPath": "provenance/cli-installed/ui/button.tsx",
+          "cliSha256": "79dd6f75f8136394442202d6b8b922fb269eaad0a5dba579397c9d5b41f893bb"
+        }
+      ]
+    },
+    {
+      "name": "card",
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/card.json",
+      "registryPath": "provenance/registry/shadcn-card.json",
+      "registrySha256": "c7ebaa49ba2a0613838558f3892c5007523c2dc26d6b36a244145d454a796106",
+      "files": [
+        {
+          "registryPath": "registry/new-york-v4/ui/card.tsx",
+          "sourcePath": "src/components/ui/card.tsx",
+          "sha256": "8e703725649f00e0022067e6ca14d6c2460ef022a46aaf75429f24ca0bb025da",
+          "cliPath": "provenance/cli-installed/ui/card.tsx",
+          "cliSha256": "ef8305b12c3112dab42a4708b41b1ebcc042fa5ab4c20f039da8d45b09ed5059"
+        }
+      ]
+    },
+    {
+      "name": "checkbox",
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/checkbox.json",
+      "registryPath": "provenance/registry/shadcn-checkbox.json",
+      "registrySha256": "567b649e4cd68c05bfdc58ca00fa04aee38bca291cd6f16ed7776ec06ba3d6bd",
+      "files": [
+        {
+          "registryPath": "registry/new-york-v4/ui/checkbox.tsx",
+          "sourcePath": "src/components/ui/checkbox.tsx",
+          "sha256": "807790fc456d4d02c70c6f7c91373ee3f928dd540fce79af56be52c52f2a1e13",
+          "cliPath": "provenance/cli-installed/ui/checkbox.tsx",
+          "cliSha256": "d3da4d7c35a3e3ebc80724fca69407e892127851d3c89d707ae1cc0d4d13dfb6"
+        }
+      ]
+    },
+    {
+      "name": "dialog",
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/dialog.json",
+      "registryPath": "provenance/registry/shadcn-dialog.json",
+      "registrySha256": "0115e3a57aa55a978c5fed0d77f7e98edd694215aae3e569def3fff722ba9f26",
+      "files": [
+        {
+          "registryPath": "registry/new-york-v4/ui/dialog.tsx",
+          "sourcePath": "src/components/ui/dialog.tsx",
+          "sha256": "46f4f9e58371110acbe6f60faeead14746a6f04566ab0731a8e92c96bb76eb29",
+          "cliPath": "provenance/cli-installed/ui/dialog.tsx",
+          "cliSha256": "dcd488cc5d713da215ce2037efd644f35904df755c70f31534706643db488514"
+        }
+      ]
+    },
+    {
+      "name": "hover-card",
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/hover-card.json",
+      "registryPath": "provenance/registry/shadcn-hover-card.json",
+      "registrySha256": "205af771916016bd2d483032060ca4c10eb3f72887230d1acc258c2229e4e63a",
+      "files": [
+        {
+          "registryPath": "registry/new-york-v4/ui/hover-card.tsx",
+          "sourcePath": "src/components/ui/hover-card.tsx",
+          "sha256": "bd3cde1f95666870e640b2b4e9b35b6b54677496550da25928124c66596b26a6",
+          "cliPath": "provenance/cli-installed/ui/hover-card.tsx",
+          "cliSha256": "73f59aa759656501ed615604ac3f2c04ba564acaea4529288fe3a487ad934953"
+        }
+      ]
+    },
+    {
+      "name": "input",
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/input.json",
+      "registryPath": "provenance/registry/shadcn-input.json",
+      "registrySha256": "b1fffa12ba72ce30a291749012b47235eda110648b8106725ced22b5b31c8f1b",
+      "files": [
+        {
+          "registryPath": "registry/new-york-v4/ui/input.tsx",
+          "sourcePath": "src/components/ui/input.tsx",
+          "sha256": "66184e4a455ef8e68b397020528ea4f5bb8c4bb266452e84f434c4e2db0895c8",
+          "cliPath": "provenance/cli-installed/ui/input.tsx",
+          "cliSha256": "0c9457181f6ddc80969bcf854e92c362903a55b6e889fbef3fd85343ecc4af5b"
+        }
+      ]
+    },
+    {
+      "name": "select",
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/select.json",
+      "registryPath": "provenance/registry/shadcn-select.json",
+      "registrySha256": "ca3189ea8101a04f144b6d0f0e7330841639bfa5f4d57e7cca0894d39b30817b",
+      "files": [
+        {
+          "registryPath": "registry/new-york-v4/ui/select.tsx",
+          "sourcePath": "src/components/ui/select.tsx",
+          "sha256": "5ea9e0b8b59e89253a92e25e112eb7ca426bbf1590d49087ef9213ee15cb4ba6",
+          "cliPath": "provenance/cli-installed/ui/select.tsx",
+          "cliSha256": "962830436bd0b7ee50e556f0747e277d6a86869ed27d167516346b15f26309d8"
+        }
+      ]
+    },
+    {
+      "name": "sheet",
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/sheet.json",
+      "registryPath": "provenance/registry/shadcn-sheet.json",
+      "registrySha256": "bdf118300491675f05a9181af491217ba690929338aefd108437c2b07d25432f",
+      "files": [
+        {
+          "registryPath": "registry/new-york-v4/ui/sheet.tsx",
+          "sourcePath": "src/components/ui/sheet.tsx",
+          "sha256": "c79fccf4e32e8bda94e18c51d8821e07332250bb06157e0acd08cde48448cc68",
+          "cliPath": "provenance/cli-installed/ui/sheet.tsx",
+          "cliSha256": "ea473d38a26a9b0b879e5a13139899ad45e9782e896b3fa205c7763a6c506876"
+        }
+      ]
+    },
+    {
+      "name": "skeleton",
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/skeleton.json",
+      "registryPath": "provenance/registry/shadcn-skeleton.json",
+      "registrySha256": "1ed4d99f9d632d9697a054eefcd19932abd68cef7808407986f6e14da401edf7",
+      "files": [
+        {
+          "registryPath": "registry/new-york-v4/ui/skeleton.tsx",
+          "sourcePath": "src/components/ui/skeleton.tsx",
+          "sha256": "0d0b604a06e7052c32c18db41b747a56006dcc6c204e17e3e28c69f146bcd09c",
+          "cliPath": "provenance/cli-installed/ui/skeleton.tsx",
+          "cliSha256": "f51ce0fcd31e5c31437382e80ea0af94b4fc3d64221d27091d36824546780a43"
+        }
+      ]
+    },
+    {
+      "name": "tabs",
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/tabs.json",
+      "registryPath": "provenance/registry/shadcn-tabs.json",
+      "registrySha256": "49320e6dcf56570753bb14ed3f5d66acf07d12e183c0e9024466995b25be5b1d",
+      "files": [
+        {
+          "registryPath": "registry/new-york-v4/ui/tabs.tsx",
+          "sourcePath": "src/components/ui/tabs.tsx",
+          "sha256": "941b11f86187a7c86a856207ac0020d2b50c0eb9ee881aeb96794d48a45109e3",
+          "cliPath": "provenance/cli-installed/ui/tabs.tsx",
+          "cliSha256": "1bb52d8082f7518a9712f1431c531217697eb2fc91cbebc534b792003b8dc767"
+        }
+      ]
+    },
+    {
+      "name": "tooltip",
+      "source": "https://ui.shadcn.com/r/styles/new-york-v4/tooltip.json",
+      "registryPath": "provenance/registry/shadcn-tooltip.json",
+      "registrySha256": "1b7b452b34beab05b22bd653963abd1c88ebd8e9ebcc89dcaebf4ac4938c929e",
+      "files": [
+        {
+          "registryPath": "registry/new-york-v4/ui/tooltip.tsx",
+          "sourcePath": "src/components/ui/tooltip.tsx",
+          "sha256": "9b20bc46af49a789bcd982507dc6183c8301a87d2a86bb014fbfd218589f5eb9",
+          "cliPath": "provenance/cli-installed/ui/tooltip.tsx",
+          "cliSha256": "908d99c8aaea79508c94b48c3278a08856f32d1d4ce531860fde038fdacb7c9d"
+        }
+      ]
+    },
+    {
+      "name": "sliding-number",
+      "source": "https://motion-primitives.com/c/sliding-number.json",
+      "registryPath": "provenance/registry/sliding-number.json",
+      "registrySha256": "53dcb6bf13033d52ca74c781059d0173288c52a865f711a80fe4d1ab9f3be7cb",
+      "files": [
+        {
+          "registryPath": "sliding-number.tsx",
+          "sourcePath": "src/components/motion-primitives/sliding-number.tsx",
+          "sha256": "41a8348fc143ea9c100a942a5206f55c351358f0db10316ffe727f660c8c01c0",
+          "cliPath": "provenance/cli-installed/ui/sliding-number.tsx",
+          "cliSha256": "9ca66075407134fd5dead648e40cd5e28fac7307e712018a7c83e5a000636ec5"
+        }
+      ]
+    }
+  ]
+}
