@@ -418,7 +418,7 @@
         id="agent-chat-panel"
         class="agent-chat-panel"
         data-agent-chat-panel
-        th:attr="data-current-role=${session.loggedInUser.role.name()}"
+        th:attr="data-current-role=${session.loggedInUser.role.name()},data-current-user=${session.loggedInUser.id}"
         hidden
         role="dialog"
         aria-labelledby="agent-chat-title"
@@ -426,45 +426,58 @@
       >
         <header class="agent-chat-header">
           <div class="agent-chat-brand">
-            <span class="agent-chat-mark" aria-hidden="true">✦</span>
+            <span class="agent-chat-mark" data-icon="assistant" aria-hidden="true"></span>
             <div>
               <p class="agent-chat-eyebrow">CATS Help Center</p>
               <p class="agent-chat-agent-name" data-agent-name></p>
+              <p class="agent-chat-status"><span class="agent-chat-status-dot" aria-hidden="true"></span><span data-agent-role-note>Demo assistant · Sample replies</span></p>
             </div>
           </div>
-          <button type="button" class="agent-chat-icon-button" data-agent-chat-close aria-label="Close assistant">×</button>
+          <button type="button" class="agent-chat-icon-button" data-agent-chat-close aria-label="Close assistant"><span data-icon="close" aria-hidden="true"></span></button>
         </header>
         <div class="agent-chat-view agent-chat-home" data-agent-view="home" role="tabpanel" aria-labelledby="agent-tab-home">
-          <h2 id="agent-chat-title" class="agent-chat-welcome">Hello <span aria-hidden="true">👋</span><br />What can I help with?</h2>
-          <button type="button" class="agent-chat-recent" data-agent-open-messages>
-            <span class="agent-chat-card-label">RECENT MESSAGES</span>
-            <span class="agent-chat-recent-row"><span class="agent-chat-avatar" aria-hidden="true">✦</span><span><strong data-agent-recent-title>Start a conversation</strong><small data-agent-recent-preview>Ask your CATS assistant a question.</small></span><span class="agent-chat-card-arrow" aria-hidden="true">›</span></span>
+          <div class="agent-chat-hero">
+            <p class="agent-chat-hello">Hello <span aria-hidden="true">👋</span></p>
+            <h2 id="agent-chat-title" class="agent-chat-welcome">What can I help with?</h2>
+          </div>
+          <button type="button" class="agent-chat-cta" data-agent-open-messages>
+            <span class="agent-chat-cta-text"><strong>Send us a message</strong><small>Usually replies instantly</small></span>
+            <span class="agent-chat-cta-icon" data-icon="send" aria-hidden="true"></span>
           </button>
-          <button type="button" class="agent-chat-link-card" data-agent-page-link="help"><span>How can this assistant help?</span><span aria-hidden="true">↗</span></button>
-          <button type="button" class="agent-chat-link-card agent-chat-send-card" data-agent-open-messages><strong>Send us a message</strong><span aria-hidden="true">➤</span></button>
-          <div class="agent-chat-home-note"><span class="agent-chat-status-dot" aria-hidden="true"></span><span data-agent-role-note>Demo assistant · Sample replies</span></div>
+          <section class="agent-chat-section" aria-labelledby="agent-chat-recent-label">
+            <h3 id="agent-chat-recent-label" class="agent-chat-section-label">Recent conversation</h3>
+            <button type="button" class="agent-chat-recent" data-agent-open-messages>
+              <span class="agent-chat-avatar" data-icon="assistant" aria-hidden="true"></span>
+              <span class="agent-chat-recent-text"><strong data-agent-recent-title>Start a conversation</strong><small data-agent-recent-preview>Ask your CATS assistant a question.</small></span>
+              <span class="agent-chat-card-arrow" data-icon="chevronRight" aria-hidden="true"></span>
+            </button>
+          </section>
+          <section class="agent-chat-section" aria-labelledby="agent-chat-quick-label">
+            <h3 id="agent-chat-quick-label" class="agent-chat-section-label">Popular questions</h3>
+            <div class="agent-chat-help-list" data-agent-quick-list></div>
+            <button type="button" class="agent-chat-text-link" data-agent-page-link="help">How can this assistant help? <span data-icon="arrowRight" aria-hidden="true"></span></button>
+          </section>
         </div>
         <div class="agent-chat-view agent-chat-thread" data-agent-view="messages" role="tabpanel" aria-labelledby="agent-tab-messages" hidden>
-          <div class="agent-chat-thread-heading"><button type="button" class="agent-chat-back" data-agent-page-link="home" aria-label="Back to home">‹</button><div><strong data-agent-thread-title></strong><small>Demo conversation</small></div></div>
           <div class="agent-chat-messages" data-agent-messages role="log" aria-live="polite" aria-relevant="additions"></div>
           <div class="agent-chat-suggestions" data-agent-suggestions aria-label="Suggested questions"></div>
           <form class="agent-chat-compose" data-agent-chat-form>
             <label class="visually-hidden" for="agent-chat-input">Message the CATS assistant</label>
-            <textarea id="agent-chat-input" rows="1" maxlength="500" placeholder="Send a message…"></textarea>
-            <div class="agent-chat-compose-footer"><span>Demo replies are simulated</span><button type="submit" aria-label="Send message" title="Send message">➤</button></div>
+            <textarea id="agent-chat-input" rows="1" maxlength="500" placeholder="Ask a question…"></textarea>
+            <button type="submit" aria-label="Send message" title="Send message"><span data-icon="send" aria-hidden="true"></span></button>
           </form>
-          <p class="agent-chat-disclaimer">Sample conversation. No CATS request is submitted or changed.</p>
+          <p class="agent-chat-disclaimer">Suggestions only. The assistant never submits, approves or changes a request.</p>
         </div>
         <div class="agent-chat-view agent-chat-help" data-agent-view="help" role="tabpanel" aria-labelledby="agent-tab-help" hidden>
           <h2>How can we help?</h2>
-          <p>Choose a question to start a sample conversation with your role’s CATS assistant.</p>
+          <p>Choose a question to ask your role’s CATS assistant.</p>
           <div class="agent-chat-help-list" data-agent-help-list></div>
-          <p class="agent-chat-help-note">This is a classroom demo. Replies are simulated and do not change application data.</p>
+          <p class="agent-chat-help-note"><span data-icon="help" aria-hidden="true"></span>This is a classroom demo. The assistant reads pages you can already open and applies fixed rules; it never changes application data.</p>
         </div>
         <nav class="agent-chat-bottom-nav" aria-label="Assistant navigation" role="tablist">
-          <button type="button" id="agent-tab-home" role="tab" data-agent-page="home" aria-selected="true"><span aria-hidden="true">◆</span><small>Home</small></button>
-          <button type="button" id="agent-tab-messages" role="tab" data-agent-page="messages" aria-selected="false"><span aria-hidden="true">▤</span><small>Messages</small></button>
-          <button type="button" id="agent-tab-help" role="tab" data-agent-page="help" aria-selected="false"><span aria-hidden="true">ⓘ</span><small>Help</small></button>
+          <button type="button" id="agent-tab-home" role="tab" data-agent-page="home" aria-selected="true"><span data-icon="home" aria-hidden="true"></span><small>Home</small></button>
+          <button type="button" id="agent-tab-messages" role="tab" data-agent-page="messages" aria-selected="false"><span data-icon="chat" aria-hidden="true"></span><small>Messages</small></button>
+          <button type="button" id="agent-tab-help" role="tab" data-agent-page="help" aria-selected="false"><span data-icon="help" aria-hidden="true"></span><small>Help</small></button>
         </nav>
       </section>
     </aside>

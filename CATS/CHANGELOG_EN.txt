@@ -1,6 +1,26 @@
 # Changelog
 (English version of CHANGELOG.txt)
 
+## 2026-10-12 - Assistant (Agent demo) redesign: suggestions from real data
+
+### Interface
+
+- The assistant panel moved from a dark theme to the light CATS style, with colours and fonts taken from the existing styles. Text grew from 8–11px to 11–15px, and unicode symbols became the project's SVG icons; `icons.js` gains `chat`, `send` and `assistant`.
+- Messages tab: assistant avatar, typing indicator and an input that grows with its text. The suggested-question row now scrolls sideways with a mouse wheel, with a scrollbar and edge fades (a mouse could not scroll it before).
+- The conversation is kept in `sessionStorage` (last 50 messages), restored after page changes and stored per user id; the panel in `chrome.html` gains a `data-current-user` attribute.
+
+### Features (frontend only, read-only, suggestions only)
+
+- The assistant reads pages the user can already open (`/home` allowance, `/employee/applications`, `/manager/history`, `/manager/applications/{id}`) with GET requests and applies fixed rules in the browser. It calls no write endpoint; the backend is unchanged.
+- Employee: on the application form it drafts a justification and a sharing plan from the course details and remaining allowance, and fills them into the form in one click. It previews what submission will reject (over allowance, weekend dates, a start date not after today, overlap with the employee's own requests), using the same rules as `CourseApplicationService.validate()`. It also reports remaining days and budget. "Give me some suggestions" asks for a CV upload (the upload button is a demo placeholder and does nothing).
+- Manager: reviews pending requests with "Suggest approve", "Approve after a quick check" or "Needs attention". It no longer repeats checks the backend enforces at submission, and flags only what submission cannot see: team calendar clashes (teammates already approved for overlapping training, the same rule as `/manager/approved-overlapping`), a start date that passed while pending, a fee above 1.5× the category average, and a repeated course. Notes cover a start within 7 days, 80%+ of the allowance used, a short justification and no sharing plan.
+- The Admin assistant is unchanged (Admin cannot view applications).
+
+### Docs and tests
+
+- Added `CATS-智能助手更新指南-Agent-Update-Guide.docx` (features and demo steps).
+- `mvn test`: 42 run, 0 failures, 1 skipped by design. Each rule was checked in the browser as emp1 and manager.
+
 ## 2026-10-11 - Fix application form validation and approval notification; add frontend source and third-party licenses
 
 ### Bug fixes
