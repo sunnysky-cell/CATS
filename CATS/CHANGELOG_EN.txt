@@ -1,6 +1,20 @@
 # Changelog
 (English version of CHANGELOG.txt)
 
+## 2026-10-12 - Require a manager for new employees; correct test counts
+
+### Bug fixes
+
+- An admin could create an employee without a manager. When that employee submitted an application, the notification to the manager failed because the manager was null. `UserService.create()` now requires a reporting manager for users with the EMPLOYEE role. Without one, the form shows "Please choose a reporting manager for an employee." and saves nothing. You can still create an admin without a manager.
+
+### Correction
+
+- Three earlier entries read Maven's `Tests run` as the pass count, but `Tests run` includes skipped tests. We corrected them: the 2026-10-12 assistant entry and the 2026-10-11 fix entry now say 41 tests, 40 pass and 1 skipped by design; the 2026-10-11 merge entry now says 30 tests, 29 pass and 1 skipped by design.
+
+### Tests
+
+- `mvn test`: 41 tests, 40 pass, 1 skipped by design.
+
 ## 2026-10-12 - Assistant (Agent demo) redesign: suggestions from real data
 
 ### Interface
@@ -19,7 +33,7 @@
 ### Docs and tests
 
 - Added `CATS-智能助手更新指南-Agent-Update-Guide.docx` (features and demo steps).
-- `mvn test`: 42 run, 0 failures, 1 skipped by design. Each rule was checked in the browser as emp1 and manager.
+- `mvn test`: 41 tests, 40 pass, 1 skipped by design. Each rule was checked in the browser as emp1 and manager.
 
 ## 2026-10-11 - Fix application form validation and approval notification; add frontend source and third-party licenses
 
@@ -34,7 +48,7 @@
 
 - Added `EmployeeApplicationValidationTests`: create with a blank title, clear the title while editing, and a normal submission.
 - Added `CourseApplicationRepositoryTests` (`@DataJpaTest`) for the queries behind approved courses in the same period, date overlap, yearly allowance, the pending list and the training calendar.
-- `mvn test`: 41 pass, 1 skipped by design. `npm test` in `frontend-source`: 21 pass. A rebuild produces the same three JS files as the ones in the repository.
+- `mvn test`: 41 tests, 40 pass, 1 skipped by design. `npm test` in `frontend-source`: 21 pass. A rebuild produces the same three JS files as the ones in the repository.
 
 ## 2026-10-11 - Merge the teammate's redesigned frontend, close six mandatory CA gaps, fix seven frontend defects
 
@@ -87,7 +101,7 @@ We checked the Mandatory Features on pages 6 and 7 of `SA63 CA Instructions.pdf`
 
 ### 6. Verification
 
-- `mvn -o clean test`: 30 tests pass, 1 skipped by design (`CalendarEventTests.browserMyEventsWorkflow` is an optional browser check; it skips through `Assumptions` when `-Dcats.calendar.browserScript` is not set). Test classes: the existing `CatsApplicationTests`, `ManagerFlowViewTests` and `SecurityIntegrationTests`, plus `CalendarEventTests`, `CourseApplicationDateBindingTests` and `DashboardAllowanceTests`.
+- `mvn -o clean test`: 30 tests, 29 pass, 1 skipped by design (`CalendarEventTests.browserMyEventsWorkflow` is an optional browser check; it skips through `Assumptions` when `-Dcats.calendar.browserScript` is not set). Test classes: the existing `CatsApplicationTests`, `ManagerFlowViewTests` and `SecurityIntegrationTests`, plus `CalendarEventTests`, `CourseApplicationDateBindingTests` and `DashboardAllowanceTests`.
 - End-to-end HTTP checks on a separate instance (port 8081): sign-in for all three roles, 13 page renders, 403 on unauthorised access, the calendar API contract (`schemaVersion` / `csrf.header` / year and month echo), CSV export content and figures, the full claim flow and the full approval flow.
 - Courses across weekends (7 cases): a two-week course (one weekend inside) goes through in one application and counts as 10.0 days; a week and a half counts as 8.0; three weeks (15 working days) exceeds the 10-day allowance and gets blocked; a Saturday start date and a Sunday end date both get blocked; two separate one-week applications do not conflict. The working-day check looks only at the start and end dates, and `calculateTrainingDays()` skips the weekend days in between. The day preview in the frontend `forms.js` is labelled "before holidays" to show it is an estimate, consistent with the backend.
 - Responsive change: 7 viewports × 24 pages = 168 measurements, 0 horizontal overflows.

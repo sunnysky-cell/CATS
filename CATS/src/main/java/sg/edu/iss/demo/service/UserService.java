@@ -110,6 +110,11 @@ public class UserService {
 
 	        user.setEnabled(true);
 
+	        if (managerId == null && user.getRole() == Role.EMPLOYEE) {
+	            throw new IllegalArgumentException(
+	                    "Please choose a reporting manager for an employee.");
+	        }
+
 	        if (managerId != null) {
 	
 	            User manager =

@@ -1,4 +1,18 @@
 # 更新日志
+## 2026-10-12 - 新建员工必须选择经理；更正测试数量
+
+### 缺陷修复
+
+- 管理员新建员工时可以不选经理。这个员工提交申请后，系统给经理发通知时因为经理为空而报错。`UserService.create()` 现在要求 EMPLOYEE 角色的用户必须选择经理，没选时表单提示 "Please choose a reporting manager for an employee."，不保存用户。新建管理员仍然可以不选经理。
+
+### 更正
+
+- 之前三条日志把 Maven 输出里的 `Tests run` 当成了通过数，其实 `Tests run` 包含跳过的测试。现已改为：2026-10-12 智能助手条目和 2026-10-11 修复条目，共 41 个测试，40 个通过，1 个按设计跳过；2026-10-11 合并条目，共 30 个测试，29 个通过，1 个按设计跳过。
+
+### 测试
+
+- `mvn test` 共 41 个，40 个通过，1 个按设计跳过。
+
 ## 2026-10-12 - 智能助手（Agent demo）改版：读取真实数据给出建议
 
 ### 界面
@@ -17,7 +31,7 @@
 ### 文档与测试
 
 - 新增 `CATS-智能助手更新指南-Agent-Update-Guide.docx`（功能说明与演示步骤）。
-- `mvn test` 42 个运行，0 失败，1 个按设计跳过。浏览器中以 emp1、manager 实测各条规则。
+- `mvn test` 共 41 个，40 个通过，1 个按设计跳过。浏览器中以 emp1、manager 实测各条规则。
 
 ## 2026-10-11 - 修复申请表单校验与批准通知，补齐前端源码和第三方许可
 
@@ -32,7 +46,7 @@
 
 - 新增 `EmployeeApplicationValidationTests`，覆盖空标题新建、编辑时清空标题和正常提交。
 - 新增 `CourseApplicationRepositoryTests`（`@DataJpaTest`），测试同期已批准课程、日期重叠、年度额度、待审批列表和培训日历的查询。
-- `mvn test` 41 个通过，1 个按设计跳过。`frontend-source` 下 `npm test` 21 个通过，重新构建出的三个 JS 与仓库里的文件一致。
+- `mvn test` 共 41 个，40 个通过，1 个按设计跳过。`frontend-source` 下 `npm test` 21 个通过，重新构建出的三个 JS 与仓库里的文件一致。
 
 ## 2026-10-11 - 合并队友重做的前端、补齐 CA 六项必做核心缺口、修复七项前端缺陷
 
@@ -85,7 +99,7 @@
 
 ### 六、验证
 
-- `mvn -o clean test`：30 个测试通过，1 个按设计跳过（`CalendarEventTests.browserMyEventsWorkflow` 为可选的浏览器联动检查，未传 `-Dcats.calendar.browserScript` 时以 `Assumptions` 优雅跳过）。测试类含既有 `CatsApplicationTests`、`ManagerFlowViewTests`、`SecurityIntegrationTests`，以及 `CalendarEventTests`、`CourseApplicationDateBindingTests`、`DashboardAllowanceTests`。
+- `mvn -o clean test`：共 30 个测试，29 个通过，1 个按设计跳过（`CalendarEventTests.browserMyEventsWorkflow` 为可选的浏览器联动检查，未传 `-Dcats.calendar.browserScript` 时以 `Assumptions` 优雅跳过）。测试类含既有 `CatsApplicationTests`、`ManagerFlowViewTests`、`SecurityIntegrationTests`，以及 `CalendarEventTests`、`CourseApplicationDateBindingTests`、`DashboardAllowanceTests`。
 - 独立实例（端口 8081）真实 HTTP 端到端验证：三种角色登录、13 个页面渲染、越权访问返回 403、日历 API 契约（`schemaVersion` / `csrf.header` / 年月回显）、CSV 导出内容与数字正确性、报销全流程、审批全流程。
 - 跨周末课程专项验证（7 个场景）：两周整（跨 1 个周末）一次申请成功且天数计为 10.0；一周半计为 8.0；三周因 15 个工作日超出 10 天年度额度被正确拦下；开始日为周六、结束日为周日均被拦下；拆成两个一周分别申请亦无重叠冲突。确认工作日校验只检查起止两天、中间周末由 `calculateTrainingDays()` 逐日跳过，前端 `forms.js` 的天数预览明确标注 "before holidays" 表示仅为粗估，与后端口径一致。
 - 响应式改动经 7 视口 × 24 页面 = 168 组测量，横向溢出 0 处。
