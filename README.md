@@ -34,7 +34,7 @@ The compiled frontend bundles are committed under `CATS/src/main/resources/stati
 │   ├── src/test/                      # Backend tests
 │   ├── frontend-source/               # React and TypeScript source
 │   └── pom.xml
-├── CATS-智能助手更新指南-Agent-Update-Guide.docx
+├── CATS-Assistant-Update-EN.docx
 └── README.md
 ```
 
@@ -115,7 +115,7 @@ Build the React components with `npm run build`. Vite writes the bundles to `src
 - `CATS/CHANGELOG_EN.txt` records changes and verification results in English.
 - `CATS/CHANGELOG.txt` contains the Chinese changelog.
 - `CATS/THIRD-PARTY-LICENSES.txt` lists third-party software and licence notices.
-- `CATS-智能助手更新指南-Agent-Update-Guide.docx` explains the assistant demo and its presentation flow.
+- `CATS-Assistant-Update-EN.docx` summarises the assistant update: features, review rules, how it works, and limitations.
 
 ## AI use declaration
 
