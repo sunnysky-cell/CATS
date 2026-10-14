@@ -1,7 +1,5 @@
 # CATS: Course Application and Training System
 
-English | [中文](README.zh-CN.md)
-
 CATS is a Spring Boot web application that handles employee training from application to reimbursement. An employee applies for a course, their manager approves or rejects it, the employee marks it complete once it ends, and then claims the fee. Administrators maintain the users, course categories, public holidays, and yearly allowances that these rules depend on.
 
 ## Login accounts
@@ -149,8 +147,7 @@ npm run build
 │   ├── mvnw, mvnw.cmd         # Maven Wrapper
 │   └── pom.xml
 ├── CATS-Assistant-Update-EN.docx
-├── README.md
-└── README.zh-CN.md
+└── README.md
 ```
 
 | Location | Contents |
@@ -174,3 +171,7 @@ Java packages sit under `CATS/src/main/java/sg/edu/iss/demo/`.
 | `CATS/frontend-source/README.txt` | Where the React source came from and which built file each page produces |
 | `CATS/frontend-source/agentREADME.txt` | Notes on the assistant page source |
 | `CATS-Assistant-Update-EN.docx` | The assistant's features, review rules, and limitations |
+
+## AI use declaration
+
+We used ChatGPT 5.6 Sol, Doubao, Qwen 3.8 Max, and Claude Opus 5.5 to fix parts of the project framework, debug some of the code, implement complex features such as the AI assistant, and improve the web front end. We are responsible for the content and quality of the submitted work.
